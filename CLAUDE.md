@@ -37,9 +37,15 @@ redimensionadas en Traslados (`stock.picking`), Ventas (`sale.order`), Facturas
 
 ## Errores conocidos SIN resolver
 _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
-- Ninguno registrado todavía.
+- Menores/no bloqueantes (vistos en logs de actualización, no introducidos por este
+  módulo): campos duplicados con etiqueta "Código de Barras" (Studio `x_codigo_barras`/
+  `x_barcode` vs `custom_product_barcode`); `<img>`/`<i>` sin `alt`/`title` en vistas de
+  facturas/ventas/compras del módulo.
 
 ## Historial de cambios (resumen, no detalle)
 - 2026-08-20: Repo inicializado, primer commit hecho y subido a
   https://github.com/andresabg09/stock_picking_sale_buttons (público, remote `origin`,
   rama `master`).
+- 2026-08-20: Fix vencimiento Kanban vs Lista en traslados — Kanban ahora usa
+  `scheduled_date` + `widget=remaining_days` (igual que la Lista). Desplegado y
+  verificado en producción.
