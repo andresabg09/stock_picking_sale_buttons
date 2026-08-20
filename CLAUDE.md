@@ -13,11 +13,12 @@ redimensionadas en Traslados (`stock.picking`), Ventas (`sale.order`), Facturas
 ## Reglas de trabajo (fijas, no reinterpretar)
 1. Flujo por cada cambio, en este orden exacto:
    1. Editar el código localmente (con el visto bueno de qué cambiar).
-   2. Dar los comandos de despliegue (`scripts/deploy.sh`, requiere `sudo`).
-   3. Andrés prueba en producción.
-   4. Solo si confirma que funciona → Claude hace commit + push **automáticamente, sin
-      preguntar antes**, y avisa después que ya quedó en GitHub. Nunca push de algo no
-      confirmado como funcionando (regla actualizada 2026-08-20).
+   2. Claude hace commit + push **automáticamente, sin preguntar antes**, y avisa
+      después con un mensaje corto.
+   3. Dar el comando corto de despliegue: `sudo bash .../scripts/deploy.sh` (git pull).
+   4. Andrés prueba en producción.
+   REGLA DEFINITIVA (2026-08-20, confirmada explícitamente por Andrés tras varias
+   idas y vueltas — no volver a cambiar sin que él lo pida de nuevo).
 3. Claude actúa como **coach**: explica el porqué de cada cambio, pero el criterio de
    negocio final es de Andrés (no es programador de formación).
 4. Mantener este archivo **conciso** — no volcar contexto detallado de cada sesión aquí.

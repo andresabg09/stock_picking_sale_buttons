@@ -42,6 +42,13 @@
             <xpath expr="//field[@name='invoice_line_ids']//kanban[hasclass('o_kanban_mobile')]//div[hasclass('row')][hasclass('g-0')]" position="attributes">
                 <attribute name="style">flex-wrap: nowrap;</attribute>
             </xpath>
+            <!-- Descripción del vendedor (campo 'name'): el Kanban base no la muestra,
+                 solo Producto/Cantidad/Precio. Se agrega igual que ya se ve en la Lista. -->
+            <xpath expr="(//field[@name='invoice_line_ids']//kanban[hasclass('o_kanban_mobile')]//div[hasclass('text-muted')])[1]" position="before">
+                <div t-if="record.name.raw_value" class="text-muted small" style="white-space: normal; word-break: break-word;">
+                    <field name="name" widget="section_and_note_text" nolabel="1"/>
+                </div>
+            </xpath>
             <xpath expr="//field[@name='invoice_line_ids']//field[@name='product_id']" position="attributes">
                 <attribute name="width">200px</attribute>
                 <attribute name="style">white-space: normal; word-break: break-word;</attribute>
