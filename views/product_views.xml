@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Forzar vista lista en Productos (Ventas) -->
+    <record id="product.product_template_action_all" model="ir.actions.act_window">
+        <field name="view_mode">list,kanban,form</field>
+    </record>
+    <!-- Forzar vista lista en Productos (Inventario) -->
+    <record id="stock.product_template_action_product" model="ir.actions.act_window">
+        <field name="view_mode">list,kanban,form</field>
+    </record>
+    <!-- Foto 200x200 en kanban general de Productos -->
+    <record id="view_product_kanban_inherit_image_size" model="ir.ui.view">
+        <field name="name">product.template.kanban.inherit.image.size</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_kanban_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//aside" position="replace">
+                <aside>
+                    <field name="image_512" widget="image" alt="Product" options="{'size': [200, 200], 'img_class': 'w-100 object-fit-contain'}" invisible="not image_512"/>
+                </aside>
+            </xpath>
+        </field>
+    </record>
+    <!-- image_512 en catálogo de ventas -->
+    <record id="view_product_kanban_catalog_inherit_image_512" model="ir.ui.view">
+        <field name="name">product.view.kanban.catalog.inherit.image.512</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_view_kanban_catalog"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='image_128']" position="replace">
+                <div style="width:200px;height:200px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                    <field name="image_512" widget="image" options="{'img_class': 'mw-100 mh-100 object-fit-contain'}" alt="Product" invisible="not image_512"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+</odoo>

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_product_kanban_inherit_image_512" model="ir.ui.view">
+        <field name="name">product.kanban.inherit.image.512</field>
+        <field name="model">product.product</field>
+        <field name="inherit_id" ref="product.product_kanban_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//t[@t-name='card']" position="attributes">
+                <attribute name="class">row g-0 flex-nowrap</attribute>
+            </xpath>
+            <xpath expr="//main" position="attributes">
+                <attribute name="class">col-8 pe-2</attribute>
+                <attribute name="style">min-width: 0; overflow: hidden;</attribute>
+            </xpath>
+            <xpath expr="//aside" position="attributes">
+                <attribute name="class">col-4 o_product_search_image_small</attribute>
+            </xpath>
+            <xpath expr="//field[@name='image_128']" position="replace">
+                <field name="image_512" widget="image" options="{'img_class': 'mw-100'}" alt="Product" invisible="not image_512"/>
+            </xpath>
+        </field>
+    </record>
+</odoo>

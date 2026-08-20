@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <template id="report_saleorder_document_inherit" inherit_id="sale.report_saleorder_document">
+
+        <!-- Agregar columna Imagen ANTES de Description -->
+        <xpath expr="//th[@name='th_description']" position="before">
+            <th name="th_image" class="text-start" style="width:90px;"></th>
+        </xpath>
+
+        <!-- Agregar columna Código DESPUÉS de Description -->
+        <xpath expr="//th[@name='th_description']" position="after">
+            <th name="th_barcode" class="text-start"><span>Código</span></th>
+        </xpath>
+
+        <!-- Agregar celda imagen en filas de producto (antes de td_name) -->
+        <xpath expr="//td[@name='td_name']" position="before">
+            <td name="td_image" style="width:90px;">
+                <img t-if="line.product_id.image_1024"
+                     t-att-src="image_data_uri(line.product_id.image_1024)"
+                     style="max-height:90px;max-width:90px;object-fit:contain;"/>
+            </td>
+        </xpath>
+
+        <!-- Agregar celda código después de descripción -->
+        <xpath expr="//td[@name='td_name']" position="after">
+            <td name="td_barcode" class="text-start">
+                <span t-if="line.product_id.barcode" t-out="line.product_id.barcode"/>
+            </td>
+        </xpath>
+
+    </template>
+</odoo>

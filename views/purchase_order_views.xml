@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_purchase_form_inherit_images" model="ir.ui.view">
+        <field name="name">purchase.order.form.inherit.images</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@name='action_rfq_send'][@context=&quot;{'send_rfq':False}&quot;]" position="after">
+                <button name="action_send_email_with_xlsx" string="Enviar Correo con Excel" type="object" invisible="state != 'purchase'" class="btn-secondary" data-hotkey="x"/>
+            </xpath>
+            <xpath expr="//field[@name='partner_ref']" position="after">
+                <field name="custom_price_list"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']//field[@name='product_id']" position="before">
+                <field name="custom_product_image" widget="image" options="{'size': [95, 95]}" class="oe_avatar" string="Imagen"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']//field[@name='product_id']" position="after">
+                <field name="custom_product_barcode" string="Código de Barras"/>
+            </xpath>
+            <xpath expr="//field[@name='order_line']//list" position="attributes">
+                <attribute name="limit">9999</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']//field[@name='product_id']" position="attributes">
+                <attribute name="width">200px</attribute>
+                <attribute name="style">white-space: normal; word-break: break-word;</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']//field[@name='name']" position="attributes">
+                <attribute name="width">180px</attribute>
+                <attribute name="style">white-space: normal; word-break: break-word;</attribute>
+            </xpath>
+            <!-- Reemplazar kanban móvil completo -->
+            <xpath expr="//field[@name='order_line']//kanban" position="replace">
+                <kanban class="o_kanban_mobile" limit="9999">
+                    <field name="display_type"/>
+                    <field name="tax_calculation_rounding_method"/>
+                    <field name="custom_product_image"/>
+                    <field name="custom_product_barcode"/>
+                    <field name="price_subtotal"/>
+                    <field name="price_total"/>
+                    <field name="product_qty"/>
+                    <field name="price_unit"/>
+                    <field name="product_uom"/>
+                    <templates>
+                        <t t-name="card">
+                            <t t-if="!record.display_type.raw_value">
+                                <div class="d-flex align-items-start gap-2">
+                                    <img t-if="record.custom_product_image.raw_value"
+                                         t-att-src="'/web/image?model=purchase.order.line&amp;id=' + record.id.raw_value + '&amp;field=custom_product_image'"
+                                         style="width:95px;height:95px;object-fit:contain;border-radius:4px;flex-shrink:0;"/>
+                                    <div class="flex-grow-1">
+                                        <div class="fw-bold">
+                                            <field name="product_id"/>
+                                        </div>
+                                        <div class="text-muted small">
+                                            <field name="custom_product_barcode"/>
+                                        </div>
+                                        <div class="d-flex justify-content-between mt-1">
+                                            <span class="text-muted">
+                                                <field name="product_qty"/>
+                                                <field name="product_uom" groups="uom.group_uom" class="small ms-1"/>
+                                                × <field name="price_unit"/>
+                                            </span>
+                                            <span class="fw-bold text-end">
+                                                <field name="price_total"/>
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </t>
+                            <div t-elif="record.display_type.raw_value === 'line_section' || record.display_type.raw_value === 'line_note'">
+                                <div t-attf-class="{{record.display_type.raw_value === 'line_section' ? 'fw-bold' : 'fst-italic' }}">
+                                    <field name="name"/>
+                                </div>
+                            </div>
+                        </t>
+                    </templates>
+                </kanban>
+            </xpath>
+        </field>
+    </record>
+    <record id="purchase.purchase_rfq" model="ir.actions.act_window">
+        <field name="view_mode">list,form</field>
+        <field name="limit">1000000</field>
+    </record>
+    <record id="purchase.purchase_form_action" model="ir.actions.act_window">
+        <field name="view_mode">list,form</field>
+        <field name="limit">1000000</field>
+    </record>
+    <record id="purchase.action_rfq_form" model="ir.actions.act_window">
+        <field name="view_mode">list,form</field>
+        <field name="limit">1000000</field>
+    </record>
+    <record id="purchase.act_res_partner_2_purchase_order" model="ir.actions.act_window">
+        <field name="view_mode">list,form</field>
+        <field name="limit">1000000</field>
+    </record>
+</odoo>

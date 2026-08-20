@@ -1,0 +1,202 @@
+/* Eliminar truncado en columnas de producto, descripción y código de barras en formularios */
+.o_form_view .o_list_renderer td.o_data_cell[name="product_id"] span.text-truncate,
+.o_form_view .o_list_renderer td.o_data_cell[name="name"] span.text-truncate,
+.o_form_view .o_list_renderer td.o_data_cell[name="custom_product_barcode"] span.text-truncate {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    display: inline !important;
+    word-break: break-word !important;
+    height: auto !important;
+    max-height: none !important;
+    width: auto !important;
+    max-width: 100% !important;
+}
+
+.o_form_view .o_list_renderer td.o_data_cell[name="product_id"],
+.o_form_view .o_list_renderer td.o_data_cell[name="name"],
+.o_form_view .o_list_renderer td.o_data_cell[name="custom_product_barcode"] {
+    white-space: normal !important;
+    overflow: visible !important;
+    height: auto !important;
+    max-width: 200px;
+}
+
+.o_form_view .o_list_renderer td.o_data_cell[name="product_id"] .o_field_product_label_section_and_note_field,
+.o_form_view .o_list_renderer td.o_data_cell[name="product_id"] .o_field_many2one,
+.o_form_view .o_list_renderer td.o_data_cell[name="product_id"] .o_field_widget,
+.o_form_view .o_list_renderer td.o_data_cell[name="product_id"] div {
+    height: auto !important;
+    max-height: none !important;
+    overflow: visible !important;
+    white-space: normal !important;
+}
+
+/* Inventario - wrap en columna producto */
+.o_inventory_report_list_view td.o_data_cell[name="product_id"],
+.o_inventory_report_list_view td.o_data_cell[name="product_id"] span,
+.o_inventory_report_list_view td.o_data_cell[name="product_id"] span.text-truncate {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    word-break: normal !important;
+    overflow-wrap: break-word !important;
+    height: auto !important;
+    max-height: none !important;
+    min-width: 150px !important;
+    width: 50% !important;
+}
+
+/* Reducir columna botones en inventario */
+.o_inventory_report_list_view td.o_list_button {
+    width: 30px !important;
+    min-width: 30px !important;
+    padding: 0 !important;
+}
+
+/* Wrap global en listas standalone */
+.o_list_view td.o_data_cell[name="product_id"] span.text-truncate {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: unset !important;
+    display: inline !important;
+    word-break: break-word !important;
+    height: auto !important;
+    max-height: none !important;
+}
+
+/* Evitar solapamiento en columnas de orden de entrega */
+.o_form_view .o_list_renderer td.o_data_cell[name="custom_product_barcode"],
+.o_form_view .o_list_renderer td.o_data_cell[name="description_picking"] {
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow: visible !important;
+    min-width: 80px !important;
+}
+
+/* Reducir altura excesiva en columna producto de facturas */
+.o_form_view .o_list_renderer td.o_data_cell[name="product_id"] div.o_field_product_label_section_and_note_field,
+.o_form_view .o_list_renderer td.o_data_cell[name="product_id"] div.o_field_product_label_section_and_note_cell,
+.o_form_view .o_list_renderer td.o_data_cell[name="product_id"] a,
+.o_form_view .o_list_renderer td.o_data_cell[name="product_id"] span.w-100 {
+    height: auto !important;
+    min-height: unset !important;
+}
+
+/* Imagen 200x200 en kanban de productos - imagen arriba, texto abajo */
+.o_kanban_record article {
+    flex-direction: column !important;
+    align-items: center !important;
+}
+.o_kanban_record aside {
+    width: 200px !important;
+    height: 200px !important;
+    flex-shrink: 0 !important;
+    min-width: 200px !important;
+}
+.o_kanban_record aside img {
+    width: 200px !important;
+    height: 200px !important;
+    object-fit: contain !important;
+}
+
+/* Imagen 200x200 en catálogo de ventas */
+.o_kanban_record .o_field_image.ms-auto {
+    width: 200px !important;
+    height: 200px !important;
+}
+.o_kanban_record .o_field_image.ms-auto .d-inline-block {
+    width: 200px !important;
+    height: 200px !important;
+}
+.o_kanban_record .o_field_image.ms-auto img {
+    width: 200px !important;
+    height: 200px !important;
+    object-fit: contain !important;
+    max-width: 200px !important;
+    max-height: 200px !important;
+}
+
+/* Imagen 200x200 en catálogo de ventas - selector correcto */
+.o_kanban_record div[name="image_512"] .d-inline-block {
+    width: 200px !important;
+    height: 200px !important;
+}
+.o_kanban_record div[name="image_512"] img {
+    width: 200px !important;
+    height: 200px !important;
+    object-fit: contain !important;
+    max-width: 200px !important;
+    max-height: 200px !important;
+}
+
+/* Imagen 200x200 en catálogo de ventas - selector correcto */
+.o_kanban_record div[name="image_512"] .d-inline-block {
+    width: 200px !important;
+    height: 200px !important;
+}
+.o_kanban_record div[name="image_512"] img {
+    width: 200px !important;
+    height: 200px !important;
+    object-fit: contain !important;
+    max-width: 200px !important;
+    max-height: 200px !important;
+}
+
+/* Wrap en columna Promo de órdenes de venta */
+.o_form_view .o_list_renderer td.o_data_cell[name="custom_promo_status"] {
+    white-space: normal !important;
+    word-break: break-word !important;
+    overflow: visible !important;
+    min-width: 120px !important;
+    max-width: 180px !important;
+}
+.o_form_view .o_list_renderer td.o_data_cell[name="custom_promo_status"] span {
+    white-space: normal !important;
+}
+
+/* Imagen 90x90 en kanban móvil de líneas de factura (dentro del formulario) */
+.o_invoice_kanban_row_nowrap {
+    flex-wrap: nowrap !important;
+}
+.o_invoice_kanban_image_90 {
+    width: 90px !important;
+    max-width: 90px !important;
+    min-width: 90px !important;
+    flex: 0 0 90px !important;
+}
+.o_invoice_kanban_image_90 .o_field_widget,
+.o_invoice_kanban_image_90 .o_field_image {
+    width: 90px !important;
+    height: 90px !important;
+}
+.o_invoice_kanban_image_90 img {
+    width: 90px !important;
+    height: 90px !important;
+    max-width: 90px !important;
+    max-height: 90px !important;
+    object-fit: contain !important;
+}
+
+/* Imagen pequeña en popup "Buscar: Producto" (many2one kanban search) */
+.o_kanban_record aside.o_product_search_image_small {
+    width: 90px !important;
+    height: auto !important;
+    min-width: 0 !important;
+    flex-shrink: 0 !important;
+}
+.o_kanban_record aside.o_product_search_image_small div[name="image_512"] {
+    width: 90px !important;
+    height: 90px !important;
+}
+.o_kanban_record aside.o_product_search_image_small div[name="image_512"] .d-inline-block {
+    width: 90px !important;
+    height: 90px !important;
+}
+.o_kanban_record aside.o_product_search_image_small div[name="image_512"] img {
+    width: 90px !important;
+    height: 90px !important;
+    max-width: 90px !important;
+    max-height: 90px !important;
+    object-fit: contain !important;
+}

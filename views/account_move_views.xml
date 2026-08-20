@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_move_form_inherit_images" model="ir.ui.view">
+        <field name="name">account.move.form.inherit.images</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='invoice_line_ids']//field[@name='product_id']" position="before">
+                <field name="custom_product_image" widget="image" options="{'size': [95, 95]}" class="oe_avatar" string="Imagen"/>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']//field[@name='product_id']" position="after">
+                <field name="custom_product_barcode" string="Código de Barras"/>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']//field[@name='discount']" position="attributes">
+                <attribute name="optional">show</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']//field[@name='tax_ids']" position="attributes">
+                <attribute name="optional">show</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']//list" position="attributes">
+                <attribute name="limit">9999</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']//kanban[hasclass('o_kanban_mobile')]" position="attributes">
+                <attribute name="limit">9999</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']//kanban[hasclass('o_kanban_mobile')]" position="inside">
+                <field name="custom_product_image"/>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']//kanban[hasclass('o_kanban_mobile')]//div[field[@name='product_id'][@widget='image']]/following-sibling::div[hasclass('col-10')]" position="attributes">
+                <attribute name="class">col-8</attribute>
+                <attribute name="style">min-width: 0;</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']//kanban[hasclass('o_kanban_mobile')]//div[field[@name='product_id'][@widget='image']]" position="replace">
+                <div class="col-4 pe-2">
+                    <img t-if="record.custom_product_image.raw_value"
+                         t-att-src="'/web/image?model=account.move.line&amp;id=' + record.id.raw_value + '&amp;field=custom_product_image'"
+                         alt="Producto"
+                         style="width:90px;height:90px;max-width:100%;max-height:90px;object-fit:contain;border-radius:8px;"/>
+                    <i t-else="" class="fa fa-image fa-2x text-muted"/>
+                </div>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']//kanban[hasclass('o_kanban_mobile')]//div[hasclass('row')][hasclass('g-0')]" position="attributes">
+                <attribute name="style">flex-wrap: nowrap;</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']//field[@name='product_id']" position="attributes">
+                <attribute name="width">200px</attribute>
+                <attribute name="style">white-space: normal; word-break: break-word;</attribute>
+            </xpath>
+            <xpath expr="//field[@name='invoice_line_ids']//field[@name='name']" position="attributes">
+                <attribute name="width">180px</attribute>
+                <attribute name="style">white-space: normal; word-break: break-word;</attribute>
+            </xpath>
+        </field>
+    </record>
+    <record id="account.action_move_out_invoice_type" model="ir.actions.act_window">
+        <field name="view_mode">list,form</field>
+        <field name="limit">1000000</field>
+    </record>
+    <record id="account.action_move_in_invoice_type" model="ir.actions.act_window">
+        <field name="view_mode">list,form</field>
+        <field name="limit">1000000</field>
+    </record>
+
+
+    <!-- Kanban facturas: vencimiento, origen, estado de pago -->
+    <record id="view_account_move_kanban_inherit_custom" model="ir.ui.view">
+        <field name="name">account.move.kanban.inherit.custom</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_move_kanban"/>
+        <field name="arch" type="xml">
+            <!-- Declarar campos adicionales junto a currency_id -->
+            <xpath expr="//kanban/field[@name='currency_id']" position="after">
+                <field name="invoice_date_due"/>
+                <field name="invoice_origin"/>
+                <field name="payment_state"/>
+            </xpath>
+            <!-- Inyectar después del último div del card -->
+            <xpath expr="//t[@t-name='card']/div[last()]" position="after">
+                <div t-if="record.invoice_origin.raw_value" class="small text-muted mt-1">
+                    <i class="fa fa-file-text-o me-1" title="Origen"/>
+                    <t t-out="record.invoice_origin.raw_value"/>
+                </div>
+                <div t-if="record.invoice_date_due.raw_value" class="small mt-1">
+                    <i class="fa fa-calendar me-1" title="Vencimiento"/>
+                    <span t-att-class="'fw-bold ' + (record.invoice_date_due.raw_value &lt; new Date().toISOString().slice(0,10) ? 'text-danger' : record.invoice_date_due.raw_value === new Date().toISOString().slice(0,10) ? 'text-warning' : 'text-muted')">
+                        Vence: <field name="invoice_date_due"/>
+                    </span>
+                </div>
+                <div class="mt-1">
+                    <span t-if="record.payment_state.raw_value === 'paid'"
+                          class="badge text-bg-success">Pagado</span>
+                    <span t-elif="record.payment_state.raw_value === 'partial'"
+                          class="badge text-bg-warning">Parcial</span>
+                    <span t-elif="record.payment_state.raw_value === 'in_payment'"
+                          class="badge text-bg-info">En pago</span>
+                    <span t-elif="record.payment_state.raw_value === 'not_paid'"
+                          class="badge text-bg-danger">Pendiente</span>
+                    <span t-elif="record.payment_state.raw_value === 'reversed'"
+                          class="badge text-bg-secondary">Revertido</span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>

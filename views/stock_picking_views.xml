@@ -1,0 +1,105 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_picking_form_inherit_images" model="ir.ui.view">
+        <field name="name">stock.picking.form.inherit.images</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='move_ids_without_package']//field[@name='product_id']" position="before">
+                <field name="custom_product_image" widget="image" options="{'size': [95, 95]}" class="oe_avatar" string="Imagen"/>
+            </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']//field[@name='product_id']" position="after">
+                <field name="custom_product_barcode" string="Código de Barras"/>
+            </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']//field[@name='description_picking']" position="attributes">
+                <attribute name="optional">show</attribute>
+                <attribute name="string">Descripción</attribute>
+            </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']//field[@name='quantity']" position="after">
+                <field name="custom_ready" widget="boolean_toggle" string="Listo"/>
+            </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']" position="attributes">
+                <attribute name="mode">list</attribute>
+            </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']//list" position="attributes">
+                <attribute name="limit">9999</attribute>
+            </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']//field[@name='product_id']" position="attributes">
+                <attribute name="width">200px</attribute>
+                <attribute name="style">white-space: normal; word-break: break-word;</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="view_picking_form_sale_invoice_buttons" model="ir.ui.view">
+        <field name="name">stock.picking.form.sale.invoice.buttons</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.view_picking_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_view_sale_order" type="object" class="oe_stat_button" icon="fa-money" invisible="not sale_id">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Orden de Venta</span>
+                        <span class="o_stat_value">
+                            <field name="sale_id" readonly="1"/>
+                        </span>
+                    </div>
+                </button>
+                <button name="action_view_invoices" type="object" class="oe_stat_button" icon="fa-pencil-square-o" invisible="invoice_count == 0">
+                    <field name="invoice_count" widget="statinfo" string="Facturas"/>
+                </button>
+            </div>
+        </field>
+    </record>
+
+    <record id="stock_picking_kanban_inherit_overdue" model="ir.ui.view">
+        <field name="name">stock.picking.kanban.inherit.overdue</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.stock_picking_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//templates" position="before">
+                <field name="date_deadline"/>
+                <field name="custom_days_overdue_text"/>
+                <field name="custom_is_overdue"/>
+                <field name="custom_overdue_class"/>
+            </xpath>
+            <xpath expr="//templates//footer" position="before">
+                <div t-attf-class="d-flex mt-1 mb-1 #{record.custom_overdue_class.raw_value}">
+                    <i class="fa fa-clock-o me-1 align-self-center" title="Vencimiento"/>
+                    <span><field name="custom_days_overdue_text"/></span>
+                    <span t-if="record.date_deadline.raw_value" class="ms-auto text-muted small">
+                        Límite: <field name="date_deadline" options="{'show_time': false}"/>
+                    </span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <record id="stock.action_picking_tree_all" model="ir.actions.act_window">
+        <field name="view_mode">list,form</field>
+        <field name="limit">1000000</field>
+    </record>
+    <record id="stock.stock_picking_action_picking_type" model="ir.actions.act_window">
+        <field name="view_mode">list,form</field>
+        <field name="limit">1000000</field>
+    </record>
+
+    <!-- Kanban entregas: documento origen -->
+    <record id="stock_picking_kanban_inherit_origin" model="ir.ui.view">
+        <field name="name">stock.picking.kanban.inherit.origin</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.stock_picking_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//templates" position="before">
+                <field name="origin"/>
+            </xpath>
+            <xpath expr="//templates//footer" position="before">
+                <div t-if="record.origin.raw_value" class="small text-muted mb-1">
+                    <i class="fa fa-file-text-o me-1" title="Origen"/>
+                    <t t-out="record.origin.raw_value"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+</odoo>
