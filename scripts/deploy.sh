@@ -30,9 +30,14 @@ if [ -z "$CID" ]; then
   exit 1
 fi
 # HOST/USER/PASSWORD/PORT ya existen como variables de entorno DENTRO del
-# contenedor (las pone EasyPanel al crearlo). Se leen ahí mismo con el shell
-# del contenedor para que el valor real nunca pase por este script ni por git.
-docker exec "$CID" bash -c 'odoo -u "'"$MODULE"'" -d "'"$DB"'" --db_host="$HOST" --db_port="$PORT" --db_user="$USER" --db_password="$PASSWORD" --stop-after-init'
+# contenedor (las pone EasyPanel al crearlo). Se leen aquí en variables de
+# shell temporales (solo viven en esta ejecución, nunca se escriben a disco
+# ni a git) para pasarlas explícitas al comando de actualización.
+DB_HOST=$(docker exec "$CID" printenv HOST)
+DB_PORT=$(docker exec "$CID" printenv PORT)
+DB_USER=$(docker exec "$CID" printenv USER)
+DB_PASS=$(docker exec "$CID" printenv PASSWORD)
+docker exec "$CID" odoo -u "$MODULE" -d "$DB" --db_host="$DB_HOST" --db_port="$DB_PORT" --db_user="$DB_USER" --db_password="$DB_PASS" --stop-after-init
 
 echo
 echo "== 4/4: Reiniciando el servicio Odoo (para recargar el código Python) =="
