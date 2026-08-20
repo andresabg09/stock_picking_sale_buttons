@@ -23,6 +23,18 @@ redimensionadas en Traslados (`stock.picking`), Ventas (`sale.order`), Facturas
    negocio final es de Andrés (no es programador de formación).
 4. Mantener este archivo **conciso** — no volcar contexto detallado de cada sesión aquí.
    Detalle largo va en memoria del harness (`memory/`), no en CLAUDE.md.
+5. **Sin acceso directo al servidor/código original de Odoo**: este módulo hereda/mejora
+   módulos base (stock, sale, account, purchase, product). Cuando falte un dato del lado
+   de Odoo (campo exacto, `xml id` de vista/reporte, ruta de módulo, estructura de modelo),
+   pedirle a Andrés el comando SSH exacto a correr y esperar que pegue la salida antes de
+   escribir el cambio. No asumir nombres sin confirmar.
+
+## Infraestructura del servidor (Docker Swarm vía EasyPanel)
+- Servicio Odoo: `crm_odoo` · BD: `shalom` · Carpeta módulo en el host (VM, bind mount):
+  `/root/odoo-addons/stock_picking_sale_buttons`.
+- Scripts listos en `scripts/`: `recon.sh` (recolectar estos datos si cambian),
+  `setup_server_git.sh` (una sola vez: conectar la carpeta del servidor a este repo git),
+  `deploy.sh` (rutina: pull → permisos → actualizar módulo → reiniciar servicio).
 
 ## Errores conocidos SIN resolver
 _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_

@@ -59,14 +59,11 @@
         <field name="arch" type="xml">
             <xpath expr="//templates" position="before">
                 <field name="date_deadline"/>
-                <field name="custom_days_overdue_text"/>
-                <field name="custom_is_overdue"/>
-                <field name="custom_overdue_class"/>
             </xpath>
             <xpath expr="//templates//footer" position="before">
-                <div t-attf-class="d-flex mt-1 mb-1 #{record.custom_overdue_class.raw_value}">
+                <div class="d-flex mt-1 mb-1 align-items-center">
                     <i class="fa fa-clock-o me-1 align-self-center" title="Vencimiento"/>
-                    <span><field name="custom_days_overdue_text"/></span>
+                    <field name="scheduled_date" widget="remaining_days" invisible="state in ('done', 'cancel')"/>
                     <span t-if="record.date_deadline.raw_value" class="ms-auto text-muted small">
                         Límite: <field name="date_deadline" options="{'show_time': false}"/>
                     </span>

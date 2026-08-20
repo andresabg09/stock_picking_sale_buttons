@@ -6,18 +6,6 @@ class StockPicking(models.Model):
         string='Facturas',
         compute='_compute_invoice_count',
     )
-    custom_days_overdue_text = fields.Char(
-        string='Días de Vencimiento',
-        compute='_compute_custom_days_overdue_text'
-    )
-    custom_is_overdue = fields.Boolean(
-        string='¿Vencido?',
-        compute='_compute_custom_days_overdue_text'
-    )
-    custom_overdue_class = fields.Char(
-        string='Clase de Alerta Bootstrap',
-        compute='_compute_custom_days_overdue_text'
-    )
     def action_view_sale_order(self):
         self.ensure_one()
         if not self.sale_id:
@@ -56,34 +44,6 @@ class StockPicking(models.Model):
             'target': 'current',
             'domain': [('id', 'in', invoices.ids)],
         }
-    @api.depends('scheduled_date', 'date_deadline', 'state')
-    def _compute_custom_days_overdue_text(self):
-        today = fields.Date.today()
-        for picking in self:
-            if picking.state in ('done', 'cancel'):
-                picking.custom_days_overdue_text = ""
-                picking.custom_is_overdue = False
-                picking.custom_overdue_class = "text-muted"
-                continue
-            target_datetime = picking.date_deadline or picking.scheduled_date
-            if not target_datetime:
-                picking.custom_days_overdue_text = ""
-                picking.custom_is_overdue = False
-                picking.custom_overdue_class = "text-muted"
-                continue
-            target_date = target_datetime.date()
-            delta = (target_date - today).days
-            picking.custom_is_overdue = delta < 0
-            if delta < 0:
-                picking.custom_days_overdue_text = f"Vencido por {-delta} día(s)"
-                picking.custom_overdue_class = "text-danger fw-bold"
-            elif delta == 0:
-                picking.custom_days_overdue_text = "Vence hoy"
-                picking.custom_overdue_class = "text-warning fw-bold"
-            else:
-                picking.custom_days_overdue_text = f"Quedan {delta} día(s)"
-                picking.custom_overdue_class = "text-success fw-bold"
-
 
 class StockMove(models.Model):
     _inherit = 'stock.move'
