@@ -2,6 +2,7 @@
 # setup_server_git.sh — Configuración ÚNICA (correr solo una vez).
 # Convierte la carpeta del módulo en el servidor en un checkout de git
 # conectado a GitHub, respaldando primero lo que hay actualmente.
+# NOTA: /root/odoo-addons pertenece a root — correr con: sudo bash setup_server_git.sh
 set -e
 
 TARGET="/root/odoo-addons/stock_picking_sale_buttons"

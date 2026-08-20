@@ -2,6 +2,7 @@
 # deploy.sh — Despliegue rutinario del módulo stock_picking_sale_buttons.
 # Requiere haber corrido setup_server_git.sh una vez antes.
 # Orden: 1) traer código nuevo y verificar  2) permisos  3) actualizar módulo  4) reiniciar
+# NOTA: /root/odoo-addons pertenece a root — correr con: sudo bash deploy.sh
 set -e
 
 REPO_DIR="/root/odoo-addons/stock_picking_sale_buttons"
