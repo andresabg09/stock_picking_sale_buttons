@@ -42,12 +42,13 @@
             <xpath expr="//field[@name='invoice_line_ids']//kanban[hasclass('o_kanban_mobile')]//div[hasclass('row')][hasclass('g-0')]" position="attributes">
                 <attribute name="style">flex-wrap: nowrap;</attribute>
             </xpath>
-            <!-- Descripción del vendedor (campo 'name'): el Kanban base no la muestra,
-                 solo Producto/Cantidad/Precio. Se agrega igual que ya se ve en la Lista. -->
-            <xpath expr="(//field[@name='invoice_line_ids']//kanban[hasclass('o_kanban_mobile')]//div[hasclass('text-muted')])[1]" position="before">
-                <div t-if="record.name.raw_value" class="text-muted small" style="white-space: normal; word-break: break-word;">
-                    <field name="name" widget="section_and_note_text" nolabel="1"/>
-                </div>
+            <!-- Descripción del vendedor: en la Lista, el campo product_id usa el
+                 widget product_label_section_and_note_field, que ya muestra solo la
+                 nota extra sin repetir el nombre del producto. El Kanban base lo
+                 renderiza "pelado" (sin ese widget) — se le agrega el mismo widget
+                 para que ambas vistas se comporten igual. -->
+            <xpath expr="//field[@name='invoice_line_ids']//kanban[hasclass('o_kanban_mobile')]//field[@name='product_id'][hasclass('fw-bold')]" position="attributes">
+                <attribute name="widget">product_label_section_and_note_field</attribute>
             </xpath>
             <xpath expr="//field[@name='invoice_line_ids']//field[@name='product_id']" position="attributes">
                 <attribute name="width">200px</attribute>
