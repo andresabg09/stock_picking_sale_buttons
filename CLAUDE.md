@@ -11,14 +11,13 @@ redimensionadas en Traslados (`stock.picking`), Ventas (`sale.order`), Facturas
 - No hay ambiente de staging — los cambios se prueban directo en producción, con cuidado.
 
 ## Reglas de trabajo (fijas, no reinterpretar)
-1. **Nunca hacer `git commit`/`git push` sin autorización explícita** en ese momento —
-   una aprobación anterior no cubre el siguiente cambio.
-2. Flujo por cada cambio, en este orden exacto:
+1. Flujo por cada cambio, en este orden exacto:
    1. Editar el código localmente (con el visto bueno de qué cambiar).
-   2. Generar un `.sh` de despliegue.
-   3. Dar los comandos en orden: copiar módulo → verificar permisos → actualizar módulo → reiniciar Odoo.
-   4. Andrés prueba en producción.
-   5. Solo si confirma que funciona → recién ahí pedir permiso para commit + push.
+   2. Dar los comandos de despliegue (`scripts/deploy.sh`, requiere `sudo`).
+   3. Andrés prueba en producción.
+   4. Solo si confirma que funciona → Claude hace commit + push **automáticamente, sin
+      preguntar antes**, y avisa después que ya quedó en GitHub. Nunca push de algo no
+      confirmado como funcionando (regla actualizada 2026-08-20).
 3. Claude actúa como **coach**: explica el porqué de cada cambio, pero el criterio de
    negocio final es de Andrés (no es programador de formación).
 4. Mantener este archivo **conciso** — no volcar contexto detallado de cada sesión aquí.

@@ -29,7 +29,10 @@ if [ -z "$CID" ]; then
   echo "ERROR: no se encontró el contenedor del servicio $SERVICE"
   exit 1
 fi
-docker exec "$CID" odoo -u "$MODULE" -d "$DB" --stop-after-init
+# HOST/USER/PASSWORD/PORT ya existen como variables de entorno DENTRO del
+# contenedor (las pone EasyPanel al crearlo). Se leen ahí mismo con el shell
+# del contenedor para que el valor real nunca pase por este script ni por git.
+docker exec "$CID" bash -c 'odoo -u "'"$MODULE"'" -d "'"$DB"'" --db_host="$HOST" --db_port="$PORT" --db_user="$USER" --db_password="$PASSWORD" --stop-after-init'
 
 echo
 echo "== 4/4: Reiniciando el servicio Odoo (para recargar el código Python) =="
