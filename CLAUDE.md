@@ -29,5 +29,6 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
 - Ninguno registrado todavía.
 
 ## Historial de cambios (resumen, no detalle)
-- 2026-08-20: Repo inicializado con git, `.gitignore` y `CLAUDE.md` creados. Aún sin
-  primer commit ni conexión a GitHub.
+- 2026-08-20: Repo inicializado, primer commit hecho y subido a
+  https://github.com/andresabg09/stock_picking_sale_buttons (público, remote `origin`,
+  rama `master`).
