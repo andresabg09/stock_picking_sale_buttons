@@ -50,3 +50,6 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
 - 2026-08-20: Fix vencimiento Kanban vs Lista en traslados — Kanban ahora usa
   `scheduled_date` + `widget=remaining_days` (igual que la Lista). Desplegado y
   verificado en producción.
+- 2026-08-20: Fix Kanban de facturas repetía nombre del producto en la descripción —
+  nuevo campo compute `custom_extra_description` en `account.move.line` (quita la
+  línea del nombre de producto de `name`, deja solo la nota del vendedor). Verificado.
