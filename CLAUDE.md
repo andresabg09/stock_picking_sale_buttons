@@ -188,3 +188,13 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   día (ej. si una ruta se manda en 2 partes en días distintos).
   `_dianke_subject_and_body` dejó de ser `@staticmethod` (ahora usa
   `self._dianke_route_info` para agrupar por ruta).
+- 2026-09-05: FIX IMPORTANTE — el orden de las pestañas por ruta salía mal.
+  Causa: `x_orden_ruta` es un Integer de Odoo — sin asignar, su valor por
+  defecto es **0**, no None/vacío. `_dianke_group_by_route` solo trataba
+  `None` como "sin asignar", así que todos los clientes con 0 (la mayoría,
+  en la práctica) se ordenaban de PRIMEROS en vez de al final, antes que los
+  que sí tenían una posición real (1, 2, 3...). Ahora 0 y None se tratan
+  igual (sin asignar → al final del archivo de esa ruta). También se quitó
+  el "(Orden 0)" engañoso que podía aparecer en el campo "Número de ruta"
+  del bloque — confirmado con Andrés: 0/vacío en `x_orden_ruta` = sin orden
+  asignado, no una posición real.
