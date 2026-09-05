@@ -127,3 +127,15 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   - **Tipo de venta** (columna del detalle): "Normal" o la nota que escribió el
     vendedor (cambio, producto gratis, etc.) vía `_dianke_extra_note`; esas filas
     se resaltan en rosa salmón pastel (`F8CBAD`).
+- 2026-09-05: Excel de Dianke: se agregaron los bordes finos y la fuente "Aptos"
+  que trae la plantilla original de Dianke (antes solo se habían copiado los
+  colores, no los bordes ni la fuente exacta).
+- 2026-09-05: CERRADO el pendiente del correo a Dianke que se había quedado sin
+  programar — CC fijo `andres@shalompma.com, luis@shalompma.com,
+  milciades@shalompma.com` (constante `DIANKE_EMAIL_CC`); asunto dinámico
+  singular/plural ("Pedido/Pedidos para Dianke Group — Orden/Órdenes de Venta
+  ..."); cuerpo sin saludo por hora ("Querido equipo de Dianke,"), avisando que
+  ahí está toda la información acordada y que identifiquen cualquier ajuste que
+  necesiten, cerrando con la firma de Andrés Gutiérrez. Todo centralizado en
+  `_dianke_subject_and_body()` para no duplicar el texto entre el envío directo
+  y el wizard de confirmación.
