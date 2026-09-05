@@ -2,7 +2,7 @@ from odoo import models, fields, api
 
 TINTE_NNP_MIN_PRICE = 1.16
 
-DIANKE_EMAIL_TO = "ventasdianke@gmail.com,Dianazuniga@diankegroup.com"
+DIANKE_EMAIL_TO = "ventasdianke@gmail.com,Dianazuniga@diankegroup.com,kenniarueda@diankegroup.com"
 DIANKE_EMAIL_CC = "andres@shalompma.com,luis@shalompma.com,milciades@shalompma.com"
 
 PAYMENT_METHOD_SELECTION = [
