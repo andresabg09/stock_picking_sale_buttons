@@ -11,8 +11,12 @@
         <field name="code">action = records.action_send_dianke_export_now()</field>
     </record>
 
-    <!-- Job automático: todos los días a las 11:59pm envía a Dianke las
-         órdenes de venta confirmadas que aún no se le han mandado -->
+    <!-- Job automático: todos los días a las 11:59pm enviaría a Dianke las
+         órdenes de venta confirmadas que aún no se le han mandado.
+         DESACTIVADO A PROPÓSITO (2026-09-05, pedido explícito de Andrés):
+         por ahora el envío es 100% manual (botón en la orden y acción
+         masiva desde el listado de Ventas). No activar sin que lo pida
+         de nuevo. -->
     <record id="ir_cron_send_dianke_export" model="ir.cron">
         <field name="name">Dianke: enviar pedidos confirmados pendientes</field>
         <field name="model_id" ref="sale.model_sale_order"/>
@@ -21,7 +25,7 @@
         <field name="interval_number">1</field>
         <field name="interval_type">days</field>
         <field name="numbercall">-1</field>
-        <field name="active">True</field>
+        <field name="active">False</field>
         <field name="nextcall" eval="datetime.datetime.now().replace(hour=23, minute=59, second=0, microsecond=0)"/>
     </record>
 </odoo>
