@@ -179,3 +179,12 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   de ruta, el Excel pesaba varios MB. Ahora se comprime de verdad con
   Pillow (thumbnail + JPEG calidad 70) antes de incrustarla. Probado: un
   archivo con 5 clientes/5 fotos pasó de pesar varios MB a ~18 KB.
+- 2026-09-05: Asunto del correo a Dianke — ya no lista los números de orden
+  (quedaba kilométrico con muchas órdenes). Ahora muestra las rutas con la
+  cantidad de órdenes de cada una (ej. "Pedregal (5), Villa Grecia (3)") más
+  la fecha del envío en español (ej. "Sábado 5 de Septiembre de 2026", vía
+  nuevo `_dianke_fecha_larga_es`, escrita a mano sin depender del locale del
+  servidor) — para distinguir de un vistazo si un envío es de hoy o de otro
+  día (ej. si una ruta se manda en 2 partes en días distintos).
+  `_dianke_subject_and_body` dejó de ser `@staticmethod` (ahora usa
+  `self._dianke_route_info` para agrupar por ruta).
