@@ -151,3 +151,14 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   por línea (1.8 por unidad de ancho) se quedaba corta y varios nombres de
   producto largos se veían cortados al envolver en 2 líneas. Ajustado a 0.9
   caracteres por unidad de ancho (más conservador → detecta el wrap antes).
+- 2026-09-05: REDISEÑO — el envío a Dianke ya no genera un solo Excel para
+  todas las órdenes: ahora genera **un archivo por ruta** (`fsm_route_id.name`
+  del cliente vía `fsm.location`), y dentro de cada archivo **una pestaña por
+  cliente/pedido**, nombrada con el cliente, en el mismo orden en que se
+  atienden en la ruta (`x_orden_ruta`, ascendente). Pedidos sin ruta asignada
+  caen en un archivo aparte "Sin Ruta". Nombre de archivo: "Pedidos Dianke
+  [Ruta] [Fecha].xlsx". El campo "Número de ruta" del bloque ahora muestra
+  también la posición, ej. "Pedregal (Orden 15)". Todos los archivos van
+  adjuntos en el mismo correo. Reemplaza `_generate_dianke_xlsx_bytes` +
+  `_dianke_xlsx_filename` por `_generate_dianke_xlsx_files` (devuelve lista de
+  archivos) + `_dianke_group_by_route` + `_dianke_safe_sheet_name`.
