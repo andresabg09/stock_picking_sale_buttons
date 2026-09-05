@@ -42,6 +42,11 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   módulo): campos duplicados con etiqueta "Código de Barras" (Studio `x_codigo_barras`/
   `x_barcode` vs `custom_product_barcode`); `<img>`/`<i>` sin `alt`/`title` en vistas de
   facturas/ventas/compras del módulo.
+- `ir.cron` en esta instalación (Odoo 18.0-20260513): NO tiene el campo `numbercall`
+  (tumbó producción dos veces al intentar crear un cron con `numbercall` y luego con
+  un `eval` de `nextcall` mal escrito). Antes de volver a crear un registro `ir.cron`,
+  confirmar por SSH los campos exactos con
+  `odoo shell -d shalom --no-http -c "print(env['ir.cron']._fields.keys())"`.
 
 ## Historial de cambios (resumen, no detalle)
 - 2026-08-20: Repo inicializado, primer commit hecho y subido a
@@ -56,6 +61,9 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
 - 2026-09-05: Exportación a Dianke (Excel) de órdenes de venta confirmadas — campo
   `custom_payment_method` en sale.order, botón "Enviar a Dianke ahora" dentro de cada
   orden confirmada, y acción masiva "Enviar a Dianke (Excel)" desde el listado de
-  Ventas (selecciona varias y las manda juntas). El cron automático de las 11:59pm
-  quedó **desactivado a propósito** (pedido explícito de Andrés) — por ahora todo
-  envío a Dianke es manual. Pendiente de probar en producción.
+  Ventas (selecciona varias y las manda juntas). Antes de enviar se abre un wizard de
+  confirmación (`sale.dianke.email.wizard`) donde se puede editar destinatario, CC,
+  asunto y cuerpo. El envío automático de las 11:59pm quedó **fuera por ahora**
+  (pedido explícito de Andrés) — no hay registro `ir.cron` todavía (ver Errores
+  conocidos: campos de `ir.cron` sin confirmar en esta versión). Pendiente de probar
+  en producción.
