@@ -574,8 +574,8 @@ class SaleOrder(models.Model):
         Así mismo, solicitamos su especial atención a las siguientes especificaciones de despacho:
         <br/><br/>
         <ul style="margin: 0px; padding-left: 20px;">
-            <li>Presentación de Productos NNP: los artículos Aliset NNP de 69gr y Decolorantes se solicitan como unidades individuales.</li>
-            <li>Los AER POCKETS se despachan por displays.</li>
+            <li>Presentación de Productos NNP: todos los artículos se solicitan en unidades individuales.</li>
+            <li>Ambientadores Pocket: también se envían en unidades — ya se ajustó la conversión desde display para facilitarles la recepción e importación.</li>
         </ul>
         <br/>
         Quedo a su disposición ante cualquier consulta adicional.

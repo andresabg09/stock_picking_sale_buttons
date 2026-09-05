@@ -215,3 +215,9 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   pone `number_format = '0.00'` a la celda, para que Excel siempre lo
   muestre en 2 decimales sin importar el cálculo. El Excel de compras a
   proveedores no tiene columna de precio, así que no le aplica esto.
+- 2026-09-05: Correo a Dianke — se actualizó el bloque PERMANENTE de
+  "especificaciones de despacho" (`_dianke_subject_and_body`): ya no dice
+  "los AER POCKETS se despachan por displays" (quedó desactualizado desde
+  que se empezó a convertir GODREJ POCKET a unidades) — ahora dice que los
+  ambientadores Pocket también van en unidades, con la conversión ya
+  ajustada.
