@@ -236,16 +236,33 @@ class SaleOrder(models.Model):
 
     @staticmethod
     def _dianke_embed_partner_photo(ws, partner, anchor_cell, row_for_height, height=90):
-        """Incrusta la foto del contacto (si tiene) en anchor_cell. Devuelve
-        True si se incrustó algo."""
+        """Incrusta la foto del contacto (si tiene) en anchor_cell, YA
+        reducida de peso real con Pillow (no solo redimensionada en
+        pantalla) — fix 2026-09-05: antes solo se cambiaba el tamaño
+        visual (xl_img.width/height), pero el binario embebido seguía
+        siendo la imagen original de Odoo (cientos de KB a varios MB).
+        Con muchos clientes en un mismo archivo de ruta, eso hacía que el
+        Excel pesara varios MB, se demorara en descargar y que el
+        navegador lo bloqueara como "descarga no segura". Ahora se
+        comprime a JPEG de baja resolución antes de incrustarla, dejando
+        cada foto en unos pocos KB. Devuelve True si se incrustó algo."""
         if not partner or not partner.image_1920:
             return False
         from openpyxl.drawing.image import Image as XLImage
+        from PIL import Image as PILImage
         import base64
         import io
         try:
             img_bytes = base64.b64decode(partner.image_1920)
-            xl_img = XLImage(io.BytesIO(img_bytes))
+            pil_img = PILImage.open(io.BytesIO(img_bytes))
+            pil_img = pil_img.convert('RGB')
+            pixel_size = int(height * 2)  # un poco más de resolución que el tamaño mostrado, para que no se vea pixelada
+            pil_img.thumbnail((pixel_size, pixel_size))
+            resized_buffer = io.BytesIO()
+            pil_img.save(resized_buffer, format='JPEG', quality=70, optimize=True)
+            resized_buffer.seek(0)
+
+            xl_img = XLImage(resized_buffer)
             xl_img.width = height
             xl_img.height = height
             ws.row_dimensions[row_for_height].height = max(
