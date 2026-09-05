@@ -90,18 +90,22 @@ class SaleOrder(models.Model):
             direccion,
         )
 
-    def _dianke_route_name(self, partner):
-        """Nombre de la ruta del cliente (fsm.route), buscando el
-        fsm.location cuyo partner_id es este cliente — confirmado por
-        Andrés 2026-09-05. Vacío si no se encuentra o el módulo de rutas
-        no está instalado (no debe tumbar el export por esto)."""
+    def _dianke_route_info(self, partner):
+        """(nombre_ruta, orden_en_ruta) del cliente, buscando el
+        fsm.location cuyo partner_id es este cliente — mapa de campos
+        confirmado por Andrés 2026-09-05. ('', None) si no se encuentra o
+        el módulo de rutas no está instalado (no debe tumbar el export)."""
         if not partner:
-            return ''
+            return '', None
         try:
             location = self.env['fsm.location'].search([('partner_id', '=', partner.id)], limit=1)
-            return location.fsm_route_id.name if location and location.fsm_route_id else ''
+            if not location:
+                return '', None
+            ruta = location.fsm_route_id.name if location.fsm_route_id else ''
+            orden = getattr(location, 'x_orden_ruta', None)
+            return ruta, orden
         except Exception:
-            return ''
+            return '', None
 
     @staticmethod
     def _dianke_delivery_date(order_date):
@@ -138,12 +142,14 @@ class SaleOrder(models.Model):
 
     def _dianke_order_rows_data(self):
         """Arma, para cada orden de self, un dict con todos los datos ya
-        resueltos (cliente, ruta, fecha de entrega, líneas, etc.)."""
+        resueltos (cliente, ruta, orden en la ruta, fecha de entrega,
+        líneas, etc.)."""
         payment_labels = dict(PAYMENT_METHOD_SELECTION)
         data = []
         for order in self.sorted(key=lambda o: o.name):
             partner = order.partner_id
             local, ruc, telefono, celular, contacto, direccion = self._dianke_contact_info(partner)
+            ruta, orden_ruta = self._dianke_route_info(partner)
             data.append({
                 'order': order,
                 'partner': partner,
@@ -155,30 +161,78 @@ class SaleOrder(models.Model):
                 'direccion': direccion,
                 'forma_pago': payment_labels.get(order.custom_payment_method, order.custom_payment_method or ''),
                 'fecha': order.date_order.strftime('%d/%m/%Y') if order.date_order else '',
-                'ruta': self._dianke_route_name(partner),
+                'ruta': ruta,
+                'orden_ruta': orden_ruta,
                 'fecha_entrega': self._dianke_delivery_date(order.date_order),
                 'lines': order.order_line.filtered(lambda l: not l.display_type),
             })
         return data
 
-    def _generate_dianke_xlsx_bytes(self):
-        """Genera un único XLSX, en el formato oficial de pedidos de Dianke
-        (plantilla compartida por Andrés 2026-09-05), repetido en un bloque
-        por cada orden de self."""
+    @staticmethod
+    def _dianke_group_by_route(rows_data):
+        """Agrupa las filas por ruta y, dentro de cada ruta, las ordena por
+        la posición del cliente en la ruta (x_orden_ruta), de menor a
+        mayor — pedido de Andrés 2026-09-05: un Excel por ruta, con los
+        pedidos en el mismo orden en que se van a atender. Sin ruta
+        asignada cae en el grupo "Sin Ruta"."""
+        groups = {}
+        group_order = []
+        for data in rows_data:
+            key = data['ruta'] or 'Sin Ruta'
+            if key not in groups:
+                groups[key] = []
+                group_order.append(key)
+            groups[key].append(data)
+        for key in groups:
+            groups[key].sort(key=lambda d: (d['orden_ruta'] is None, d['orden_ruta'] or 0))
+        return [(key, groups[key]) for key in group_order]
+
+    @staticmethod
+    def _dianke_safe_sheet_name(name, used_names):
+        """Nombre de pestaña de Excel válido y único: sin :\\/?*[], máximo
+        31 caracteres, sin repetirse dentro del mismo archivo."""
+        import re
+        base = re.sub(r'[:\\/?*\[\]]', '', name or 'Pedido').strip()[:31] or 'Pedido'
+        candidate = base
+        i = 2
+        while candidate in used_names:
+            suffix = " (%d)" % i
+            candidate = base[:31 - len(suffix)] + suffix
+            i += 1
+        used_names.add(candidate)
+        return candidate
+
+    def _generate_dianke_xlsx_files(self):
+        """Genera un XLSX por cada ruta de las órdenes de self (pedido de
+        Andrés 2026-09-05), con una pestaña por cliente/pedido, en el mismo
+        orden de la ruta. Devuelve una lista de (nombre_archivo, bytes)."""
         from openpyxl import Workbook
         import io
+        import re
 
-        wb = Workbook()
         rows_data = self._dianke_order_rows_data()
+        grouped = self._dianke_group_by_route(rows_data)
+        fecha_str = fields.Date.context_today(self).strftime('%d-%m-%Y')
 
-        ws = wb.active
-        ws.title = "Pedido Dianke"
-        self._fill_dianke_template_sheet(ws, rows_data)
+        files = []
+        for route_name, group_rows in grouped:
+            wb = Workbook()
+            used_names = set()
+            for i, data in enumerate(group_rows):
+                sheet_name = self._dianke_safe_sheet_name(data['local'], used_names)
+                ws = wb.active if i == 0 else wb.create_sheet()
+                ws.title = sheet_name
+                self._fill_dianke_template_sheet(ws, [data])
 
-        buffer = io.BytesIO()
-        wb.save(buffer)
-        buffer.seek(0)
-        return buffer.read()
+            buffer = io.BytesIO()
+            wb.save(buffer)
+            buffer.seek(0)
+
+            safe_route = re.sub(r'[\\/:*?"<>|]', '', route_name).strip() or 'Sin Ruta'
+            filename = "Pedidos Dianke %s %s.xlsx" % (safe_route, fecha_str)
+            files.append((filename, buffer.read()))
+
+        return files
 
     @staticmethod
     def _dianke_embed_partner_photo(ws, partner, anchor_cell, row_for_height, height=90):
@@ -305,6 +359,10 @@ class SaleOrder(models.Model):
                 )
 
             # --- Campos del pedido (etiqueta en A, valor fusionado B:F) ---
+            if data['ruta'] and data['orden_ruta'] is not None:
+                ruta_texto = "%s (Orden %s)" % (data['ruta'], data['orden_ruta'])
+            else:
+                ruta_texto = data['ruta']
             campos = [
                 ("Fecha", data['fecha']),
                 ("Nombre o razón social del negocio", data['local']),
@@ -312,7 +370,7 @@ class SaleOrder(models.Model):
                 ("Nombre del contacto o persona que recibe el pedido", data['contacto']),
                 ("Dirección exacta con indicaciones claras", data['direccion']),
                 ("Teléfono de quien recibe el pedido", data['telefono'] or data['celular']),
-                ("Número de ruta", data['ruta']),
+                ("Número de ruta", ruta_texto),
                 ("Número de pedido", order.name),
                 ("Fecha en que se debe entregar el pedido al cliente", entrega_str),
             ]
@@ -408,10 +466,6 @@ class SaleOrder(models.Model):
 
         ws.freeze_panes = None
 
-    def _dianke_xlsx_filename(self):
-        fecha = fields.Date.context_today(self)
-        return "Pedidos Dianke %s.xlsx" % fecha.strftime('%d-%m-%Y')
-
     @staticmethod
     def _dianke_subject_and_body(orders):
         """Arma asunto y cuerpo del correo a Dianke, en singular o plural
@@ -455,23 +509,24 @@ class SaleOrder(models.Model):
         return subject, body
 
     def _send_dianke_export_email(self):
-        """Envía por correo el XLSX consolidado de self (órdenes de venta
+        """Envía por correo un XLSX por cada ruta (órdenes de venta
         confirmadas) a Dianke y marca cada orden como exportada."""
         orders = self.filtered(lambda o: o.state == 'sale')
         if not orders:
             return False
 
-        xlsx_bytes = orders._generate_dianke_xlsx_bytes()
-        filename = orders._dianke_xlsx_filename()
-
-        attachment = self.env['ir.attachment'].create({
-            'name': filename,
-            'type': 'binary',
-            'raw': xlsx_bytes,
-            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'res_model': 'sale.order',
-            'res_id': orders[0].id,
-        })
+        files = orders._generate_dianke_xlsx_files()
+        attachment_ids = []
+        for filename, xlsx_bytes in files:
+            attachment = self.env['ir.attachment'].create({
+                'name': filename,
+                'type': 'binary',
+                'raw': xlsx_bytes,
+                'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'res_model': 'sale.order',
+                'res_id': orders[0].id,
+            })
+            attachment_ids.append(attachment.id)
 
         subject, body = self._dianke_subject_and_body(orders)
 
@@ -480,7 +535,7 @@ class SaleOrder(models.Model):
             'body_html': body,
             'email_to': DIANKE_EMAIL_TO,
             'email_cc': DIANKE_EMAIL_CC,
-            'attachment_ids': [(6, 0, [attachment.id])],
+            'attachment_ids': [(6, 0, attachment_ids)],
             'model': 'sale.order',
             'res_id': orders[0].id,
         })
@@ -493,24 +548,27 @@ class SaleOrder(models.Model):
         return True
 
     def action_send_dianke_export_now(self):
-        """Botón/acción manual: genera el Excel de las órdenes seleccionadas
-        que estén confirmadas (ignora las que no estén en estado 'sale') y
-        abre la ventana de confirmación para revisar/editar antes de enviar."""
+        """Botón/acción manual: genera un Excel por ruta de las órdenes
+        seleccionadas que estén confirmadas (ignora las que no estén en
+        estado 'sale') y abre la ventana de confirmación para revisar/
+        editar antes de enviar."""
         orders = self.filtered(lambda o: o.state == 'sale')
         if not orders:
             from odoo.exceptions import UserError
             raise UserError("Selecciona al menos una orden de venta CONFIRMADA para enviar a Dianke.")
 
-        xlsx_bytes = orders._generate_dianke_xlsx_bytes()
-        filename = orders._dianke_xlsx_filename()
-        attachment = self.env['ir.attachment'].create({
-            'name': filename,
-            'type': 'binary',
-            'raw': xlsx_bytes,
-            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'res_model': 'sale.order',
-            'res_id': orders[0].id,
-        })
+        files = orders._generate_dianke_xlsx_files()
+        attachment_ids = []
+        for filename, xlsx_bytes in files:
+            attachment = self.env['ir.attachment'].create({
+                'name': filename,
+                'type': 'binary',
+                'raw': xlsx_bytes,
+                'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                'res_model': 'sale.order',
+                'res_id': orders[0].id,
+            })
+            attachment_ids.append(attachment.id)
 
         subject, body = self._dianke_subject_and_body(orders)
 
@@ -520,7 +578,7 @@ class SaleOrder(models.Model):
             'email_cc': DIANKE_EMAIL_CC,
             'subject': subject,
             'body': body,
-            'attachment_ids': [(6, 0, [attachment.id])],
+            'attachment_ids': [(6, 0, attachment_ids)],
         })
 
         return {
