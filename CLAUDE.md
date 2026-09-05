@@ -55,11 +55,6 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   un `eval` de `nextcall` mal escrito). Antes de volver a crear un registro `ir.cron`,
   confirmar por SSH los campos exactos con
   `odoo shell -d shalom --no-http -c "print(env['ir.cron']._fields.keys())"`.
-- Excel "Importar" de Dianke: por pedido explícito de Andrés (2026-09-05), los campos
-  fijos (cliente, RUC, teléfono, etc.) solo van llenos en la primera línea de cada
-  pedido — en blanco en las siguientes líneas del mismo pedido. Riesgo conocido: si el
-  sistema de Dianke espera un valor en cada fila (no "hereda" el de la fila de arriba),
-  la importación puede fallar. Si eso pasa, este es el primer sospechoso a revisar.
 
 ## Historial de cambios (resumen, no detalle)
 - 2026-08-20: Repo inicializado, primer commit hecho y subido a
@@ -99,3 +94,15 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   (fecha, cliente, RUC, teléfono, celular, forma de pago) queda solo en "Resumen".
   Las filas con nota extra (cambio, gratis, etc.) se resaltan en rosa salmón pastel
   (`F8CBAD`) en "Importar".
+- 2026-09-05: Ajustes al Excel de Dianke tras 4to feedback de Andrés — se agregó
+  "Cliente" de vuelta en "Importar" (junto a Contacto) y "Código Anclado" en las 2
+  pestañas (mismo `product.barcode.multi` que ya se usa en el Excel de compras a
+  proveedores). Se corrigió la Dirección: antes usaba `contact_address_complete`
+  (trae el nombre del cliente pegado al inicio); ahora se arma solo con
+  street/street2/city/state/country del cliente, sin el nombre.
+- 2026-09-05: REVERTIDO el punto de "campos fijos solo en la primera línea" del
+  cambio anterior — Andrés aclaró que en "Importar" el sistema que la importe
+  necesita poder identificar en CADA fila a qué cliente pertenece. Orden de Venta,
+  Cliente, Contacto y Dirección vuelven a repetirse en todas las líneas del mismo
+  pedido (diseño original). No volver a poner esto en blanco sin que lo pida de
+  nuevo explícitamente.
