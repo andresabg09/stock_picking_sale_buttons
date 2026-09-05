@@ -155,15 +155,47 @@ class SaleOrder(models.Model):
         except Exception:
             return False
 
+    @staticmethod
+    def _dianke_extra_note(display_name, line_name):
+        """Devuelve solo la parte de line_name (la descripción/nota que
+        escribió el vendedor) que NO es el nombre del producto — ej. si
+        line_name es "ALISET NNP 69GR CAMBIO X CAMBIO" y display_name es
+        "ALISET NNP 69GR", devuelve "CAMBIO X CAMBIO". Si line_name es
+        igual al nombre del producto (o no aporta nada nuevo), devuelve
+        cadena vacía en vez de repetir el nombre completo."""
+        display_name = (display_name or '').strip()
+        line_name = (line_name or '').strip()
+        if not line_name:
+            return ''
+        if not display_name:
+            return line_name
+
+        idx = line_name.upper().find(display_name.upper())
+        if idx == -1:
+            # No hay traslape: el texto es completamente distinto al
+            # nombre del producto, se conserva tal cual.
+            return line_name
+
+        remainder = line_name[:idx] + line_name[idx + len(display_name):]
+        return remainder.strip(' -—.,')
+
     def _fill_dianke_import_sheet(self, ws, rows_data):
-        """Hoja 1 "Importar": plana, una fila por línea de producto, para
-        subida automática a cualquier sistema."""
-        from openpyxl.styles import Font, Alignment
+        """Hoja 1 "Importar": plana, una fila por línea de producto, con
+        solo las columnas que Andrés pidió (el resto — fecha, cliente, RUC,
+        teléfono, celular, forma de pago — queda solo en "Resumen"). Orden,
+        Contacto y Dirección (fijos por pedido) solo se llenan en la
+        primera línea de cada pedido; en blanco en las siguientes líneas
+        del mismo pedido, a pedido de Andrés. Las filas con una nota extra
+        (cambio, gratis, etc.) se resaltan en rosa salmón pastel."""
+        from openpyxl.styles import Font, Alignment, PatternFill
         from openpyxl.utils import get_column_letter
 
+        CURRENCY_FORMAT = '#,##0.00'
+        NOTA_FILL = PatternFill(start_color="F8CBAD", end_color="F8CBAD", fill_type="solid")
+        N_FIJOS = 3  # Orden de Venta, Contacto, Dirección
+
         headers = [
-            "Orden de Venta", "Fecha", "Cliente", "RUC", "Teléfono", "Celular",
-            "Contacto", "Dirección", "Forma de Pago", "Código/Referencia",
+            "Orden de Venta", "Contacto", "Dirección", "Código/Referencia",
             "Producto", "Descripción / Notas", "Cantidad", "Precio Unitario",
             "Subtotal",
         ]
@@ -174,47 +206,54 @@ class SaleOrder(models.Model):
             cell.alignment = Alignment(horizontal='center')
 
         for data in rows_data:
-            for line in data['lines']:
+            for line_num, line in enumerate(data['lines']):
                 product = line.product_id
                 codigo = product.barcode or product.default_code or ''
-                ws.append([
-                    data['order'].name,
-                    data['fecha'],
-                    data['local'],
-                    data['ruc'],
-                    data['telefono'],
-                    data['celular'],
-                    data['contacto'],
-                    data['direccion'],
-                    data['forma_pago'],
+                nota = self._dianke_extra_note(product.display_name, line.name)
+
+                if line_num == 0:
+                    fijos = [data['order'].name, data['contacto'], data['direccion']]
+                else:
+                    fijos = [''] * N_FIJOS
+
+                ws.append(fijos + [
                     codigo,
                     product.display_name or '',
-                    line.name or '',
+                    nota,
                     line.product_uom_qty,
                     line.price_unit,
                     line.price_subtotal,
                 ])
+                row = ws.max_row
+                ws.cell(row=row, column=8).number_format = CURRENCY_FORMAT
+                ws.cell(row=row, column=9).number_format = CURRENCY_FORMAT
 
-        column_widths = [16, 12, 28, 14, 14, 14, 18, 32, 16, 18, 40, 32, 10, 14, 14]
+                if nota:
+                    for col in range(1, len(headers) + 1):
+                        ws.cell(row=row, column=col).fill = NOTA_FILL
+
+        column_widths = [16, 18, 32, 18, 40, 26, 10, 14, 14]
         for i, width in enumerate(column_widths, start=1):
             ws.column_dimensions[get_column_letter(i)].width = width
         ws.freeze_panes = "A2"
 
     def _fill_dianke_resumen_sheet(self, ws, rows_data):
         """Hoja 2 "Resumen": un bloque por orden — cabecera del cliente una
-        sola vez (con foto) y debajo la tabla de sus productos."""
+        sola vez (con foto) y debajo la tabla de sus productos, con total."""
         from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
         from openpyxl.utils import get_column_letter
 
         ITEM_COLS = 5  # Código, Producto/Descripción, Cantidad, Precio, Subtotal
         PHOTO_COL = ITEM_COLS + 1
+        CURRENCY_FORMAT = '$#,##0.00'
 
         header_fill = PatternFill(start_color="1F4E78", end_color="1F4E78", fill_type="solid")
         header_font = Font(bold=True, color="FFFFFF")
         item_header_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+        total_fill = PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid")
         thin_border = Border(*(Side(style='thin', color='BFBFBF'),) * 4)
 
-        column_widths = [18, 42, 10, 12, 12, 14]
+        column_widths = [18, 46, 10, 13, 13, 14]
         for i, width in enumerate(column_widths, start=1):
             ws.column_dimensions[get_column_letter(i)].width = width
 
@@ -259,22 +298,42 @@ class SaleOrder(models.Model):
                 cell.alignment = Alignment(horizontal='center')
 
             # --- Líneas de producto ---
+            total_pedido = 0.0
             for line in data['lines']:
                 row_idx += 1
                 product = line.product_id
                 codigo = product.barcode or product.default_code or ''
+                nota = self._dianke_extra_note(product.display_name, line.name)
                 descripcion = product.display_name or ''
-                if line.name and line.name.strip() != descripcion.strip():
-                    descripcion = "%s — %s" % (descripcion, line.name.strip())
+                if nota:
+                    descripcion = "%s — %s" % (descripcion, nota)
+                total_pedido += line.price_subtotal
 
                 valores = [codigo, descripcion, line.product_uom_qty, line.price_unit, line.price_subtotal]
                 for col, valor in enumerate(valores, start=1):
                     cell = ws.cell(row=row_idx, column=col, value=valor)
                     cell.border = thin_border
+                    if col in (4, 5):
+                        cell.number_format = CURRENCY_FORMAT
                     if col in (3, 4, 5):
                         cell.alignment = Alignment(horizontal='right')
                     else:
                         cell.alignment = Alignment(horizontal='left', wrap_text=True)
+
+            # --- Fila de total del pedido ---
+            row_idx += 1
+            ws.merge_cells(start_row=row_idx, start_column=1, end_row=row_idx, end_column=4)
+            cell = ws.cell(row=row_idx, column=1, value="Total del pedido")
+            cell.font = Font(bold=True)
+            cell.fill = total_fill
+            cell.alignment = Alignment(horizontal='right')
+            cell.border = thin_border
+            total_cell = ws.cell(row=row_idx, column=5, value=total_pedido)
+            total_cell.font = Font(bold=True)
+            total_cell.fill = total_fill
+            total_cell.border = thin_border
+            total_cell.number_format = CURRENCY_FORMAT
+            total_cell.alignment = Alignment(horizontal='right')
 
             # --- Fila en blanco de separación entre pedidos ---
             row_idx += 1

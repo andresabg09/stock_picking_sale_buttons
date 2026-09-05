@@ -55,6 +55,11 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   un `eval` de `nextcall` mal escrito). Antes de volver a crear un registro `ir.cron`,
   confirmar por SSH los campos exactos con
   `odoo shell -d shalom --no-http -c "print(env['ir.cron']._fields.keys())"`.
+- Excel "Importar" de Dianke: por pedido explícito de Andrés (2026-09-05), los campos
+  fijos (cliente, RUC, teléfono, etc.) solo van llenos en la primera línea de cada
+  pedido — en blanco en las siguientes líneas del mismo pedido. Riesgo conocido: si el
+  sistema de Dianke espera un valor en cada fila (no "hereda" el de la fila de arriba),
+  la importación puede fallar. Si eso pasa, este es el primer sospechoso a revisar.
 
 ## Historial de cambios (resumen, no detalle)
 - 2026-08-20: Repo inicializado, primer commit hecho y subido a
@@ -81,3 +86,16 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   tabla de productos debajo — sin repetir datos fijos). Contacto corregido: usa el
   campo de Studio `x_nombre_contacto` en res.partner (nombre de la persona, ej.
   "Julio"), separado de `name` (nombre del local). Pendiente de probar en producción.
+- 2026-09-05: Ajustes al Excel de Dianke tras 2do feedback de Andrés — en "Importar"
+  los campos fijos (cliente, RUC, teléfono, etc.) solo se llenan en la primera línea
+  de cada pedido (en blanco en las siguientes del mismo pedido; ver Errores conocidos
+  sobre el riesgo de que un importador espere valor en cada fila). En ambas pestañas,
+  "Descripción/Notas" ya no repite el nombre del producto — solo muestra lo que sobra
+  (ej. "CAMBIO X CAMBIO", "Producto gratis") vía `_dianke_extra_note`. "Resumen" ahora
+  tiene formato de moneda y una fila de "Total del pedido" por bloque.
+- 2026-09-05: Ajustes al Excel de Dianke tras 3er feedback de Andrés — "Importar" se
+  redujo a solo 9 columnas (Orden de Venta, Contacto, Dirección, Código/Referencia,
+  Producto, Descripción/Notas, Cantidad, Precio Unitario, Subtotal); todo lo demás
+  (fecha, cliente, RUC, teléfono, celular, forma de pago) queda solo en "Resumen".
+  Las filas con nota extra (cambio, gratis, etc.) se resaltan en rosa salmón pastel
+  (`F8CBAD`) en "Importar".
