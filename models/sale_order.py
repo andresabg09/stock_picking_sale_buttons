@@ -2,6 +2,18 @@ from odoo import models, fields, api
 
 TINTE_NNP_MIN_PRICE = 1.16
 
+DIANKE_EMAIL_TO = "ventasdianke@gmail.com,Dianazuniga@diankegroup.com"
+
+PAYMENT_METHOD_SELECTION = [
+    ('efectivo', 'Efectivo'),
+    ('tarjeta', 'Tarjeta'),
+    ('credito_1_semana', 'Crédito 1 semana'),
+    ('credito_2_semanas', 'Crédito 2 semanas'),
+    ('transferencia', 'Transferencia'),
+    ('yappy', 'Yappy'),
+    ('otro', 'Otro'),
+]
+
 
 class SaleOrder(models.Model):
     _inherit = 'sale.order'
@@ -10,6 +22,22 @@ class SaleOrder(models.Model):
         string='Imagen',
         compute='_compute_custom_first_product_image',
         readonly=True,
+    )
+    custom_payment_method = fields.Selection(
+        PAYMENT_METHOD_SELECTION,
+        string='Forma de Pago',
+        help='Cómo va a pagar el cliente. Se incluye en el reporte que se envía a Dianke.',
+    )
+    custom_dianke_exported = fields.Boolean(
+        string='Enviada a Dianke',
+        default=False,
+        copy=False,
+        help='Se marca automáticamente cuando la orden se incluye en un envío (manual o automático) a Dianke.',
+    )
+    custom_dianke_exported_date = fields.Datetime(
+        string='Fecha envío a Dianke',
+        readonly=True,
+        copy=False,
     )
 
     @api.depends('order_line.product_id')
@@ -21,6 +49,204 @@ class SaleOrder(models.Model):
             order.custom_first_product_image = (
                 first_line.product_id.image_128 if first_line else False
             )
+
+    # ------------------------------------------------------------------
+    # Exportación a Dianke
+    # ------------------------------------------------------------------
+
+    @staticmethod
+    def _dianke_contact_info(partner):
+        """Devuelve (cliente, ruc, telefono, celular, contacto, direccion)
+        para el reporte de Dianke, a partir de los campos estándar de Odoo
+        en res.partner."""
+        if not partner:
+            return ('', '', '', '', '', '')
+
+        # Si el partner es un contacto individual de una empresa, el
+        # "Cliente" es la empresa y el "Contacto" es la persona.
+        company = partner.commercial_partner_id or partner
+        if partner != company and partner.name:
+            contacto = partner.name
+        else:
+            contacto = partner.name or ''
+
+        direccion = ''
+        if hasattr(partner, 'contact_address_complete') and partner.contact_address_complete:
+            direccion = partner.contact_address_complete
+        else:
+            direccion = partner._display_address() if partner else ''
+
+        return (
+            company.name or '',
+            partner.vat or company.vat or '',
+            partner.phone or company.phone or '',
+            partner.mobile or company.mobile or '',
+            contacto,
+            direccion,
+        )
+
+    def _generate_dianke_xlsx_bytes(self):
+        """Genera un único XLSX con todas las órdenes de self, una fila por
+        línea de producto, con la información completa del cliente para
+        que Dianke pueda subirlo directo a su sistema."""
+        from openpyxl import Workbook
+        from openpyxl.styles import Font, Alignment
+        from openpyxl.drawing.image import Image as XLImage
+        from openpyxl.utils import get_column_letter
+        import io
+
+        wb = Workbook()
+        ws = wb.active
+        ws.title = "Pedidos Dianke"
+
+        headers = [
+            "Orden de Venta", "Fecha", "Cliente", "RUC", "Teléfono", "Celular",
+            "Contacto", "Dirección", "Forma de Pago", "Código/Referencia",
+            "Producto", "Descripción / Notas", "Cantidad", "Precio Unitario",
+            "Subtotal", "Foto del Local",
+        ]
+        ws.append(headers)
+        for col_idx in range(1, len(headers) + 1):
+            cell = ws.cell(row=1, column=col_idx)
+            cell.font = Font(bold=True)
+            cell.alignment = Alignment(horizontal='center')
+
+        payment_labels = dict(PAYMENT_METHOD_SELECTION)
+        photo_col = len(headers)  # última columna
+        row_idx = 1
+
+        for order in self.sorted(key=lambda o: o.name):
+            partner = order.partner_id
+            cliente, ruc, telefono, celular, contacto, direccion = self._dianke_contact_info(partner)
+            forma_pago = payment_labels.get(order.custom_payment_method, order.custom_payment_method or '')
+            fecha = order.date_order.strftime('%d/%m/%Y') if order.date_order else ''
+
+            lines = order.order_line.filtered(lambda l: not l.display_type)
+            first_line_of_order = True
+
+            for line in lines:
+                row_idx += 1
+                product = line.product_id
+                codigo = product.barcode or product.default_code or ''
+
+                ws.append([
+                    order.name,
+                    fecha,
+                    cliente,
+                    ruc,
+                    telefono,
+                    celular,
+                    contacto,
+                    direccion,
+                    forma_pago,
+                    codigo,
+                    product.display_name or '',
+                    line.name or '',
+                    line.product_uom_qty,
+                    line.price_unit,
+                    line.price_subtotal,
+                    '',
+                ])
+
+                # Foto del local: se incrusta una sola vez, en la primera
+                # línea de cada orden, para no repetir la imagen por línea.
+                if first_line_of_order and partner and partner.image_1920:
+                    try:
+                        import base64
+                        img_bytes = base64.b64decode(partner.image_1920)
+                        xl_img = XLImage(io.BytesIO(img_bytes))
+                        xl_img.width = 90
+                        xl_img.height = 90
+                        ws.row_dimensions[row_idx].height = 68
+                        ws.add_image(xl_img, "%s%s" % (get_column_letter(photo_col), row_idx))
+                    except Exception:
+                        pass
+                first_line_of_order = False
+
+        column_widths = [16, 12, 28, 14, 14, 14, 22, 32, 16, 18, 40, 32, 10, 14, 14, 14]
+        for i, width in enumerate(column_widths, start=1):
+            ws.column_dimensions[get_column_letter(i)].width = width
+
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        return buffer.read()
+
+    def _dianke_xlsx_filename(self):
+        fecha = fields.Date.context_today(self)
+        return "Pedidos Dianke %s.xlsx" % fecha.strftime('%d-%m-%Y')
+
+    def _send_dianke_export_email(self):
+        """Envía por correo el XLSX consolidado de self (órdenes de venta
+        confirmadas) a Dianke y marca cada orden como exportada."""
+        orders = self.filtered(lambda o: o.state == 'sale')
+        if not orders:
+            return False
+
+        xlsx_bytes = orders._generate_dianke_xlsx_bytes()
+        filename = orders._dianke_xlsx_filename()
+
+        attachment = self.env['ir.attachment'].create({
+            'name': filename,
+            'type': 'binary',
+            'raw': xlsx_bytes,
+            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'res_model': 'sale.order',
+            'res_id': orders[0].id,
+        })
+
+        subject = "Pedidos confirmados para Dianke - %s" % orders._dianke_xlsx_filename().replace('.xlsx', '')
+        body = """
+<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Buenas noches,
+        <br/><br/>
+        Adjunto el Excel con los pedidos confirmados (<strong>%s</strong>) listos para subir al sistema.
+        <br/><br/>
+        Saludos,<br/>
+        Shalom Panamá.
+        <br/><br/>
+    </p>
+</div>
+""" % ", ".join(orders.mapped('name'))
+
+        mail = self.env['mail.mail'].create({
+            'subject': subject,
+            'body_html': body,
+            'email_to': DIANKE_EMAIL_TO,
+            'attachment_ids': [(6, 0, [attachment.id])],
+            'model': 'sale.order',
+            'res_id': orders[0].id,
+        })
+        mail.send()
+
+        orders.write({
+            'custom_dianke_exported': True,
+            'custom_dianke_exported_date': fields.Datetime.now(),
+        })
+        return True
+
+    def action_send_dianke_export_now(self):
+        """Botón/acción manual: envía a Dianke las órdenes seleccionadas que
+        estén confirmadas (ignora las que no estén en estado 'sale')."""
+        orders = self.filtered(lambda o: o.state == 'sale')
+        if not orders:
+            from odoo.exceptions import UserError
+            raise UserError("Selecciona al menos una orden de venta CONFIRMADA para enviar a Dianke.")
+        orders._send_dianke_export_email()
+        return {'type': 'ir.actions.act_window_close'}
+
+    @api.model
+    def _cron_send_dianke_export(self):
+        """Job automático (11:59pm): junta todas las órdenes de venta
+        confirmadas que aún no se le han mandado a Dianke y las envía en un
+        solo correo con un solo Excel."""
+        pending = self.search([
+            ('state', '=', 'sale'),
+            ('custom_dianke_exported', '=', False),
+        ])
+        if pending:
+            pending._send_dianke_export_email()
 
 
 class SaleOrderLine(models.Model):
