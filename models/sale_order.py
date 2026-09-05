@@ -5,6 +5,8 @@ TINTE_NNP_MIN_PRICE = 1.16
 DIANKE_EMAIL_TO = "ventasdianke@gmail.com,Dianazuniga@diankegroup.com,kenniarueda@diankegroup.com"
 DIANKE_EMAIL_CC = "andres@shalompma.com,luis@shalompma.com,milciades@shalompma.com"
 
+DIANKE_GODREJ_POCKET_UNITS_PER_DISPLAY = 6  # las 6 referencias AMB GODREJ POCKET se manejan por display; Dianke las necesita en unidades
+
 PAYMENT_METHOD_SELECTION = [
     ('efectivo', 'Efectivo'),
     ('tarjeta', 'Tarjeta'),
@@ -303,6 +305,19 @@ class SaleOrder(models.Model):
         return ", ".join(additional.mapped('name')) if additional else ''
 
     @staticmethod
+    def _dianke_is_godrej_pocket(display_name):
+        """Las 6 referencias de ambientador AMB GODREJ POCKET (Berry Rush,
+        Bright, Fresh Blossom, Sea Breeze, Floral Delight, etc.) — Andrés
+        las maneja por display, pero Dianke las necesita en unidades
+        (1 display = 6 unidades). Se detecta por nombre porque el orden de
+        las palabras varía entre referencias (ej. "AMB GODREJ 10GR POCKET
+        FLORAL DELIGHT" vs "AMB GODREJ POCKET BERRY RUSH 10GR"), así que se
+        exige que tenga GODREJ y POCKET en el nombre, sin importar el
+        orden — confirmado por Andrés 2026-09-05."""
+        name = (display_name or '').upper()
+        return 'GODREJ' in name and 'POCKET' in name
+
+    @staticmethod
     def _dianke_extra_note(display_name, line_name):
         """Devuelve solo la parte de line_name (la descripción/nota que
         escribió el vendedor) que NO es el nombre del producto — ej. si
@@ -484,7 +499,13 @@ class SaleOrder(models.Model):
                 tipo_venta = nota if nota else "Normal"
                 descripcion = product.display_name or ''
 
-                valores = [codigo, codigo_anclado, descripcion, line.product_uom_qty, line.price_unit, tipo_venta]
+                cantidad = line.product_uom_qty
+                precio = line.price_unit
+                if self._dianke_is_godrej_pocket(product.display_name):
+                    cantidad = cantidad * DIANKE_GODREJ_POCKET_UNITS_PER_DISPLAY
+                    precio = precio / DIANKE_GODREJ_POCKET_UNITS_PER_DISPLAY
+
+                valores = [codigo, codigo_anclado, descripcion, cantidad, precio, tipo_venta]
                 for col, valor in enumerate(valores, start=1):
                     cell = ws.cell(row=row_idx, column=col, value=valor)
                     cell.fill = NOTA_FILL if nota else ROW_FILL

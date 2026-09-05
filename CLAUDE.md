@@ -198,3 +198,14 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   el "(Orden 0)" engañoso que podía aparecer en el campo "Número de ruta"
   del bloque — confirmado con Andrés: 0/vacío en `x_orden_ruta` = sin orden
   asignado, no una posición real.
+- 2026-09-05: Se agregó `kenniarueda@diankegroup.com` al correo principal
+  (`DIANKE_EMAIL_TO`).
+- 2026-09-05: Conversión display→unidades para las 6 referencias AMB GODREJ
+  POCKET (Berry Rush, Bright, Fresh Blossom, Sea Breeze, Floral Delight,
+  etc.) en el Excel de Dianke — Andrés las maneja por display (1 display = 6
+  unidades) pero Dianke las necesita en unidades. `_dianke_is_godrej_pocket`
+  detecta el producto por nombre (requiere "GODREJ" y "POCKET" en el
+  nombre, sin importar el orden de las palabras, porque varía entre
+  referencias). Cuando aplica: Cantidad ×6, Precio venta ÷6 (así el
+  subtotal cantidad×precio sigue representando el mismo valor real del
+  pedido, solo que en unidades en vez de displays) — confirmado con Andrés.
