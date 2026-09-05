@@ -89,10 +89,55 @@ class SaleOrder(models.Model):
             direccion,
         )
 
+    def _dianke_route_name(self, partner):
+        """Nombre de la ruta del cliente (fsm.route), buscando el
+        fsm.location cuyo partner_id es este cliente — confirmado por
+        Andrés 2026-09-05. Vacío si no se encuentra o el módulo de rutas
+        no está instalado (no debe tumbar el export por esto)."""
+        if not partner:
+            return ''
+        try:
+            location = self.env['fsm.location'].search([('partner_id', '=', partner.id)], limit=1)
+            return location.fsm_route_id.name if location and location.fsm_route_id else ''
+        except Exception:
+            return ''
+
+    @staticmethod
+    def _dianke_delivery_date(order_date):
+        """4 días hábiles (lunes a viernes, sin contar sábado ni domingo)
+        desde la fecha de la orden — regla confirmada por Andrés
+        2026-09-05. No contempla feriados, solo fines de semana. No hay
+        ningún campo en el sistema que ya calcule esto, así que se computa
+        aquí mismo, sin guardar nada nuevo en la orden."""
+        if not order_date:
+            return None
+        from datetime import timedelta
+        d = order_date.date() if hasattr(order_date, 'date') else order_date
+        dias_habiles = 0
+        while dias_habiles < 4:
+            d = d + timedelta(days=1)
+            if d.weekday() < 5:  # 0=lunes ... 4=viernes (5=sábado, 6=domingo se saltan)
+                dias_habiles += 1
+        return d
+
+    @staticmethod
+    def _dianke_payment_checkboxes(payment_method):
+        """Traduce custom_payment_method a las casillas de la plantilla de
+        Dianke (Efectivo/Tarjeta/ACH). Transferencia se marca como ACH (es
+        pago electrónico). Yappy y Crédito no tienen casilla propia en su
+        plantilla, así que se agrega una 4ta opción "Otro: <forma de pago>"
+        para no perder esa información — pedido de Andrés 2026-09-05."""
+        efectivo = payment_method == 'efectivo'
+        tarjeta = payment_method == 'tarjeta'
+        ach = payment_method == 'transferencia'
+        otro_label = None
+        if payment_method and not (efectivo or tarjeta or ach):
+            otro_label = dict(PAYMENT_METHOD_SELECTION).get(payment_method, payment_method)
+        return efectivo, tarjeta, ach, otro_label
+
     def _dianke_order_rows_data(self):
         """Arma, para cada orden de self, un dict con todos los datos ya
-        resueltos (cliente, líneas, etc.) para no repetir esta lógica entre
-        la hoja plana y la hoja resumen."""
+        resueltos (cliente, ruta, fecha de entrega, líneas, etc.)."""
         payment_labels = dict(PAYMENT_METHOD_SELECTION)
         data = []
         for order in self.sorted(key=lambda o: o.name):
@@ -109,30 +154,25 @@ class SaleOrder(models.Model):
                 'direccion': direccion,
                 'forma_pago': payment_labels.get(order.custom_payment_method, order.custom_payment_method or ''),
                 'fecha': order.date_order.strftime('%d/%m/%Y') if order.date_order else '',
+                'ruta': self._dianke_route_name(partner),
+                'fecha_entrega': self._dianke_delivery_date(order.date_order),
                 'lines': order.order_line.filtered(lambda l: not l.display_type),
             })
         return data
 
     def _generate_dianke_xlsx_bytes(self):
-        """Genera un único XLSX con 2 pestañas para todas las órdenes de
-        self:
-        1) "Importar": una fila por línea de producto, todo repetido — para
-           que un sistema externo la importe de forma automática y plana.
-        2) "Resumen": un bloque por orden (los datos del cliente aparecen
-           una sola vez, con la foto del local) y debajo la tabla de sus
-           productos — para que una persona lo revise fácil."""
+        """Genera un único XLSX, en el formato oficial de pedidos de Dianke
+        (plantilla compartida por Andrés 2026-09-05), repetido en un bloque
+        por cada orden de self."""
         from openpyxl import Workbook
         import io
 
         wb = Workbook()
         rows_data = self._dianke_order_rows_data()
 
-        ws_import = wb.active
-        ws_import.title = "Importar"
-        self._fill_dianke_import_sheet(ws_import, rows_data)
-
-        ws_resumen = wb.create_sheet("Resumen")
-        self._fill_dianke_resumen_sheet(ws_resumen, rows_data)
+        ws = wb.active
+        ws.title = "Pedido Dianke"
+        self._fill_dianke_template_sheet(ws, rows_data)
 
         buffer = io.BytesIO()
         wb.save(buffer)
@@ -191,164 +231,132 @@ class SaleOrder(models.Model):
         remainder = line_name[:idx] + line_name[idx + len(display_name):]
         return remainder.strip(' -—.,')
 
-    def _fill_dianke_import_sheet(self, ws, rows_data):
-        """Hoja 1 "Importar": plana, una fila por línea de producto, con
-        solo las columnas que Andrés pidió (el resto — fecha, RUC, teléfono,
-        celular, forma de pago — queda solo en "Resumen"). Orden, Cliente,
-        Contacto y Dirección se repiten en TODAS las líneas del pedido (no
-        solo en la primera) — así el sistema que importe el archivo puede
-        identificar en cada fila, sin ambigüedad, a qué cliente pertenece
-        cada producto. Las filas con una nota extra (cambio, gratis, etc.)
-        se resaltan en rosa salmón pastel."""
+    def _fill_dianke_template_sheet(self, ws, rows_data):
+        """Hoja única con el formato oficial de pedidos de Dianke (plantilla
+        "Formato_para_recibir_pedidos_clientes.xlsx" que Andrés compartió
+        2026-09-05), repetido en un bloque por cada orden de rows_data. Se
+        agregan 2 datos que la plantilla de Dianke no trae pero Andrés
+        pidió de todas formas: RUC y foto del local (esta última fuera de
+        las columnas A-E, para no romper el formato de ellos)."""
         from openpyxl.styles import Font, Alignment, PatternFill
         from openpyxl.utils import get_column_letter
 
-        CURRENCY_FORMAT = '#,##0.00'
+        N_COLS = 5  # A-E, igual que la plantilla de Dianke
+        PHOTO_COL = N_COLS + 2
+
+        LABEL_FONT = Font(bold=True, size=10, color="173B4D")
+        VALUE_FILL = PatternFill(start_color="FFF9E8", end_color="FFF9E8", fill_type="solid")
+        DIVIDER_FILL = PatternFill(start_color="E8F1F5", end_color="E8F1F5", fill_type="solid")
+        SECTION_FILL = PatternFill(start_color="173B4D", end_color="173B4D", fill_type="solid")
+        SECTION_FONT = Font(bold=True, size=10, color="FFFFFF")
+        TABLE_HEADER_FILL = PatternFill(start_color="2F6F7E", end_color="2F6F7E", fill_type="solid")
+        TABLE_HEADER_FONT = Font(bold=True, size=10, color="FFFFFF")
+        ROW_FILL = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
         NOTA_FILL = PatternFill(start_color="F8CBAD", end_color="F8CBAD", fill_type="solid")
 
-        headers = [
-            "Orden de Venta", "Cliente", "Contacto", "Dirección",
-            "Código/Referencia", "Código Anclado", "Producto",
-            "Descripción / Notas", "Cantidad", "Precio Unitario", "Subtotal",
-        ]
-        ws.append(headers)
-        for col_idx in range(1, len(headers) + 1):
-            cell = ws.cell(row=1, column=col_idx)
-            cell.font = Font(bold=True)
-            cell.alignment = Alignment(horizontal='center')
-
-        for data in rows_data:
-            fijos = [data['order'].name, data['local'], data['contacto'], data['direccion']]
-            for line in data['lines']:
-                product = line.product_id
-                codigo = product.barcode or product.default_code or ''
-                codigo_anclado = self._dianke_codigo_anclado(product)
-                nota = self._dianke_extra_note(product.display_name, line.name)
-
-                ws.append(fijos + [
-                    codigo,
-                    codigo_anclado,
-                    product.display_name or '',
-                    nota,
-                    line.product_uom_qty,
-                    line.price_unit,
-                    line.price_subtotal,
-                ])
-                row = ws.max_row
-                ws.cell(row=row, column=10).number_format = CURRENCY_FORMAT
-                ws.cell(row=row, column=11).number_format = CURRENCY_FORMAT
-
-                if nota:
-                    for col in range(1, len(headers) + 1):
-                        ws.cell(row=row, column=col).fill = NOTA_FILL
-
-        column_widths = [16, 28, 18, 32, 18, 22, 40, 26, 10, 14, 14]
-        for i, width in enumerate(column_widths, start=1):
-            ws.column_dimensions[get_column_letter(i)].width = width
-        ws.freeze_panes = "A2"
-
-    def _fill_dianke_resumen_sheet(self, ws, rows_data):
-        """Hoja 2 "Resumen": un bloque por orden — cabecera del cliente una
-        sola vez (con foto) y debajo la tabla de sus productos, con total."""
-        from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
-        from openpyxl.utils import get_column_letter
-
-        ITEM_COLS = 6  # Código, Código Anclado, Producto/Descripción, Cantidad, Precio, Subtotal
-        PHOTO_COL = ITEM_COLS + 1
-        CURRENCY_FORMAT = '$#,##0.00'
-
-        header_fill = PatternFill(start_color="1F4E78", end_color="1F4E78", fill_type="solid")
-        header_font = Font(bold=True, color="FFFFFF")
-        item_header_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
-        total_fill = PatternFill(start_color="F2F2F2", end_color="F2F2F2", fill_type="solid")
-        thin_border = Border(*(Side(style='thin', color='BFBFBF'),) * 4)
-
-        column_widths = [18, 22, 46, 10, 13, 13, 14]
-        for i, width in enumerate(column_widths, start=1):
-            ws.column_dimensions[get_column_letter(i)].width = width
+        column_widths = {1: 39.78, 2: 20, 3: 14, 4: 14, 5: 16, PHOTO_COL: 16}
+        for col, width in column_widths.items():
+            ws.column_dimensions[get_column_letter(col)].width = width
 
         row_idx = 0
         for data in rows_data:
             order = data['order']
+            block_start_row = row_idx + 1
+            entrega = data['fecha_entrega']
+            entrega_str = entrega.strftime('%d/%m/%Y') if entrega else ''
+            efectivo, tarjeta, ach, otro_label = self._dianke_payment_checkboxes(order.custom_payment_method)
 
-            # --- Bloque de cabecera del pedido (3 filas, fusionadas) ---
-            header_start_row = row_idx + 1
-            linea1 = "%s · %s · %s · RUC %s" % (order.name, data['fecha'], data['local'], data['ruc'] or 'N/A')
-            linea2 = "Tel/Cel: %s / %s · Contacto: %s · Forma de Pago: %s" % (
-                data['telefono'] or 'N/A', data['celular'] or 'N/A',
-                data['contacto'] or 'N/A', data['forma_pago'] or 'N/A',
-            )
-            linea3 = "Dirección: %s" % (data['direccion'] or 'N/A')
-
-            for texto in (linea1, linea2, linea3):
+            # --- Campos del pedido (etiqueta en A, valor fusionado B:E) ---
+            campos = [
+                ("Fecha", data['fecha']),
+                ("Nombre o razón social del negocio", data['local']),
+                ("RUC", data['ruc']),
+                ("Nombre del contacto o persona que recibe el pedido", data['contacto']),
+                ("Dirección exacta con indicaciones claras", data['direccion']),
+                ("Teléfono de quien recibe el pedido", data['telefono'] or data['celular']),
+                ("Número de ruta", data['ruta']),
+                ("Número de pedido", order.name),
+                ("Fecha en que se debe entregar el pedido al cliente", entrega_str),
+            ]
+            for label, valor in campos:
                 row_idx += 1
-                ws.merge_cells(start_row=row_idx, start_column=1, end_row=row_idx, end_column=ITEM_COLS)
-                cell = ws.cell(row=row_idx, column=1, value=texto)
-                cell.fill = header_fill
-                cell.font = header_font
-                cell.alignment = Alignment(vertical='center')
-                ws.row_dimensions[row_idx].height = 18
+                ws.cell(row=row_idx, column=1, value=label).font = LABEL_FONT
+                ws.merge_cells(start_row=row_idx, start_column=2, end_row=row_idx, end_column=N_COLS)
+                for col in range(2, N_COLS + 1):
+                    cell = ws.cell(row=row_idx, column=col)
+                    cell.fill = VALUE_FILL
+                    cell.alignment = Alignment(horizontal='center', vertical='center')
+                ws.cell(row=row_idx, column=2, value=valor)
+                ws.row_dimensions[row_idx].height = 24
 
+            # --- Tipo de pago (casillas) ---
+            row_idx += 1
+            ws.cell(row=row_idx, column=1, value="Tipo de pago").font = LABEL_FONT
+            opciones_pago = [("Efectivo", efectivo), ("Tarjeta", tarjeta), ("ACH", ach)]
+            if otro_label:
+                opciones_pago.append((otro_label, True))
+            for i in range(N_COLS - 1):
+                col = 2 + i
+                cell = ws.cell(row=row_idx, column=col)
+                cell.fill = VALUE_FILL
+                if i < len(opciones_pago):
+                    texto, marcado = opciones_pago[i]
+                    cell.value = "%s %s" % ("☑" if marcado else "☐", texto)
+                    cell.font = Font(bold=True, size=11)
+                cell.alignment = Alignment(horizontal='center')
+            ws.row_dimensions[row_idx].height = 24
+
+            # --- Foto del local (a un lado, fuera de las columnas de la plantilla) ---
             self._dianke_embed_partner_photo(
                 ws, data['partner'],
-                "%s%s" % (get_column_letter(PHOTO_COL), header_start_row),
-                header_start_row,
+                "%s%s" % (get_column_letter(PHOTO_COL), block_start_row),
+                block_start_row, height=110,
             )
+
+            # --- Fila divisoria ---
+            row_idx += 1
+            for col in range(1, N_COLS + 1):
+                ws.cell(row=row_idx, column=col).fill = DIVIDER_FILL if col == 1 else VALUE_FILL
+            ws.row_dimensions[row_idx].height = 10
+
+            # --- DETALLE DEL PEDIDO ---
+            row_idx += 1
+            ws.merge_cells(start_row=row_idx, start_column=1, end_row=row_idx, end_column=N_COLS)
+            cell = ws.cell(row=row_idx, column=1, value="DETALLE DEL PEDIDO")
+            cell.fill = SECTION_FILL
+            cell.font = SECTION_FONT
+            cell.alignment = Alignment(horizontal='center')
+            ws.row_dimensions[row_idx].height = 22
 
             # --- Encabezado de la tabla de productos ---
             row_idx += 1
-            item_header_row = row_idx
-            for col, texto in enumerate(
-                ["Código", "Código Anclado", "Producto / Descripción", "Cantidad", "Precio Unit.", "Subtotal"],
-                start=1,
-            ):
-                cell = ws.cell(row=item_header_row, column=col, value=texto)
-                cell.font = Font(bold=True)
-                cell.fill = item_header_fill
-                cell.border = thin_border
+            for col, texto in enumerate(["Código", "Descripción", "Cantidad", "Precio venta", "Tipo de venta"], start=1):
+                cell = ws.cell(row=row_idx, column=col, value=texto)
+                cell.fill = TABLE_HEADER_FILL
+                cell.font = TABLE_HEADER_FONT
                 cell.alignment = Alignment(horizontal='center')
+            ws.row_dimensions[row_idx].height = 22
 
             # --- Líneas de producto ---
-            total_pedido = 0.0
             for line in data['lines']:
                 row_idx += 1
                 product = line.product_id
                 codigo = product.barcode or product.default_code or ''
-                codigo_anclado = self._dianke_codigo_anclado(product)
                 nota = self._dianke_extra_note(product.display_name, line.name)
-                descripcion = product.display_name or ''
-                if nota:
-                    descripcion = "%s — %s" % (descripcion, nota)
-                total_pedido += line.price_subtotal
+                tipo_venta = nota if nota else "Normal"
 
-                valores = [codigo, codigo_anclado, descripcion, line.product_uom_qty, line.price_unit, line.price_subtotal]
+                valores = [codigo, product.display_name or '', line.product_uom_qty, line.price_unit, tipo_venta]
                 for col, valor in enumerate(valores, start=1):
                     cell = ws.cell(row=row_idx, column=col, value=valor)
-                    cell.border = thin_border
-                    if col in (5, 6):
-                        cell.number_format = CURRENCY_FORMAT
-                    if col in (4, 5, 6):
-                        cell.alignment = Alignment(horizontal='right')
-                    else:
-                        cell.alignment = Alignment(horizontal='left', wrap_text=True)
+                    cell.fill = NOTA_FILL if nota else ROW_FILL
+                    cell.alignment = Alignment(
+                        horizontal='left' if col == 2 else 'center',
+                        wrap_text=(col == 2),
+                    )
+                ws.row_dimensions[row_idx].height = 20
 
-            # --- Fila de total del pedido ---
-            row_idx += 1
-            ws.merge_cells(start_row=row_idx, start_column=1, end_row=row_idx, end_column=ITEM_COLS - 1)
-            cell = ws.cell(row=row_idx, column=1, value="Total del pedido")
-            cell.font = Font(bold=True)
-            cell.fill = total_fill
-            cell.alignment = Alignment(horizontal='right')
-            cell.border = thin_border
-            total_cell = ws.cell(row=row_idx, column=ITEM_COLS, value=total_pedido)
-            total_cell.font = Font(bold=True)
-            total_cell.fill = total_fill
-            total_cell.border = thin_border
-            total_cell.number_format = CURRENCY_FORMAT
-            total_cell.alignment = Alignment(horizontal='right')
-
-            # --- Fila en blanco de separación entre pedidos ---
-            row_idx += 1
+            # --- Separación entre pedidos ---
+            row_idx += 2
 
         ws.freeze_panes = None
 
@@ -381,7 +389,7 @@ class SaleOrder(models.Model):
     <p style="margin: 0px; padding: 0px; font-size: 13px;">
         Buenas noches,
         <br/><br/>
-        Adjunto el Excel con los pedidos confirmados (<strong>%s</strong>). Tiene 2 pestañas: <strong>"Importar"</strong> (formato plano, lista para subir directo al sistema) y <strong>"Resumen"</strong> (vista más fácil de leer, con foto del local por pedido).
+        Adjunto el Excel con los pedidos confirmados (<strong>%s</strong>), en el formato de pedido acordado con Dianke, listo para su revisión e importación al sistema.
         <br/><br/>
         Saludos,<br/>
         Shalom Panamá.
@@ -432,7 +440,7 @@ class SaleOrder(models.Model):
     <p style="margin: 0px; padding: 0px; font-size: 13px;">
         Buenas noches,
         <br/><br/>
-        Adjunto el Excel con los pedidos confirmados (<strong>%s</strong>). Tiene 2 pestañas: <strong>"Importar"</strong> (formato plano, lista para subir directo al sistema) y <strong>"Resumen"</strong> (vista más fácil de leer, con foto del local por pedido).
+        Adjunto el Excel con los pedidos confirmados (<strong>%s</strong>), en el formato de pedido acordado con Dianke, listo para su revisión e importación al sistema.
         <br/><br/>
         Saludos,<br/>
         Shalom Panamá.
