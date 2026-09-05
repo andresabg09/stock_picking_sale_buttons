@@ -169,3 +169,13 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   Tinte N.º 1, reservado para cambios/promos/rotaciones) NO se agregó al
   código — Andrés pidió esa parte solo como texto suelto para copiar/pegar
   cuando la necesite, no como default de todos los correos.
+- 2026-09-05: FIX IMPORTANTE — los correos SÍ se estaban mandando bien (el "no
+  envía" reportado por Andrés era en realidad el navegador bloqueando la
+  descarga de los adjuntos, "no se puede descargar de forma segura", por
+  archivos de varios MB). Causa real: `_dianke_embed_partner_photo` solo
+  cambiaba el tamaño VISUAL de la foto (`xl_img.width/height`), pero el
+  binario incrustado seguía siendo la imagen original de Odoo (cientos de
+  KB a varios MB) — con una foto por cliente y varios clientes por archivo
+  de ruta, el Excel pesaba varios MB. Ahora se comprime de verdad con
+  Pillow (thumbnail + JPEG calidad 70) antes de incrustarla. Probado: un
+  archivo con 5 clientes/5 fotos pasó de pesar varios MB a ~18 KB.
