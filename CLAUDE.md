@@ -19,6 +19,14 @@ redimensionadas en Traslados (`stock.picking`), Ventas (`sale.order`), Facturas
    4. Andrés prueba en producción.
    REGLA DEFINITIVA (2026-08-20, confirmada explícitamente por Andrés tras varias
    idas y vueltas — no volver a cambiar sin que él lo pida de nuevo).
+2. Para cambios de diseño/alcance no triviales (formato de un reporte, estructura de un
+   Excel, flujo nuevo, etc.): primero **mostrar el diseño/plan y esperar la confirmación
+   explícita de Andrés**, sin tocar código ni git. Recién cuando él confirma, se codifica
+   y se aplica la regla 1 completa (commit + push automático, sin volver a preguntar en
+   ese momento — la confirmación de diseño ya cubre el "ok" para programar y subir). No
+   ir montando y subiendo cambios a cada rato mientras el diseño todavía se está afinando.
+   REGLA DEFINITIVA (2026-09-05, pedida explícitamente por Andrés — no volver a cambiar
+   sin que él lo pida de nuevo).
 3. Claude actúa como **coach**: explica el porqué de cada cambio, pero el criterio de
    negocio final es de Andrés (no es programador de formación).
 4. Mantener este archivo **conciso** — no volcar contexto detallado de cada sesión aquí.
