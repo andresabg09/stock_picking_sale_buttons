@@ -126,6 +126,23 @@ class SaleOrder(models.Model):
         return d
 
     @staticmethod
+    def _dianke_fecha_larga_es(fecha):
+        """"Sábado 5 de Septiembre de 2026" — para el asunto del correo a
+        Dianke, así se distingue de un vistazo si el envío es de hoy o de
+        otro día (ej. si un día se manda solo una parte de una ruta y al
+        día siguiente el resto) — pedido de Andrés 2026-09-05. Se escribe
+        a mano en vez de usar locale del servidor, que puede no tener
+        español instalado."""
+        if not fecha:
+            return ''
+        dias = ['Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo']
+        meses = [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio',
+            'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre',
+        ]
+        return "%s %d de %s de %d" % (dias[fecha.weekday()], fecha.day, meses[fecha.month - 1], fecha.year)
+
+    @staticmethod
     def _dianke_payment_checkboxes(payment_method):
         """Traduce custom_payment_method a las casillas de la plantilla de
         Dianke (Efectivo/Tarjeta/ACH). Transferencia se marca como ACH (es
@@ -483,21 +500,35 @@ class SaleOrder(models.Model):
 
         ws.freeze_panes = None
 
-    @staticmethod
-    def _dianke_subject_and_body(orders):
+    def _dianke_subject_and_body(self, orders):
         """Arma asunto y cuerpo del correo a Dianke, en singular o plural
         según la cantidad de órdenes — texto acordado con Andrés
-        2026-09-05."""
+        2026-09-05. El asunto muestra las rutas con la cantidad de
+        órdenes de cada una (ej. "Pedregal (5), Villa Grecia (3)") en vez
+        de listar cada número de orden, para que no quede kilométrico
+        cuando son muchas órdenes — pedido de Andrés 2026-09-05."""
         names = orders.mapped('name')
-        plural = len(names) > 1
         names_str = ", ".join(names)
+        plural = len(names) > 1
+
+        route_counts = {}
+        route_order_list = []
+        for order in orders.sorted(key=lambda o: o.name):
+            ruta, _ = self._dianke_route_info(order.partner_id)
+            key = ruta or 'Sin Ruta'
+            if key not in route_counts:
+                route_counts[key] = 0
+                route_order_list.append(key)
+            route_counts[key] += 1
+        rutas_str = ", ".join("%s (%d)" % (r, route_counts[r]) for r in route_order_list)
+        fecha_str = self._dianke_fecha_larga_es(fields.Date.context_today(self))
 
         if plural:
-            subject = "Pedidos para Dianke Group — Órdenes de Venta %s" % names_str
+            subject = "Pedidos para Dianke Group — %s — %s" % (rutas_str, fecha_str)
             pedido_texto = "los pedidos confirmados"
             listo_texto = "listos"
         else:
-            subject = "Pedido para Dianke Group — Orden de Venta %s" % names_str
+            subject = "Pedido para Dianke Group — %s — %s" % (rutas_str, fecha_str)
             pedido_texto = "el pedido confirmado"
             listo_texto = "listo"
 
