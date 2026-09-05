@@ -209,3 +209,9 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   referencias). Cuando aplica: Cantidad ×6, Precio venta ÷6 (así el
   subtotal cantidad×precio sigue representando el mismo valor real del
   pedido, solo que en unidades en vez de displays) — confirmado con Andrés.
+- 2026-09-05: "Precio venta" del Excel de Dianke siempre a 2 decimales —
+  se notaba sobre todo con la conversión de GODREJ POCKET (4.25÷6 =
+  0.7083333...). Se redondea el valor (`round(precio, 2)`) y además se le
+  pone `number_format = '0.00'` a la celda, para que Excel siempre lo
+  muestre en 2 decimales sin importar el cálculo. El Excel de compras a
+  proveedores no tiene columna de precio, así que no le aplica esto.

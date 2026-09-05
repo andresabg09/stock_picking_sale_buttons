@@ -504,6 +504,7 @@ class SaleOrder(models.Model):
                 if self._dianke_is_godrej_pocket(product.display_name):
                     cantidad = cantidad * DIANKE_GODREJ_POCKET_UNITS_PER_DISPLAY
                     precio = precio / DIANKE_GODREJ_POCKET_UNITS_PER_DISPLAY
+                precio = round(precio, 2)  # nunca 3+ decimales, pedido de Andrés 2026-09-05
 
                 valores = [codigo, codigo_anclado, descripcion, cantidad, precio, tipo_venta]
                 for col, valor in enumerate(valores, start=1):
@@ -516,6 +517,8 @@ class SaleOrder(models.Model):
                         vertical='center',
                         wrap_text=(col in (2, 3, 6)),
                     )
+                    if col == 5:  # Precio venta: formato fijo de 2 decimales, sin importar el cálculo
+                        cell.number_format = '0.00'
                 ws.row_dimensions[row_idx].height = max(
                     self._dianke_estimate_row_height(codigo_anclado, column_widths[2]),
                     self._dianke_estimate_row_height(descripcion, descripcion_width),
