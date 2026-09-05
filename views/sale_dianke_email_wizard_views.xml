@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <record id="view_sale_dianke_email_wizard_form" model="ir.ui.view">
+        <field name="name">sale.dianke.email.wizard.form</field>
+        <field name="model">sale.dianke.email.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Confirmar envío a Dianke">
+                <div class="alert alert-info" role="alert">
+                    <strong>Órdenes incluidas en este Excel:</strong>
+                    <field name="sale_order_ids" readonly="1" nolabel="1" widget="many2many_tags"/>
+                </div>
+                <group>
+                    <field name="email_to" placeholder="correo@dianke.com"/>
+                    <field name="email_cc" placeholder="correo1@x.com, correo2@x.com"/>
+                    <field name="subject"/>
+                </group>
+                <field name="body"/>
+                <group string="Adjunto">
+                    <field name="attachment_ids" widget="many2many_binary"/>
+                </group>
+                <footer>
+                    <button name="action_send" string="Enviar a Dianke" type="object" class="btn-primary"/>
+                    <button name="action_cancel" string="Cancelar" type="object" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+</odoo>

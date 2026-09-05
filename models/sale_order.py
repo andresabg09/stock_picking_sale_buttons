@@ -227,14 +227,55 @@ class SaleOrder(models.Model):
         return True
 
     def action_send_dianke_export_now(self):
-        """Botón/acción manual: envía a Dianke las órdenes seleccionadas que
-        estén confirmadas (ignora las que no estén en estado 'sale')."""
+        """Botón/acción manual: genera el Excel de las órdenes seleccionadas
+        que estén confirmadas (ignora las que no estén en estado 'sale') y
+        abre la ventana de confirmación para revisar/editar antes de enviar."""
         orders = self.filtered(lambda o: o.state == 'sale')
         if not orders:
             from odoo.exceptions import UserError
             raise UserError("Selecciona al menos una orden de venta CONFIRMADA para enviar a Dianke.")
-        orders._send_dianke_export_email()
-        return {'type': 'ir.actions.act_window_close'}
+
+        xlsx_bytes = orders._generate_dianke_xlsx_bytes()
+        filename = orders._dianke_xlsx_filename()
+        attachment = self.env['ir.attachment'].create({
+            'name': filename,
+            'type': 'binary',
+            'raw': xlsx_bytes,
+            'mimetype': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'res_model': 'sale.order',
+            'res_id': orders[0].id,
+        })
+
+        subject = "Pedidos confirmados para Dianke - %s" % filename.replace('.xlsx', '')
+        body = """
+<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Buenas noches,
+        <br/><br/>
+        Adjunto el Excel con los pedidos confirmados (<strong>%s</strong>) listos para subir al sistema.
+        <br/><br/>
+        Saludos,<br/>
+        Shalom Panamá.
+        <br/><br/>
+    </p>
+</div>
+""" % ", ".join(orders.mapped('name'))
+
+        wizard = self.env['sale.dianke.email.wizard'].create({
+            'sale_order_ids': [(6, 0, orders.ids)],
+            'email_to': DIANKE_EMAIL_TO,
+            'subject': subject,
+            'body': body,
+            'attachment_ids': [(6, 0, [attachment.id])],
+        })
+
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'sale.dianke.email.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }
 
     @api.model
     def _cron_send_dianke_export(self):
