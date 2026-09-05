@@ -53,3 +53,9 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
 - 2026-08-20: Fix Kanban de facturas repetía nombre del producto en la descripción —
   nuevo campo compute `custom_extra_description` en `account.move.line` (quita la
   línea del nombre de producto de `name`, deja solo la nota del vendedor). Verificado.
+- 2026-09-05: Exportación a Dianke (Excel) de órdenes de venta confirmadas — campo
+  `custom_payment_method` en sale.order, botón "Enviar a Dianke ahora" dentro de cada
+  orden confirmada, y acción masiva "Enviar a Dianke (Excel)" desde el listado de
+  Ventas (selecciona varias y las manda juntas). El cron automático de las 11:59pm
+  quedó **desactivado a propósito** (pedido explícito de Andrés) — por ahora todo
+  envío a Dianke es manual. Pendiente de probar en producción.
