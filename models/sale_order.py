@@ -234,16 +234,18 @@ class SaleOrder(models.Model):
 
     @staticmethod
     def _dianke_estimate_row_height(text, col_width, base_height=20):
-        """Estimación simple de la altura de fila necesaria para que un
-        texto largo con wrap_text no se vea cortado — Excel no calcula
-        esto solo al generar el archivo por código, hay que aproximarlo.
-        ~1.8 caracteres visibles por unidad de ancho de columna."""
+        """Estimación de la altura de fila necesaria para que un texto
+        largo con wrap_text no se vea cortado — Excel no la calcula solo
+        al generar el archivo por código, hay que aproximarla. ~0.9
+        caracteres visibles por unidad de ancho de columna (ajustado
+        2026-09-05: la primera estimación de 1.8 se quedaba corta y
+        cortaba nombres de producto largos)."""
         if not text:
             return base_height
-        chars_per_line = max(int(col_width * 1.8), 10)
+        chars_per_line = max(int(col_width * 0.9), 8)
         import math
         lineas = math.ceil(len(str(text)) / chars_per_line)
-        return max(base_height, 14 * lineas + 6)
+        return max(base_height, 16 * lineas + 8)
 
     def _fill_dianke_template_sheet(self, ws, rows_data):
         """Hoja única con el formato oficial de pedidos de Dianke (plantilla

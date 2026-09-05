@@ -147,3 +147,7 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   es larga) ya no se cortan — `_dianke_estimate_row_height()` calcula la altura
   de cada fila según el texto más largo entre Código Anclado/Descripción/Tipo
   de venta (con `wrap_text`), en vez de una altura fija.
+- 2026-09-05: Fix `_dianke_estimate_row_height` — la estimación de caracteres
+  por línea (1.8 por unidad de ancho) se quedaba corta y varios nombres de
+  producto largos se veían cortados al envolver en 2 líneas. Ajustado a 0.9
+  caracteres por unidad de ancho (más conservador → detecta el wrap antes).
