@@ -56,19 +56,17 @@ class SaleOrder(models.Model):
 
     @staticmethod
     def _dianke_contact_info(partner):
-        """Devuelve (cliente, ruc, telefono, celular, contacto, direccion)
-        para el reporte de Dianke, a partir de los campos estándar de Odoo
-        en res.partner."""
+        """Devuelve (nombre_local, ruc, telefono, celular, nombre_contacto,
+        direccion) para el reporte de Dianke, a partir de campos de
+        res.partner: los estándar de Odoo (vat, phone, mobile) más el campo
+        de Studio `x_nombre_contacto` (nombre de la persona, ej. "Julio";
+        confirmado por Andrés 2026-09-05 — separado de `name`, que es el
+        nombre del local/negocio)."""
         if not partner:
             return ('', '', '', '', '', '')
 
-        # Si el partner es un contacto individual de una empresa, el
-        # "Cliente" es la empresa y el "Contacto" es la persona.
         company = partner.commercial_partner_id or partner
-        if partner != company and partner.name:
-            contacto = partner.name
-        else:
-            contacto = partner.name or ''
+        nombre_contacto = getattr(partner, 'x_nombre_contacto', '') or ''
 
         direccion = ''
         if hasattr(partner, 'contact_address_complete') and partner.contact_address_complete:
@@ -77,33 +75,97 @@ class SaleOrder(models.Model):
             direccion = partner._display_address() if partner else ''
 
         return (
-            company.name or '',
+            partner.name or '',
             partner.vat or company.vat or '',
             partner.phone or company.phone or '',
             partner.mobile or company.mobile or '',
-            contacto,
+            nombre_contacto,
             direccion,
         )
 
+    def _dianke_order_rows_data(self):
+        """Arma, para cada orden de self, un dict con todos los datos ya
+        resueltos (cliente, líneas, etc.) para no repetir esta lógica entre
+        la hoja plana y la hoja resumen."""
+        payment_labels = dict(PAYMENT_METHOD_SELECTION)
+        data = []
+        for order in self.sorted(key=lambda o: o.name):
+            partner = order.partner_id
+            local, ruc, telefono, celular, contacto, direccion = self._dianke_contact_info(partner)
+            data.append({
+                'order': order,
+                'partner': partner,
+                'local': local,
+                'ruc': ruc,
+                'telefono': telefono,
+                'celular': celular,
+                'contacto': contacto,
+                'direccion': direccion,
+                'forma_pago': payment_labels.get(order.custom_payment_method, order.custom_payment_method or ''),
+                'fecha': order.date_order.strftime('%d/%m/%Y') if order.date_order else '',
+                'lines': order.order_line.filtered(lambda l: not l.display_type),
+            })
+        return data
+
     def _generate_dianke_xlsx_bytes(self):
-        """Genera un único XLSX con todas las órdenes de self, una fila por
-        línea de producto, con la información completa del cliente para
-        que Dianke pueda subirlo directo a su sistema."""
+        """Genera un único XLSX con 2 pestañas para todas las órdenes de
+        self:
+        1) "Importar": una fila por línea de producto, todo repetido — para
+           que un sistema externo la importe de forma automática y plana.
+        2) "Resumen": un bloque por orden (los datos del cliente aparecen
+           una sola vez, con la foto del local) y debajo la tabla de sus
+           productos — para que una persona lo revise fácil."""
         from openpyxl import Workbook
-        from openpyxl.styles import Font, Alignment
-        from openpyxl.drawing.image import Image as XLImage
-        from openpyxl.utils import get_column_letter
         import io
 
         wb = Workbook()
-        ws = wb.active
-        ws.title = "Pedidos Dianke"
+        rows_data = self._dianke_order_rows_data()
+
+        ws_import = wb.active
+        ws_import.title = "Importar"
+        self._fill_dianke_import_sheet(ws_import, rows_data)
+
+        ws_resumen = wb.create_sheet("Resumen")
+        self._fill_dianke_resumen_sheet(ws_resumen, rows_data)
+
+        buffer = io.BytesIO()
+        wb.save(buffer)
+        buffer.seek(0)
+        return buffer.read()
+
+    @staticmethod
+    def _dianke_embed_partner_photo(ws, partner, anchor_cell, row_for_height, height=90):
+        """Incrusta la foto del contacto (si tiene) en anchor_cell. Devuelve
+        True si se incrustó algo."""
+        if not partner or not partner.image_1920:
+            return False
+        from openpyxl.drawing.image import Image as XLImage
+        import base64
+        import io
+        try:
+            img_bytes = base64.b64decode(partner.image_1920)
+            xl_img = XLImage(io.BytesIO(img_bytes))
+            xl_img.width = height
+            xl_img.height = height
+            ws.row_dimensions[row_for_height].height = max(
+                ws.row_dimensions[row_for_height].height or 0, height * 0.75
+            )
+            ws.add_image(xl_img, anchor_cell)
+            return True
+        except Exception:
+            return False
+
+    def _fill_dianke_import_sheet(self, ws, rows_data):
+        """Hoja 1 "Importar": plana, una fila por línea de producto, para
+        subida automática a cualquier sistema."""
+        from openpyxl.styles import Font, Alignment
+        from openpyxl.utils import get_column_letter
 
         headers = [
             "Orden de Venta", "Fecha", "Cliente", "RUC", "Teléfono", "Celular",
             "Contacto", "Dirección", "Forma de Pago", "Código/Referencia",
             "Producto", "Descripción / Notas", "Cantidad", "Precio Unitario",
-            "Subtotal", "Foto del Local",
+            "Subtotal",
         ]
         ws.append(headers)
         for col_idx in range(1, len(headers) + 1):
@@ -111,66 +173,113 @@ class SaleOrder(models.Model):
             cell.font = Font(bold=True)
             cell.alignment = Alignment(horizontal='center')
 
-        payment_labels = dict(PAYMENT_METHOD_SELECTION)
-        photo_col = len(headers)  # última columna
-        row_idx = 1
-
-        for order in self.sorted(key=lambda o: o.name):
-            partner = order.partner_id
-            cliente, ruc, telefono, celular, contacto, direccion = self._dianke_contact_info(partner)
-            forma_pago = payment_labels.get(order.custom_payment_method, order.custom_payment_method or '')
-            fecha = order.date_order.strftime('%d/%m/%Y') if order.date_order else ''
-
-            lines = order.order_line.filtered(lambda l: not l.display_type)
-            first_line_of_order = True
-
-            for line in lines:
-                row_idx += 1
+        for data in rows_data:
+            for line in data['lines']:
                 product = line.product_id
                 codigo = product.barcode or product.default_code or ''
-
                 ws.append([
-                    order.name,
-                    fecha,
-                    cliente,
-                    ruc,
-                    telefono,
-                    celular,
-                    contacto,
-                    direccion,
-                    forma_pago,
+                    data['order'].name,
+                    data['fecha'],
+                    data['local'],
+                    data['ruc'],
+                    data['telefono'],
+                    data['celular'],
+                    data['contacto'],
+                    data['direccion'],
+                    data['forma_pago'],
                     codigo,
                     product.display_name or '',
                     line.name or '',
                     line.product_uom_qty,
                     line.price_unit,
                     line.price_subtotal,
-                    '',
                 ])
 
-                # Foto del local: se incrusta una sola vez, en la primera
-                # línea de cada orden, para no repetir la imagen por línea.
-                if first_line_of_order and partner and partner.image_1920:
-                    try:
-                        import base64
-                        img_bytes = base64.b64decode(partner.image_1920)
-                        xl_img = XLImage(io.BytesIO(img_bytes))
-                        xl_img.width = 90
-                        xl_img.height = 90
-                        ws.row_dimensions[row_idx].height = 68
-                        ws.add_image(xl_img, "%s%s" % (get_column_letter(photo_col), row_idx))
-                    except Exception:
-                        pass
-                first_line_of_order = False
+        column_widths = [16, 12, 28, 14, 14, 14, 18, 32, 16, 18, 40, 32, 10, 14, 14]
+        for i, width in enumerate(column_widths, start=1):
+            ws.column_dimensions[get_column_letter(i)].width = width
+        ws.freeze_panes = "A2"
 
-        column_widths = [16, 12, 28, 14, 14, 14, 22, 32, 16, 18, 40, 32, 10, 14, 14, 14]
+    def _fill_dianke_resumen_sheet(self, ws, rows_data):
+        """Hoja 2 "Resumen": un bloque por orden — cabecera del cliente una
+        sola vez (con foto) y debajo la tabla de sus productos."""
+        from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
+        from openpyxl.utils import get_column_letter
+
+        ITEM_COLS = 5  # Código, Producto/Descripción, Cantidad, Precio, Subtotal
+        PHOTO_COL = ITEM_COLS + 1
+
+        header_fill = PatternFill(start_color="1F4E78", end_color="1F4E78", fill_type="solid")
+        header_font = Font(bold=True, color="FFFFFF")
+        item_header_fill = PatternFill(start_color="D9E1F2", end_color="D9E1F2", fill_type="solid")
+        thin_border = Border(*(Side(style='thin', color='BFBFBF'),) * 4)
+
+        column_widths = [18, 42, 10, 12, 12, 14]
         for i, width in enumerate(column_widths, start=1):
             ws.column_dimensions[get_column_letter(i)].width = width
 
-        buffer = io.BytesIO()
-        wb.save(buffer)
-        buffer.seek(0)
-        return buffer.read()
+        row_idx = 0
+        for data in rows_data:
+            order = data['order']
+
+            # --- Bloque de cabecera del pedido (3 filas, fusionadas) ---
+            header_start_row = row_idx + 1
+            linea1 = "%s · %s · %s · RUC %s" % (order.name, data['fecha'], data['local'], data['ruc'] or 'N/A')
+            linea2 = "Tel/Cel: %s / %s · Contacto: %s · Forma de Pago: %s" % (
+                data['telefono'] or 'N/A', data['celular'] or 'N/A',
+                data['contacto'] or 'N/A', data['forma_pago'] or 'N/A',
+            )
+            linea3 = "Dirección: %s" % (data['direccion'] or 'N/A')
+
+            for texto in (linea1, linea2, linea3):
+                row_idx += 1
+                ws.merge_cells(start_row=row_idx, start_column=1, end_row=row_idx, end_column=ITEM_COLS)
+                cell = ws.cell(row=row_idx, column=1, value=texto)
+                cell.fill = header_fill
+                cell.font = header_font
+                cell.alignment = Alignment(vertical='center')
+                ws.row_dimensions[row_idx].height = 18
+
+            self._dianke_embed_partner_photo(
+                ws, data['partner'],
+                "%s%s" % (get_column_letter(PHOTO_COL), header_start_row),
+                header_start_row,
+            )
+
+            # --- Encabezado de la tabla de productos ---
+            row_idx += 1
+            item_header_row = row_idx
+            for col, texto in enumerate(
+                ["Código", "Producto / Descripción", "Cantidad", "Precio Unit.", "Subtotal"], start=1
+            ):
+                cell = ws.cell(row=item_header_row, column=col, value=texto)
+                cell.font = Font(bold=True)
+                cell.fill = item_header_fill
+                cell.border = thin_border
+                cell.alignment = Alignment(horizontal='center')
+
+            # --- Líneas de producto ---
+            for line in data['lines']:
+                row_idx += 1
+                product = line.product_id
+                codigo = product.barcode or product.default_code or ''
+                descripcion = product.display_name or ''
+                if line.name and line.name.strip() != descripcion.strip():
+                    descripcion = "%s — %s" % (descripcion, line.name.strip())
+
+                valores = [codigo, descripcion, line.product_uom_qty, line.price_unit, line.price_subtotal]
+                for col, valor in enumerate(valores, start=1):
+                    cell = ws.cell(row=row_idx, column=col, value=valor)
+                    cell.border = thin_border
+                    if col in (3, 4, 5):
+                        cell.alignment = Alignment(horizontal='right')
+                    else:
+                        cell.alignment = Alignment(horizontal='left', wrap_text=True)
+
+            # --- Fila en blanco de separación entre pedidos ---
+            row_idx += 1
+
+        ws.freeze_panes = None
 
     def _dianke_xlsx_filename(self):
         fecha = fields.Date.context_today(self)
@@ -201,7 +310,7 @@ class SaleOrder(models.Model):
     <p style="margin: 0px; padding: 0px; font-size: 13px;">
         Buenas noches,
         <br/><br/>
-        Adjunto el Excel con los pedidos confirmados (<strong>%s</strong>) listos para subir al sistema.
+        Adjunto el Excel con los pedidos confirmados (<strong>%s</strong>). Tiene 2 pestañas: <strong>"Importar"</strong> (formato plano, lista para subir directo al sistema) y <strong>"Resumen"</strong> (vista más fácil de leer, con foto del local por pedido).
         <br/><br/>
         Saludos,<br/>
         Shalom Panamá.
@@ -252,7 +361,7 @@ class SaleOrder(models.Model):
     <p style="margin: 0px; padding: 0px; font-size: 13px;">
         Buenas noches,
         <br/><br/>
-        Adjunto el Excel con los pedidos confirmados (<strong>%s</strong>) listos para subir al sistema.
+        Adjunto el Excel con los pedidos confirmados (<strong>%s</strong>). Tiene 2 pestañas: <strong>"Importar"</strong> (formato plano, lista para subir directo al sistema) y <strong>"Resumen"</strong> (vista más fácil de leer, con foto del local por pedido).
         <br/><br/>
         Saludos,<br/>
         Shalom Panamá.

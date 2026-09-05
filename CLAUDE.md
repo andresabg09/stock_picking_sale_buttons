@@ -75,3 +75,9 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   (pedido explícito de Andrés) — no hay registro `ir.cron` todavía (ver Errores
   conocidos: campos de `ir.cron` sin confirmar en esta versión). Pendiente de probar
   en producción.
+- 2026-09-05: Rediseño del Excel de Dianke tras feedback de Andrés — un solo archivo
+  con 2 pestañas: "Importar" (plana, una fila por línea, para subida automática) y
+  "Resumen" (un bloque por pedido: cabecera del cliente una sola vez + foto del local,
+  tabla de productos debajo — sin repetir datos fijos). Contacto corregido: usa el
+  campo de Studio `x_nombre_contacto` en res.partner (nombre de la persona, ej.
+  "Julio"), separado de `name` (nombre del local). Pendiente de probar en producción.
