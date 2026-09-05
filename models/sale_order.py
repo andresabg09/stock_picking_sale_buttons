@@ -3,6 +3,7 @@ from odoo import models, fields, api
 TINTE_NNP_MIN_PRICE = 1.16
 
 DIANKE_EMAIL_TO = "ventasdianke@gmail.com,Dianazuniga@diankegroup.com"
+DIANKE_EMAIL_CC = "andres@shalompma.com,luis@shalompma.com,milciades@shalompma.com"
 
 PAYMENT_METHOD_SELECTION = [
     ('efectivo', 'Efectivo'),
@@ -238,21 +239,27 @@ class SaleOrder(models.Model):
         agregan 2 datos que la plantilla de Dianke no trae pero Andrés
         pidió de todas formas: RUC y foto del local (esta última fuera de
         las columnas A-E, para no romper el formato de ellos)."""
-        from openpyxl.styles import Font, Alignment, PatternFill
+        from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
         from openpyxl.utils import get_column_letter
 
         N_COLS = 5  # A-E, igual que la plantilla de Dianke
         PHOTO_COL = N_COLS + 2
+        FONT_NAME = "Aptos"  # misma fuente que usa la plantilla de Dianke
 
-        LABEL_FONT = Font(bold=True, size=10, color="173B4D")
+        LABEL_FONT = Font(name=FONT_NAME, bold=True, size=10, color="173B4D")
+        VALUE_FONT = Font(name=FONT_NAME, size=10)
+        PAGO_FONT = Font(name=FONT_NAME, bold=True, size=11)
         VALUE_FILL = PatternFill(start_color="FFF9E8", end_color="FFF9E8", fill_type="solid")
         DIVIDER_FILL = PatternFill(start_color="E8F1F5", end_color="E8F1F5", fill_type="solid")
         SECTION_FILL = PatternFill(start_color="173B4D", end_color="173B4D", fill_type="solid")
-        SECTION_FONT = Font(bold=True, size=10, color="FFFFFF")
+        SECTION_FONT = Font(name=FONT_NAME, bold=True, size=10, color="FFFFFF")
         TABLE_HEADER_FILL = PatternFill(start_color="2F6F7E", end_color="2F6F7E", fill_type="solid")
-        TABLE_HEADER_FONT = Font(bold=True, size=10, color="FFFFFF")
+        TABLE_HEADER_FONT = Font(name=FONT_NAME, bold=True, size=10, color="FFFFFF")
+        ROW_FONT = Font(name=FONT_NAME, size=10)
         ROW_FILL = PatternFill(start_color="FFFFFF", end_color="FFFFFF", fill_type="solid")
         NOTA_FILL = PatternFill(start_color="F8CBAD", end_color="F8CBAD", fill_type="solid")
+        THIN_SIDE = Side(style='thin', color='000000')
+        THIN_BORDER = Border(left=THIN_SIDE, right=THIN_SIDE, top=THIN_SIDE, bottom=THIN_SIDE)
 
         column_widths = {1: 39.78, 2: 20, 3: 14, 4: 14, 5: 16, PHOTO_COL: 16}
         for col, width in column_widths.items():
@@ -280,18 +287,24 @@ class SaleOrder(models.Model):
             ]
             for label, valor in campos:
                 row_idx += 1
-                ws.cell(row=row_idx, column=1, value=label).font = LABEL_FONT
+                label_cell = ws.cell(row=row_idx, column=1, value=label)
+                label_cell.font = LABEL_FONT
+                label_cell.border = THIN_BORDER
                 ws.merge_cells(start_row=row_idx, start_column=2, end_row=row_idx, end_column=N_COLS)
                 for col in range(2, N_COLS + 1):
                     cell = ws.cell(row=row_idx, column=col)
                     cell.fill = VALUE_FILL
+                    cell.font = VALUE_FONT
+                    cell.border = THIN_BORDER
                     cell.alignment = Alignment(horizontal='center', vertical='center')
                 ws.cell(row=row_idx, column=2, value=valor)
                 ws.row_dimensions[row_idx].height = 24
 
             # --- Tipo de pago (casillas) ---
             row_idx += 1
-            ws.cell(row=row_idx, column=1, value="Tipo de pago").font = LABEL_FONT
+            pago_label_cell = ws.cell(row=row_idx, column=1, value="Tipo de pago")
+            pago_label_cell.font = LABEL_FONT
+            pago_label_cell.border = THIN_BORDER
             opciones_pago = [("Efectivo", efectivo), ("Tarjeta", tarjeta), ("ACH", ach)]
             if otro_label:
                 opciones_pago.append((otro_label, True))
@@ -299,10 +312,11 @@ class SaleOrder(models.Model):
                 col = 2 + i
                 cell = ws.cell(row=row_idx, column=col)
                 cell.fill = VALUE_FILL
+                cell.border = THIN_BORDER
                 if i < len(opciones_pago):
                     texto, marcado = opciones_pago[i]
                     cell.value = "%s %s" % ("☑" if marcado else "☐", texto)
-                    cell.font = Font(bold=True, size=11)
+                    cell.font = PAGO_FONT
                 cell.alignment = Alignment(horizontal='center')
             ws.row_dimensions[row_idx].height = 24
 
@@ -349,6 +363,8 @@ class SaleOrder(models.Model):
                 for col, valor in enumerate(valores, start=1):
                     cell = ws.cell(row=row_idx, column=col, value=valor)
                     cell.fill = NOTA_FILL if nota else ROW_FILL
+                    cell.font = ROW_FONT
+                    cell.border = THIN_BORDER
                     cell.alignment = Alignment(
                         horizontal='left' if col == 2 else 'center',
                         wrap_text=(col == 2),
@@ -363,6 +379,48 @@ class SaleOrder(models.Model):
     def _dianke_xlsx_filename(self):
         fecha = fields.Date.context_today(self)
         return "Pedidos Dianke %s.xlsx" % fecha.strftime('%d-%m-%Y')
+
+    @staticmethod
+    def _dianke_subject_and_body(orders):
+        """Arma asunto y cuerpo del correo a Dianke, en singular o plural
+        según la cantidad de órdenes — texto acordado con Andrés
+        2026-09-05."""
+        names = orders.mapped('name')
+        plural = len(names) > 1
+        names_str = ", ".join(names)
+
+        if plural:
+            subject = "Pedidos para Dianke Group — Órdenes de Venta %s" % names_str
+            pedido_texto = "los pedidos confirmados"
+            listo_texto = "listos"
+        else:
+            subject = "Pedido para Dianke Group — Orden de Venta %s" % names_str
+            pedido_texto = "el pedido confirmado"
+            listo_texto = "listo"
+
+        body = """
+<div style="margin: 0px; padding: 0px;">
+    <p style="margin: 0px; padding: 0px; font-size: 13px;">
+        Querido equipo de Dianke,
+        <br/><br/>
+        Adjunto el Excel con %s (<strong>%s</strong>), %s para su revisión e importación al sistema.
+        Ahí está toda la información acordada; si necesitan algún ajuste, por favor identifíquenlo
+        para poder corregirlo.
+        <br/><br/>
+        Quedo a su disposición ante cualquier consulta adicional.
+        <br/><br/>
+        ¿Podría confirmar que recibió esta orden?
+        <br/><br/>
+        Atentamente,<br/>
+        Andrés Gutiérrez<br/>
+        Asistente<br/>
+        Shalom Panamá.
+        <br/><br/>
+    </p>
+</div>
+""" % (pedido_texto, names_str, listo_texto)
+
+        return subject, body
 
     def _send_dianke_export_email(self):
         """Envía por correo el XLSX consolidado de self (órdenes de venta
@@ -383,25 +441,13 @@ class SaleOrder(models.Model):
             'res_id': orders[0].id,
         })
 
-        subject = "Pedidos confirmados para Dianke - %s" % orders._dianke_xlsx_filename().replace('.xlsx', '')
-        body = """
-<div style="margin: 0px; padding: 0px;">
-    <p style="margin: 0px; padding: 0px; font-size: 13px;">
-        Buenas noches,
-        <br/><br/>
-        Adjunto el Excel con los pedidos confirmados (<strong>%s</strong>), en el formato de pedido acordado con Dianke, listo para su revisión e importación al sistema.
-        <br/><br/>
-        Saludos,<br/>
-        Shalom Panamá.
-        <br/><br/>
-    </p>
-</div>
-""" % ", ".join(orders.mapped('name'))
+        subject, body = self._dianke_subject_and_body(orders)
 
         mail = self.env['mail.mail'].create({
             'subject': subject,
             'body_html': body,
             'email_to': DIANKE_EMAIL_TO,
+            'email_cc': DIANKE_EMAIL_CC,
             'attachment_ids': [(6, 0, [attachment.id])],
             'model': 'sale.order',
             'res_id': orders[0].id,
@@ -434,24 +480,12 @@ class SaleOrder(models.Model):
             'res_id': orders[0].id,
         })
 
-        subject = "Pedidos confirmados para Dianke - %s" % filename.replace('.xlsx', '')
-        body = """
-<div style="margin: 0px; padding: 0px;">
-    <p style="margin: 0px; padding: 0px; font-size: 13px;">
-        Buenas noches,
-        <br/><br/>
-        Adjunto el Excel con los pedidos confirmados (<strong>%s</strong>), en el formato de pedido acordado con Dianke, listo para su revisión e importación al sistema.
-        <br/><br/>
-        Saludos,<br/>
-        Shalom Panamá.
-        <br/><br/>
-    </p>
-</div>
-""" % ", ".join(orders.mapped('name'))
+        subject, body = self._dianke_subject_and_body(orders)
 
         wizard = self.env['sale.dianke.email.wizard'].create({
             'sale_order_ids': [(6, 0, orders.ids)],
             'email_to': DIANKE_EMAIL_TO,
+            'email_cc': DIANKE_EMAIL_CC,
             'subject': subject,
             'body': body,
             'attachment_ids': [(6, 0, [attachment.id])],
