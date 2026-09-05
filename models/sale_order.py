@@ -191,7 +191,13 @@ class SaleOrder(models.Model):
         la posición del cliente en la ruta (x_orden_ruta), de menor a
         mayor — pedido de Andrés 2026-09-05: un Excel por ruta, con los
         pedidos en el mismo orden en que se van a atender. Sin ruta
-        asignada cae en el grupo "Sin Ruta"."""
+        asignada cae en el grupo "Sin Ruta".
+
+        Fix 2026-09-05: x_orden_ruta es un Integer de Odoo — si nunca se
+        asignó, su valor por defecto es 0, no None. Antes solo se trataba
+        None como "sin asignar", así que todos los clientes con 0 (la
+        mayoría, en la práctica) se ordenaban de PRIMEROS en vez de al
+        final. Ahora 0 y None se tratan igual (sin asignar → al final)."""
         groups = {}
         group_order = []
         for data in rows_data:
@@ -201,7 +207,7 @@ class SaleOrder(models.Model):
                 group_order.append(key)
             groups[key].append(data)
         for key in groups:
-            groups[key].sort(key=lambda d: (d['orden_ruta'] is None, d['orden_ruta'] or 0))
+            groups[key].sort(key=lambda d: (not d['orden_ruta'], d['orden_ruta'] or 0))
         return [(key, groups[key]) for key in group_order]
 
     @staticmethod
@@ -393,7 +399,7 @@ class SaleOrder(models.Model):
                 )
 
             # --- Campos del pedido (etiqueta en A, valor fusionado B:F) ---
-            if data['ruta'] and data['orden_ruta'] is not None:
+            if data['ruta'] and data['orden_ruta']:
                 ruta_texto = "%s (Orden %s)" % (data['ruta'], data['orden_ruta'])
             else:
                 ruta_texto = data['ruta']
