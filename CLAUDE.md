@@ -162,3 +162,10 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   adjuntos en el mismo correo. Reemplaza `_generate_dianke_xlsx_bytes` +
   `_dianke_xlsx_filename` por `_generate_dianke_xlsx_files` (devuelve lista de
   archivos) + `_dianke_group_by_route` + `_dianke_safe_sheet_name`.
+- 2026-09-05: Correo a Dianke — se agregó de forma PERMANENTE (parte del
+  template, `_dianke_subject_and_body`) el bloque de "especificaciones de
+  despacho" (Productos NNP Aliset 69gr/Decolorantes en unidades individuales,
+  AER POCKETS por displays). La info sobre tintes en múltiplos de 5 (excepto
+  Tinte N.º 1, reservado para cambios/promos/rotaciones) NO se agregó al
+  código — Andrés pidió esa parte solo como texto suelto para copiar/pegar
+  cuando la necesite, no como default de todos los correos.

@@ -493,6 +493,13 @@ class SaleOrder(models.Model):
         Ahí está toda la información acordada; si necesitan algún ajuste, por favor identifíquenlo
         para poder corregirlo.
         <br/><br/>
+        Así mismo, solicitamos su especial atención a las siguientes especificaciones de despacho:
+        <br/><br/>
+        <ul style="margin: 0px; padding-left: 20px;">
+            <li>Presentación de Productos NNP: los artículos Aliset NNP de 69gr y Decolorantes se solicitan como unidades individuales.</li>
+            <li>Los AER POCKETS se despachan por displays.</li>
+        </ul>
+        <br/>
         Quedo a su disposición ante cualquier consulta adicional.
         <br/><br/>
         ¿Podría confirmar que recibió esta orden?
