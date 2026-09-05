@@ -9,6 +9,7 @@
         'views/stock_picking_views.xml',
         'views/account_move_views.xml',
         'views/sale_order_views.xml',
+        'views/sale_dianke_email_wizard_views.xml',
         'views/sale_order_dianke_export.xml',
         'views/product_views.xml',
         'views/purchase_order_views.xml',
