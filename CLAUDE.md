@@ -139,3 +139,11 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   necesiten, cerrando con la firma de Andrés Gutiérrez. Todo centralizado en
   `_dianke_subject_and_body()` para no duplicar el texto entre el envío directo
   y el wizard de confirmación.
+- 2026-09-05: Excel de Dianke, 3 ajustes más — la foto del local ya no queda en
+  una columna aparte desalineada: ahora es su propia fila "Foto del local"
+  arriba de "Fecha", integrada al bloque (solo aparece si el cliente tiene
+  foto). Se agregó "Código Anclado" de vuelta en el detalle (mismo
+  `product.barcode.multi`). La Descripción y el "Tipo de venta" (cuando la nota
+  es larga) ya no se cortan — `_dianke_estimate_row_height()` calcula la altura
+  de cada fila según el texto más largo entre Código Anclado/Descripción/Tipo
+  de venta (con `wrap_text`), en vez de una altura fija.

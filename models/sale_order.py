@@ -232,19 +232,32 @@ class SaleOrder(models.Model):
         remainder = line_name[:idx] + line_name[idx + len(display_name):]
         return remainder.strip(' -—.,')
 
+    @staticmethod
+    def _dianke_estimate_row_height(text, col_width, base_height=20):
+        """Estimación simple de la altura de fila necesaria para que un
+        texto largo con wrap_text no se vea cortado — Excel no calcula
+        esto solo al generar el archivo por código, hay que aproximarlo.
+        ~1.8 caracteres visibles por unidad de ancho de columna."""
+        if not text:
+            return base_height
+        chars_per_line = max(int(col_width * 1.8), 10)
+        import math
+        lineas = math.ceil(len(str(text)) / chars_per_line)
+        return max(base_height, 14 * lineas + 6)
+
     def _fill_dianke_template_sheet(self, ws, rows_data):
         """Hoja única con el formato oficial de pedidos de Dianke (plantilla
         "Formato_para_recibir_pedidos_clientes.xlsx" que Andrés compartió
         2026-09-05), repetido en un bloque por cada orden de rows_data. Se
-        agregan 2 datos que la plantilla de Dianke no trae pero Andrés
-        pidió de todas formas: RUC y foto del local (esta última fuera de
-        las columnas A-E, para no romper el formato de ellos)."""
+        agregan datos que la plantilla de Dianke no trae pero Andrés pidió
+        de todas formas: RUC, foto del local (en su propia fila, integrada
+        al bloque) y Código Anclado en el detalle."""
         from openpyxl.styles import Font, Alignment, PatternFill, Border, Side
         from openpyxl.utils import get_column_letter
 
-        N_COLS = 5  # A-E, igual que la plantilla de Dianke
-        PHOTO_COL = N_COLS + 2
+        N_COLS = 6  # Código, Código Anclado, Descripción, Cantidad, Precio venta, Tipo de venta
         FONT_NAME = "Aptos"  # misma fuente que usa la plantilla de Dianke
+        DESCRIPCION_COL = 3
 
         LABEL_FONT = Font(name=FONT_NAME, bold=True, size=10, color="173B4D")
         VALUE_FONT = Font(name=FONT_NAME, size=10)
@@ -261,19 +274,35 @@ class SaleOrder(models.Model):
         THIN_SIDE = Side(style='thin', color='000000')
         THIN_BORDER = Border(left=THIN_SIDE, right=THIN_SIDE, top=THIN_SIDE, bottom=THIN_SIDE)
 
-        column_widths = {1: 39.78, 2: 20, 3: 14, 4: 14, 5: 16, PHOTO_COL: 16}
+        column_widths = {1: 22, 2: 20, 3: 44, 4: 12, 5: 14, 6: 16}
         for col, width in column_widths.items():
             ws.column_dimensions[get_column_letter(col)].width = width
+        descripcion_width = column_widths[DESCRIPCION_COL]
 
         row_idx = 0
         for data in rows_data:
             order = data['order']
-            block_start_row = row_idx + 1
             entrega = data['fecha_entrega']
             entrega_str = entrega.strftime('%d/%m/%Y') if entrega else ''
             efectivo, tarjeta, ach, otro_label = self._dianke_payment_checkboxes(order.custom_payment_method)
 
-            # --- Campos del pedido (etiqueta en A, valor fusionado B:E) ---
+            # --- Foto del local (fila propia, integrada al bloque) ---
+            if data['partner'] and data['partner'].image_1920:
+                row_idx += 1
+                foto_label_cell = ws.cell(row=row_idx, column=1, value="Foto del local")
+                foto_label_cell.font = LABEL_FONT
+                foto_label_cell.border = THIN_BORDER
+                ws.merge_cells(start_row=row_idx, start_column=2, end_row=row_idx, end_column=N_COLS)
+                for col in range(2, N_COLS + 1):
+                    cell = ws.cell(row=row_idx, column=col)
+                    cell.fill = VALUE_FILL
+                    cell.border = THIN_BORDER
+                ws.row_dimensions[row_idx].height = 90
+                self._dianke_embed_partner_photo(
+                    ws, data['partner'], "%s%s" % (get_column_letter(2), row_idx), row_idx, height=110,
+                )
+
+            # --- Campos del pedido (etiqueta en A, valor fusionado B:F) ---
             campos = [
                 ("Fecha", data['fecha']),
                 ("Nombre o razón social del negocio", data['local']),
@@ -320,13 +349,6 @@ class SaleOrder(models.Model):
                 cell.alignment = Alignment(horizontal='center')
             ws.row_dimensions[row_idx].height = 24
 
-            # --- Foto del local (a un lado, fuera de las columnas de la plantilla) ---
-            self._dianke_embed_partner_photo(
-                ws, data['partner'],
-                "%s%s" % (get_column_letter(PHOTO_COL), block_start_row),
-                block_start_row, height=110,
-            )
-
             # --- Fila divisoria ---
             row_idx += 1
             for col in range(1, N_COLS + 1):
@@ -344,7 +366,8 @@ class SaleOrder(models.Model):
 
             # --- Encabezado de la tabla de productos ---
             row_idx += 1
-            for col, texto in enumerate(["Código", "Descripción", "Cantidad", "Precio venta", "Tipo de venta"], start=1):
+            headers_tabla = ["Código", "Código Anclado", "Descripción", "Cantidad", "Precio venta", "Tipo de venta"]
+            for col, texto in enumerate(headers_tabla, start=1):
                 cell = ws.cell(row=row_idx, column=col, value=texto)
                 cell.fill = TABLE_HEADER_FILL
                 cell.font = TABLE_HEADER_FONT
@@ -356,20 +379,27 @@ class SaleOrder(models.Model):
                 row_idx += 1
                 product = line.product_id
                 codigo = product.barcode or product.default_code or ''
+                codigo_anclado = self._dianke_codigo_anclado(product)
                 nota = self._dianke_extra_note(product.display_name, line.name)
                 tipo_venta = nota if nota else "Normal"
+                descripcion = product.display_name or ''
 
-                valores = [codigo, product.display_name or '', line.product_uom_qty, line.price_unit, tipo_venta]
+                valores = [codigo, codigo_anclado, descripcion, line.product_uom_qty, line.price_unit, tipo_venta]
                 for col, valor in enumerate(valores, start=1):
                     cell = ws.cell(row=row_idx, column=col, value=valor)
                     cell.fill = NOTA_FILL if nota else ROW_FILL
                     cell.font = ROW_FONT
                     cell.border = THIN_BORDER
                     cell.alignment = Alignment(
-                        horizontal='left' if col == 2 else 'center',
-                        wrap_text=(col == 2),
+                        horizontal='left' if col in (2, 3) else 'center',
+                        vertical='center',
+                        wrap_text=(col in (2, 3, 6)),
                     )
-                ws.row_dimensions[row_idx].height = 20
+                ws.row_dimensions[row_idx].height = max(
+                    self._dianke_estimate_row_height(codigo_anclado, column_widths[2]),
+                    self._dianke_estimate_row_height(descripcion, descripcion_width),
+                    self._dianke_estimate_row_height(tipo_venta, column_widths[6]),
+                )
 
             # --- Separación entre pedidos ---
             row_idx += 2
