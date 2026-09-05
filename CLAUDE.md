@@ -106,3 +106,24 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   Cliente, Contacto y Dirección vuelven a repetirse en todas las líneas del mismo
   pedido (diseño original). No volver a poner esto en blanco sin que lo pida de
   nuevo explícitamente.
+- 2026-09-05: REDISEÑO COMPLETO del Excel de Dianke — Andrés compartió la plantilla
+  oficial que Dianke usa para recibir pedidos ("Formato_para_recibir_pedidos_clientes.xlsx")
+  y pidió usarla tal cual en vez de "Importar"/"Resumen". Ahora es 1 sola hoja
+  ("Pedido Dianke"), con un bloque por orden en el formato/colores exactos de esa
+  plantilla: Fecha, Nombre o razón social, RUC (agregado aunque no está en la
+  plantilla original), Contacto, Dirección, Teléfono, Número de ruta, Número de
+  pedido, Fecha de entrega, Tipo de pago (casillas), y debajo el detalle
+  (Código/Descripción/Cantidad/Precio venta/Tipo de venta). Foto del local
+  incrustada a un lado (fuera de las columnas A-E de la plantilla). Notas de
+  detalles nuevos:
+  - **Ruta**: se busca `fsm.location` con `partner_id = cliente` y se usa
+    `fsm_route_id.name` (mapa de campos confirmado por Andrés).
+  - **Fecha de entrega**: calculada (no hay campo que ya la calcule) — 4 días
+    hábiles desde `date_order`, contando lunes a viernes, sin fines de semana,
+    sin feriados.
+  - **Tipo de pago**: Efectivo/Tarjeta se marcan directo; Transferencia se marca
+    como ACH; Yappy/Crédito 1-2 semanas se agregan como una 4ta casilla
+    "Otro: <forma de pago>" ya que la plantilla de Dianke no las contempla.
+  - **Tipo de venta** (columna del detalle): "Normal" o la nota que escribió el
+    vendedor (cambio, producto gratis, etc.) vía `_dianke_extra_note`; esas filas
+    se resaltan en rosa salmón pastel (`F8CBAD`).
