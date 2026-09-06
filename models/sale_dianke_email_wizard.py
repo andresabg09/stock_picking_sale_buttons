@@ -40,10 +40,16 @@ class SaleDiankeEmailWizard(models.TransientModel):
         mail = self.env['mail.mail'].create(mail_values)
         mail.send()
 
+        now = fields.Datetime.now()
         self.sale_order_ids.write({
             'custom_dianke_exported': True,
-            'custom_dianke_exported_date': fields.Datetime.now(),
+            'custom_dianke_exported_date': now,
+            'custom_dianke_exported_by': self.env.user.id,
         })
+        for order in self.sale_order_ids:
+            order.message_post(
+                body="Enviado a Dianke por %s el %s." % (self.env.user.name, now),
+            )
 
         return {'type': 'ir.actions.act_window_close'}
 

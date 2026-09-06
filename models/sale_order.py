@@ -42,6 +42,13 @@ class SaleOrder(models.Model):
         readonly=True,
         copy=False,
     )
+    custom_dianke_exported_by = fields.Many2one(
+        'res.users',
+        string='Enviado a Dianke por',
+        readonly=True,
+        copy=False,
+        help='Usuario que confirmó el envío a Dianke (manual o automático).',
+    )
 
     @api.depends('order_line.product_id')
     def _compute_custom_first_product_image(self):
@@ -626,10 +633,16 @@ class SaleOrder(models.Model):
         })
         mail.send()
 
+        now = fields.Datetime.now()
         orders.write({
             'custom_dianke_exported': True,
-            'custom_dianke_exported_date': fields.Datetime.now(),
+            'custom_dianke_exported_date': now,
+            'custom_dianke_exported_by': False,
         })
+        for order in orders:
+            order.message_post(
+                body="Enviado a Dianke automáticamente el %s." % now,
+            )
         return True
 
     def action_send_dianke_export_now(self):
