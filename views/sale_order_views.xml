@@ -139,4 +139,102 @@
         <field name="view_mode">list,form</field>
         <field name="limit">1000000</field>
     </record>
+
+    <!-- ================================================================
+         Visibilidad de envíos a Dianke en Ventas: lista, kanban y
+         filtros de búsqueda, para Órdenes y Cotizaciones (mismo campo
+         custom_dianke_exported en las dos). Xml id de las vistas core
+         confirmados por SSH con Andrés (ver historial en CLAUDE.md).
+         ================================================================ -->
+
+    <!-- Lista de Órdenes -->
+    <record id="view_order_list_dianke" model="ir.ui.view">
+        <field name="name">sale.order.list.dianke.orders</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_list_upload"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="decoration-warning">state == 'sale' and not custom_dianke_exported</attribute>
+            </xpath>
+            <xpath expr="//list" position="inside">
+                <field name="custom_dianke_exported" string="Dianke" widget="boolean_toggle" readonly="1" optional="show"/>
+                <field name="custom_dianke_exported_date" string="Fecha envío Dianke" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Lista de Cotizaciones -->
+    <record id="view_quotation_list_dianke" model="ir.ui.view">
+        <field name="name">sale.order.list.dianke.quotations</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="decoration-warning">state == 'sale' and not custom_dianke_exported</attribute>
+            </xpath>
+            <xpath expr="//list" position="inside">
+                <field name="custom_dianke_exported" string="Dianke" widget="boolean_toggle" readonly="1" optional="show"/>
+                <field name="custom_dianke_exported_date" string="Fecha envío Dianke" optional="show"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Kanban raíz: heredado tanto por Órdenes como por Cotizaciones -->
+    <record id="view_sale_order_kanban_dianke" model="ir.ui.view">
+        <field name="name">sale.order.kanban.dianke</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_sale_order_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='currency_id']" position="after">
+                <field name="custom_dianke_exported"/>
+                <field name="custom_dianke_exported_date"/>
+            </xpath>
+            <xpath expr="//div[@class='d-flex align-items-baseline mb-2']" position="after">
+                <div t-if="record.custom_dianke_exported.raw_value"
+                     class="d-flex align-items-center gap-1 mb-1 text-success" style="font-size:0.78rem;">
+                    <i class="fa fa-check-circle"/>
+                    <span>Dianke: <field name="custom_dianke_exported_date"/></span>
+                </div>
+                <div t-elif="record.state.raw_value === 'sale'"
+                     class="d-flex align-items-center gap-1 mb-1 text-warning" style="font-size:0.78rem;">
+                    <i class="fa fa-exclamation-circle"/>
+                    <span>Pendiente de Dianke</span>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Filtros de búsqueda: Órdenes -->
+    <record id="view_sales_order_filter_dianke_orders" model="ir.ui.view">
+        <field name="name">sale.order.search.dianke.orders</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_view_search_inherit_sale"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <filter name="dianke_pending" string="Pendientes de Dianke"
+                        domain="[('state','=','sale'),('custom_dianke_exported','=',False)]"/>
+                <filter name="dianke_sent" string="Enviados a Dianke"
+                        domain="[('custom_dianke_exported','=',True)]"/>
+                <filter name="group_dianke_exported" string="Enviado a Dianke"
+                        context="{'group_by':'custom_dianke_exported'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Filtros de búsqueda: Cotizaciones -->
+    <record id="view_sales_order_filter_dianke_quotations" model="ir.ui.view">
+        <field name="name">sale.order.search.dianke.quotations</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_view_search_inherit_quotation"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <filter name="dianke_pending" string="Pendientes de Dianke"
+                        domain="[('state','=','sale'),('custom_dianke_exported','=',False)]"/>
+                <filter name="dianke_sent" string="Enviados a Dianke"
+                        domain="[('custom_dianke_exported','=',True)]"/>
+                <filter name="group_dianke_exported" string="Enviado a Dianke"
+                        context="{'group_by':'custom_dianke_exported'}"/>
+            </xpath>
+        </field>
+    </record>
 </odoo>
