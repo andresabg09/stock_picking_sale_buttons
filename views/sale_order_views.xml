@@ -147,27 +147,13 @@
          confirmados por SSH con Andrés (ver historial en CLAUDE.md).
          ================================================================ -->
 
-    <!-- Lista de Órdenes -->
+    <!-- Lista RAÍZ: se hereda automáticamente en TODAS las variantes de
+         lista de Órdenes y Cotizaciones (con o sin banner de onboarding),
+         sin depender de cuál esté activa en cada momento. -->
     <record id="view_order_list_dianke" model="ir.ui.view">
-        <field name="name">sale.order.list.dianke.orders</field>
+        <field name="name">sale.order.list.dianke</field>
         <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale.sale_order_list_upload"/>
-        <field name="arch" type="xml">
-            <xpath expr="//list" position="attributes">
-                <attribute name="decoration-warning">state == 'sale' and not custom_dianke_exported</attribute>
-            </xpath>
-            <xpath expr="//list" position="inside">
-                <field name="custom_dianke_exported" string="Dianke" widget="boolean_toggle" readonly="1" optional="show"/>
-                <field name="custom_dianke_exported_date" string="Fecha envío Dianke" optional="show"/>
-            </xpath>
-        </field>
-    </record>
-
-    <!-- Lista de Cotizaciones -->
-    <record id="view_quotation_list_dianke" model="ir.ui.view">
-        <field name="name">sale.order.list.dianke.quotations</field>
-        <field name="model">sale.order</field>
-        <field name="inherit_id" ref="sale.view_quotation_tree_with_onboarding"/>
+        <field name="inherit_id" ref="sale.sale_order_tree"/>
         <field name="arch" type="xml">
             <xpath expr="//list" position="attributes">
                 <attribute name="decoration-warning">state == 'sale' and not custom_dianke_exported</attribute>
