@@ -221,3 +221,19 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   que se empezó a convertir GODREJ POCKET a unidades) — ahora dice que los
   ambientadores Pocket también van en unidades, con la conversión ya
   ajustada.
+- 2026-09-07: Visibilidad de envíos a Dianke en Ventas — pedido de Andrés:
+  que cualquiera del equipo (no solo él) vea qué pedidos ya se mandaron a
+  Dianke, cuándo y quién los mandó, sin que él tenga que avisar. Nuevo
+  campo `custom_dianke_exported_by` (usuario) junto a los ya existentes
+  `custom_dianke_exported`/`custom_dianke_exported_date`. Al confirmar el
+  envío (wizard `sale.dianke.email.wizard`, botón individual o acción
+  masiva "Enviar a Dianke (Excel)") queda un mensaje en el chatter de cada
+  orden y un banner visible al abrir la orden. En la lista y el kanban de
+  Ventas (Órdenes y Cotizaciones) se agregaron columnas/indicador de envío
+  y resaltado (`decoration-warning`) para las confirmadas y aún no
+  enviadas, más filtros "Pendientes de Dianke" / "Enviados a Dianke" y
+  agrupar por estado de envío. Xml id de las vistas core de `sale.order`
+  (lista, kanban, búsqueda — separadas para Órdenes y Cotizaciones)
+  confirmados por SSH con Andrés antes de escribir los xpaths (regla 5).
+  Los envíos hechos ANTES de este cambio no tienen mensaje en el chatter
+  ni usuario registrado — solo los envíos nuevos quedan completos.
