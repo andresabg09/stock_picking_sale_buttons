@@ -10,7 +10,7 @@
                 </div>
                 <group>
                     <field name="sale_order_id" readonly="1"/>
-                    <field name="payment_method"/>
+                    <field name="payment_method" required="1"/>
                     <field name="special_delivery_date" placeholder="Solo si el cliente pidió un día especial"/>
                 </group>
                 <footer>

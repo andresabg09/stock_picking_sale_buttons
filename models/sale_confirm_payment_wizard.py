@@ -12,9 +12,10 @@ class SaleConfirmPaymentWizard(models.TransientModel):
     payment_method = fields.Selection(
         PAYMENT_METHOD_SELECTION,
         string='Forma de Pago',
-        required=True,
-        help='Obligatoria para poder confirmar la orden. Se precarga con la última '
-             'forma de pago usada por este cliente, pero se puede cambiar.',
+        help='Obligatoria para poder confirmar la orden (se valida al confirmar, no '
+             'al abrir el pop-up — así no explota si un cliente nuevo no tiene forma '
+             'de pago previa que precargar). Se precarga con la última forma de pago '
+             'usada por este cliente, pero se puede cambiar.',
     )
     special_delivery_date = fields.Date(
         string='Fecha especial de entrega',
