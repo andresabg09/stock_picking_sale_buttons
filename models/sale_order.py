@@ -166,10 +166,24 @@ class SaleOrder(models.Model):
             otro_label = dict(PAYMENT_METHOD_SELECTION).get(payment_method, payment_method)
         return efectivo, tarjeta, ach, otro_label
 
+    @staticmethod
+    def _dianke_waze_link(partner):
+        """Link de Waze a la ubicación exacta del cliente, armado a partir
+        de las coordenadas GPS estándar de Odoo (`partner_latitude` /
+        `partner_longitude` en res.partner) — pedido de Andrés 2026-09-08:
+        Waze en vez de Google Maps, mismo formato que ya usa el botón "Ir
+        con Waze" de la ficha del cliente. None si el cliente no tiene
+        coordenadas registradas."""
+        if not partner or not partner.partner_latitude or not partner.partner_longitude:
+            return None
+        return "https://waze.com/ul?ll=%s,%s&navigate=yes" % (
+            partner.partner_latitude, partner.partner_longitude,
+        )
+
     def _dianke_order_rows_data(self):
         """Arma, para cada orden de self, un dict con todos los datos ya
-        resueltos (cliente, ruta, orden en la ruta, fecha de entrega,
-        líneas, etc.)."""
+        resueltos (cliente, vendedor, ruta, orden en la ruta, fecha de
+        entrega, link de Waze, líneas, etc.)."""
         payment_labels = dict(PAYMENT_METHOD_SELECTION)
         data = []
         for order in self.sorted(key=lambda o: o.name):
@@ -180,11 +194,13 @@ class SaleOrder(models.Model):
                 'order': order,
                 'partner': partner,
                 'local': local,
+                'vendedor': order.user_id.name or '',
                 'ruc': ruc,
                 'telefono': telefono,
                 'celular': celular,
                 'contacto': contacto,
                 'direccion': direccion,
+                'gps_link': self._dianke_waze_link(partner),
                 'forma_pago': payment_labels.get(order.custom_payment_method, order.custom_payment_method or ''),
                 'fecha': order.date_order.strftime('%d/%m/%Y') if order.date_order else '',
                 'ruta': ruta,
@@ -425,12 +441,16 @@ class SaleOrder(models.Model):
                 ruta_texto = "%s (Orden %s)" % (data['ruta'], data['orden_ruta'])
             else:
                 ruta_texto = data['ruta']
+            gps_link = data.get('gps_link')
+            gps_texto = "Abrir en Waze" if gps_link else "Sin coordenadas registradas"
             campos = [
                 ("Fecha", data['fecha']),
                 ("Nombre o razón social del negocio", data['local']),
+                ("Vendedor", data['vendedor']),
                 ("RUC", data['ruc']),
                 ("Nombre del contacto o persona que recibe el pedido", data['contacto']),
                 ("Dirección exacta con indicaciones claras", data['direccion']),
+                ("Ubicación GPS", gps_texto),
                 ("Teléfono de quien recibe el pedido", data['telefono'] or data['celular']),
                 ("Número de ruta", ruta_texto),
                 ("Número de pedido", order.name),
@@ -448,7 +468,12 @@ class SaleOrder(models.Model):
                     cell.font = VALUE_FONT
                     cell.border = THIN_BORDER
                     cell.alignment = Alignment(horizontal='center', vertical='center')
-                ws.cell(row=row_idx, column=2, value=valor)
+                value_cell = ws.cell(row=row_idx, column=2, value=valor)
+                if label == "Ubicación GPS" and gps_link:
+                    # Link cliqueable a Waze (pedido de Andrés 2026-09-08), en
+                    # vez de solo texto — estilo típico de hipervínculo.
+                    value_cell.hyperlink = gps_link
+                    value_cell.font = Font(name=FONT_NAME, size=10, color="0563C1", underline='single')
                 ws.row_dimensions[row_idx].height = 24
 
             # --- Tipo de pago (casillas) ---

@@ -237,3 +237,15 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   confirmados por SSH con Andrés antes de escribir los xpaths (regla 5).
   Los envíos hechos ANTES de este cambio no tienen mensaje en el chatter
   ni usuario registrado — solo los envíos nuevos quedan completos.
+- 2026-09-08: Excel de Dianke, 2 filas nuevas en el bloque de cada pedido —
+  pedido de Andrés (necesita que Dianke sepa a quién preguntarle por
+  cambios/reemplazos, y dónde queda exactamente el cliente):
+  "Vendedor" (después del nombre del negocio, usa el campo estándar
+  `user_id` de `sale.order`) y "Ubicación GPS" (después de la dirección,
+  link cliqueable a **Waze**, no Google Maps — confirmado con Andrés).
+  El link se arma con `partner_latitude`/`partner_longitude` (estándar de
+  Odoo en `res.partner`, mismo par que usa el botón "Ir con Waze" del
+  módulo de rutas) vía nuevo `_dianke_waze_link`, formato
+  `https://waze.com/ul?ll=<lat>,<lng>&navigate=yes`. Si el cliente no
+  tiene coordenadas registradas, la celda muestra "Sin coordenadas
+  registradas" en vez de un link roto.
