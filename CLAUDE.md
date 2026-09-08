@@ -249,3 +249,24 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   `https://waze.com/ul?ll=<lat>,<lng>&navigate=yes`. Si el cliente no
   tiene coordenadas registradas, la celda muestra "Sin coordenadas
   registradas" en vez de un link roto.
+- 2026-09-08: Forma de Pago obligatoria para confirmar una orden — pedido
+  de Andrés. Nuevo campo `custom_special_delivery_date` ("Fecha especial
+  de entrega", opcional, visible en el formulario junto a Forma de Pago).
+  `action_confirm` de `sale.order` queda sobrescrito: si falta la Forma de
+  Pago, en vez de confirmar abre el pop-up `sale.confirm.payment.wizard`
+  (Forma de Pago obligatoria, precargada con la última usada por ESE
+  cliente vía `_last_payment_method_for_partner` pero editable; Fecha
+  especial de entrega opcional) — al confirmar el pop-up guarda ambos
+  datos y recién ahí confirma la orden de verdad
+  (`with_context(skip_payment_method_check=True)`, para no volver a caer
+  en el mismo chequeo). Se enganchó en el método estándar de Odoo
+  (`action_confirm`) para que cubra tanto el botón "Confirmar" de la
+  cotización como el del módulo de rutas Shalom (otro módulo/repo, no
+  probado desde aquí — pendiente que Andrés confirme en producción que
+  también le sale el pop-up desde ahí). Si se confirman varias órdenes a
+  la vez y a alguna le falta la Forma de Pago, no se abre el pop-up —
+  sale un error pidiendo confirmarlas una por una. Se agregó "Cheque" a
+  las opciones de Forma de Pago (cae en "Otro: Cheque" en el Excel de
+  Dianke, que no tiene casilla propia para cheque). Si hay Fecha especial
+  de entrega cargada, el Excel de Dianke la usa en vez de la calculada de
+  3-4 días hábiles.

@@ -1,4 +1,5 @@
 from odoo import models, fields, api
+from odoo.exceptions import UserError
 
 TINTE_NNP_MIN_PRICE = 1.16
 
@@ -10,6 +11,7 @@ DIANKE_GODREJ_POCKET_UNITS_PER_DISPLAY = 6  # las 6 referencias AMB GODREJ POCKE
 PAYMENT_METHOD_SELECTION = [
     ('efectivo', 'Efectivo'),
     ('tarjeta', 'Tarjeta'),
+    ('cheque', 'Cheque'),
     ('credito_1_semana', 'Crédito 1 semana'),
     ('credito_2_semanas', 'Crédito 2 semanas'),
     ('transferencia', 'Transferencia'),
@@ -49,6 +51,12 @@ class SaleOrder(models.Model):
         copy=False,
         help='Usuario que confirmó el envío a Dianke (manual o automático).',
     )
+    custom_special_delivery_date = fields.Date(
+        string='Fecha especial de entrega',
+        help='Solo si el cliente pidió la mercancía en un día distinto al normal '
+             '(antes o después). Si se deja vacía, se entrega en el plazo normal '
+             '(3-4 días hábiles) — así se refleja también en el Excel de Dianke.',
+    )
 
     @api.depends('order_line.product_id')
     def _compute_custom_first_product_image(self):
@@ -59,6 +67,67 @@ class SaleOrder(models.Model):
             order.custom_first_product_image = (
                 first_line.product_id.image_128 if first_line else False
             )
+
+    # ------------------------------------------------------------------
+    # Forma de Pago obligatoria al confirmar
+    # ------------------------------------------------------------------
+
+    def action_confirm(self):
+        """No deja confirmar una orden sin Forma de Pago — pedido de Andrés
+        2026-09-08: abre un pop-up para elegirla (y, opcionalmente, la
+        fecha especial de entrega) antes de continuar. Se engancha aquí,
+        en el método estándar de Odoo, para cubrir tanto el botón
+        "Confirmar" de la cotización como cualquier otro botón (ej. el del
+        módulo de rutas Shalom) que use el mismo flujo estándar.
+
+        `skip_payment_method_check` en el contexto es lo que usa el propio
+        wizard (`sale.confirm.payment.wizard`) para volver a llamar a este
+        método una vez ya guardó la forma de pago, sin caer otra vez en el
+        pop-up."""
+        if not self.env.context.get('skip_payment_method_check'):
+            missing = self.filtered(lambda o: not o.custom_payment_method)
+            if missing:
+                if len(self) > 1:
+                    raise UserError(
+                        "Estas órdenes no tienen Forma de Pago: %s.\n"
+                        "Confírmalas una por una para poder elegir la forma de pago "
+                        "de cada una." % ", ".join(missing.mapped('name'))
+                    )
+                return missing._open_confirm_payment_wizard()
+        return super().action_confirm()
+
+    def _last_payment_method_for_partner(self):
+        """Última Forma de Pago usada por este cliente en otra orden (la
+        más reciente, excluyendo esta misma orden) — para precargarla en
+        el pop-up de confirmación, editable. Pedido de Andrés 2026-09-08:
+        si un cliente siempre paga en cheque, que aparezca cheque por
+        defecto en vez de vacío."""
+        self.ensure_one()
+        if not self.partner_id:
+            return False
+        last_order = self.search([
+            ('partner_id', '=', self.partner_id.id),
+            ('custom_payment_method', '!=', False),
+            ('id', '!=', self.id),
+        ], order='date_order desc', limit=1)
+        return last_order.custom_payment_method or False
+
+    def _open_confirm_payment_wizard(self):
+        """Abre el pop-up para elegir Forma de Pago (obligatoria, precargada
+        con la última usada por el cliente) y Fecha especial de entrega
+        (opcional) antes de confirmar la orden."""
+        self.ensure_one()
+        wizard = self.env['sale.confirm.payment.wizard'].create({
+            'sale_order_id': self.id,
+            'payment_method': self._last_payment_method_for_partner(),
+        })
+        return {
+            'type': 'ir.actions.act_window',
+            'res_model': 'sale.confirm.payment.wizard',
+            'res_id': wizard.id,
+            'view_mode': 'form',
+            'target': 'new',
+        }
 
     # ------------------------------------------------------------------
     # Exportación a Dianke
@@ -183,7 +252,12 @@ class SaleOrder(models.Model):
     def _dianke_order_rows_data(self):
         """Arma, para cada orden de self, un dict con todos los datos ya
         resueltos (cliente, vendedor, ruta, orden en la ruta, fecha de
-        entrega, link de Waze, líneas, etc.)."""
+        entrega, link de Waze, líneas, etc.).
+
+        La fecha de entrega usa `custom_special_delivery_date` cuando el
+        vendedor la cargó (cliente pidió un día especial, antes o después
+        de lo normal) — si no, sigue el cálculo automático de 3-4 días
+        hábiles, como siempre — pedido de Andrés 2026-09-08."""
         payment_labels = dict(PAYMENT_METHOD_SELECTION)
         data = []
         for order in self.sorted(key=lambda o: o.name):
@@ -205,7 +279,7 @@ class SaleOrder(models.Model):
                 'fecha': order.date_order.strftime('%d/%m/%Y') if order.date_order else '',
                 'ruta': ruta,
                 'orden_ruta': orden_ruta,
-                'fecha_entrega': self._dianke_delivery_date(order.date_order),
+                'fecha_entrega': order.custom_special_delivery_date or self._dianke_delivery_date(order.date_order),
                 'lines': order.order_line.filtered(lambda l: not l.display_type),
             })
         return data

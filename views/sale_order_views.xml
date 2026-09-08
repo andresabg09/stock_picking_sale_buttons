@@ -6,9 +6,10 @@
         <field name="inherit_id" ref="sale.view_order_form"/>
         <field name="arch" type="xml">
 
-            <!-- Forma de pago -->
+            <!-- Forma de pago y fecha especial de entrega -->
             <xpath expr="//field[@name='payment_term_id']" position="after">
                 <field name="custom_payment_method"/>
+                <field name="custom_special_delivery_date"/>
             </xpath>
 
             <!-- Botón para enviar manualmente a Dianke (solo si ya está confirmada) -->
