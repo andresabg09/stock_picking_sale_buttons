@@ -10,6 +10,7 @@
             <xpath expr="//field[@name='payment_term_id']" position="after">
                 <field name="custom_payment_method"/>
                 <field name="custom_special_delivery_date"/>
+                <field name="custom_itbms_required" widget="boolean_toggle"/>
             </xpath>
 
             <!-- Botón para enviar manualmente a Dianke (solo si ya está confirmada) -->

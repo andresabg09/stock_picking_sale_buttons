@@ -23,11 +23,18 @@ class SaleConfirmPaymentWizard(models.TransientModel):
              '(antes o después). Si se deja vacía, se entrega en el plazo normal '
              '(3-4 días hábiles).',
     )
+    includes_itbms = fields.Boolean(
+        string='Incluye ITBMS',
+        default=True,
+        help='Si este pedido lleva ITBMS o no. No cambia ningún cálculo de impuestos '
+             'de la orden — es solo para que Dianke sepa si cobrarlo al entregar '
+             'la mercancía. Se incluye en el Excel que se les envía.',
+    )
 
     def action_confirm(self):
-        """Guarda Forma de Pago (y la fecha especial, si se cargó) en la
-        orden y recién ahí la confirma de verdad, saltándose el chequeo
-        que abrió este mismo pop-up (ya no hace falta, ya se llenó)."""
+        """Guarda Forma de Pago, fecha especial e ITBMS en la orden y
+        recién ahí la confirma de verdad, saltándose el chequeo que abrió
+        este mismo pop-up (ya no hace falta, ya se llenó)."""
         self.ensure_one()
         if not self.payment_method:
             raise UserError("Selecciona la Forma de Pago para poder confirmar la orden.")
@@ -35,6 +42,7 @@ class SaleConfirmPaymentWizard(models.TransientModel):
         self.sale_order_id.write({
             'custom_payment_method': self.payment_method,
             'custom_special_delivery_date': self.special_delivery_date,
+            'custom_itbms_required': self.includes_itbms,
         })
         self.sale_order_id.with_context(skip_payment_method_check=True).action_confirm()
         return {'type': 'ir.actions.act_window_close'}

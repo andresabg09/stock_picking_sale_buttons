@@ -57,6 +57,15 @@ class SaleOrder(models.Model):
              '(antes o después). Si se deja vacía, se entrega en el plazo normal '
              '(3-4 días hábiles) — así se refleja también en el Excel de Dianke.',
     )
+    custom_itbms_required = fields.Boolean(
+        string='Incluye ITBMS',
+        default=True,
+        help='Si este pedido lleva ITBMS o no. NO cambia ningún cálculo de impuestos '
+             'de la orden — es solo informativo, para que Dianke sepa si cobrarlo al '
+             'entregar la mercancía (quien entrega es Dianke, no Chalón). Se elige al '
+             'confirmar la orden (mismo pop-up de Forma de Pago) y se incluye en el '
+             'Excel que se les envía.',
+    )
 
     @api.depends('order_line.product_id')
     def _compute_custom_first_product_image(self):
@@ -112,14 +121,32 @@ class SaleOrder(models.Model):
         ], order='date_order desc', limit=1)
         return last_order.custom_payment_method or False
 
+    def _last_itbms_choice_for_partner(self):
+        """Última elección de "Incluye ITBMS" de este cliente en otra
+        orden ya confirmada por este flujo (la más reciente, excluyendo
+        esta misma) — mismo patrón que la Forma de Pago, para precargarla
+        en el pop-up. Si no hay ninguna orden anterior, True (mismo
+        default del campo)."""
+        self.ensure_one()
+        if not self.partner_id:
+            return True
+        last_order = self.search([
+            ('partner_id', '=', self.partner_id.id),
+            ('custom_payment_method', '!=', False),
+            ('id', '!=', self.id),
+        ], order='date_order desc', limit=1)
+        return last_order.custom_itbms_required if last_order else True
+
     def _open_confirm_payment_wizard(self):
         """Abre el pop-up para elegir Forma de Pago (obligatoria, precargada
-        con la última usada por el cliente) y Fecha especial de entrega
-        (opcional) antes de confirmar la orden."""
+        con la última usada por el cliente), Fecha especial de entrega
+        (opcional) e Incluye ITBMS (precargado con la última elección de
+        ese cliente) antes de confirmar la orden."""
         self.ensure_one()
         wizard = self.env['sale.confirm.payment.wizard'].create({
             'sale_order_id': self.id,
             'payment_method': self._last_payment_method_for_partner(),
+            'includes_itbms': self._last_itbms_choice_for_partner(),
         })
         return {
             'type': 'ir.actions.act_window',
@@ -275,6 +302,7 @@ class SaleOrder(models.Model):
                 'contacto': contacto,
                 'direccion': direccion,
                 'gps_link': self._dianke_waze_link(partner),
+                'itbms': order.custom_itbms_required,
                 'forma_pago': payment_labels.get(order.custom_payment_method, order.custom_payment_method or ''),
                 'fecha': order.date_order.strftime('%d/%m/%Y') if order.date_order else '',
                 'ruta': ruta,
@@ -565,6 +593,26 @@ class SaleOrder(models.Model):
                 cell.border = THIN_BORDER
                 if i < len(opciones_pago):
                     texto, marcado = opciones_pago[i]
+                    cell.value = "%s %s" % ("☑" if marcado else "☐", texto)
+                    cell.font = PAGO_FONT
+                cell.alignment = Alignment(horizontal='center')
+            ws.row_dimensions[row_idx].height = 24
+
+            # --- ITBMS (casillas) --- pedido de Andrés 2026-09-08: solo
+            # informativo, no cambia ningún cálculo de impuestos de la
+            # orden — es para que Dianke sepa si cobrarlo al entregar.
+            row_idx += 1
+            itbms_label_cell = ws.cell(row=row_idx, column=1, value="ITBMS")
+            itbms_label_cell.font = LABEL_FONT
+            itbms_label_cell.border = THIN_BORDER
+            opciones_itbms = [("Con ITBMS", data['itbms']), ("Sin ITBMS", not data['itbms'])]
+            for i in range(N_COLS - 1):
+                col = 2 + i
+                cell = ws.cell(row=row_idx, column=col)
+                cell.fill = VALUE_FILL
+                cell.border = THIN_BORDER
+                if i < len(opciones_itbms):
+                    texto, marcado = opciones_itbms[i]
                     cell.value = "%s %s" % ("☑" if marcado else "☐", texto)
                     cell.font = PAGO_FONT
                 cell.alignment = Alignment(horizontal='center')

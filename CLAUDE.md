@@ -270,3 +270,31 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   Dianke, que no tiene casilla propia para cheque). Si hay Fecha especial
   de entrega cargada, el Excel de Dianke la usa en vez de la calculada de
   3-4 días hábiles.
+- 2026-09-08: Fix del pop-up de confirmar orden — `payment_method` en
+  `sale.confirm.payment.wizard` tenía `required=True` a nivel de campo,
+  así que Odoo fallaba al CREAR el wizard vacío (antes de que el usuario
+  llegara a verlo) cuando no había ninguna orden anterior del cliente con
+  forma de pago para precargar. La obligatoriedad ahora se valida al
+  confirmar (ya existía ese chequeo) y en la vista (`required="1"`), no
+  al crear el registro. Confirmado por Andrés que ya funciona en
+  producción.
+- 2026-09-08: Bug encontrado (no corregido acá, es otro repo) en
+  `shalom_route_sales` — el botón "Confirmar pedido" de la app del
+  vendedor (`fsm_order.py::shalom_confirmar_pedido`) llama al mismo
+  `action_confirm()` de `sale.order`, pero ignora lo que devuelve y sigue
+  cerrando la visita como "Completada" aunque la orden se quede sin
+  confirmar por falta de Forma de Pago. Por pedido explícito de Andrés,
+  **no se tocó ese repo** — se le entregó un prompt detallado para que lo
+  arreglen aparte, agregando un pop-up nativo de Forma de Pago/Fecha
+  especial/ITBMS dentro de la app (sin redirigir al navegador), que solo
+  aplica al confirmar un pedido (no al revisar/guardar cotización).
+- 2026-09-08: Opción "Incluye ITBMS" — pedido de Andrés: es solo
+  informativa (NO toca ningún cálculo de impuestos de la orden), para que
+  Dianke sepa si cobrarlo al entregar la mercancía (Dianke es quien
+  entrega, no Chalón). Nuevo campo `custom_itbms_required` (Boolean,
+  default True) en `sale.order`. Se agregó al mismo pop-up de confirmación
+  (`sale.confirm.payment.wizard`), se elige en CADA pedido (no es fijo por
+  cliente), precargado con la última elección de ESE cliente vía nuevo
+  `_last_itbms_choice_for_partner` (mismo patrón que la Forma de Pago).
+  En el Excel de Dianke se agregó como fila de casillas "Con ITBMS" /
+  "Sin ITBMS" junto a "Tipo de pago".
