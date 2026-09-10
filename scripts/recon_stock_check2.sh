@@ -25,15 +25,18 @@ docker exec -i "$CID" odoo shell -d shalom --no-http \
   --db_host="$DB_HOST" --db_port="$DB_PORT" --db_user="$DB_USER" --db_password="$DB_PASS" <<'PYEOF'
 Product = env['product.product']
 
-def con_stock(termino, min_qty=0.01, limit=60):
+def con_stock(termino, min_qty=0.01, limit=200):
+    # qty_available es un campo computado NO almacenado — no se puede usar
+    # en 'order' de search() (Odoo 18 lo rechaza: "Cannot convert ... to
+    # SQL because it is not stored"). Se trae todo por nombre y se ordena
+    # en Python después de calcular qty_available.
     print(f"\n--- '{termino}' CON STOCK (qty_available > 0) ---")
-    productos = Product.search(
-        [('name', 'ilike', termino), ('qty_available', '>', min_qty)],
-        order='qty_available desc', limit=limit,
-    )
-    if not productos:
+    productos = Product.search([('name', 'ilike', termino)], limit=limit)
+    con_stock_list = [p for p in productos if p.qty_available > min_qty]
+    con_stock_list.sort(key=lambda p: p.qty_available, reverse=True)
+    if not con_stock_list:
         print("  (NINGUNO con stock)")
-    for p in productos:
+    for p in con_stock_list:
         print(f"  id={p.id} | {p.display_name!r} | qty_available={p.qty_available} | "
               f"precio_lista={p.list_price} | sale_ok={p.sale_ok}")
 
