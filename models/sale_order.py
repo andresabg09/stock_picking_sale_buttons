@@ -59,12 +59,14 @@ class SaleOrder(models.Model):
     )
     custom_itbms_required = fields.Boolean(
         string='Incluye ITBMS',
-        default=True,
+        default=False,
         help='Si este pedido lleva ITBMS o no. NO cambia ningún cálculo de impuestos '
              'de la orden — es solo informativo, para que Dianke sepa si cobrarlo al '
              'entregar la mercancía (quien entrega es Dianke, no Chalón). Se elige al '
              'confirmar la orden (mismo pop-up de Forma de Pago) y se incluye en el '
-             'Excel que se les envía.',
+             'Excel que se les envía. Default apagado — pedido de Andrés 2026-09-10: '
+             'el 99% de los clientes NO quiere ITBMS, así que solo se prende solo si '
+             'ESE cliente ya lo tuvo encendido antes (ver _last_itbms_choice_for_partner).',
     )
 
     @api.depends('order_line.product_id')
@@ -125,17 +127,19 @@ class SaleOrder(models.Model):
         """Última elección de "Incluye ITBMS" de este cliente en otra
         orden ya confirmada por este flujo (la más reciente, excluyendo
         esta misma) — mismo patrón que la Forma de Pago, para precargarla
-        en el pop-up. Si no hay ninguna orden anterior, True (mismo
-        default del campo)."""
+        en el pop-up. Si no hay ninguna orden anterior, False (apagado) —
+        pedido de Andrés 2026-09-10: el 99% de los clientes NO quiere
+        ITBMS, así que un cliente nuevo o sin historial arranca apagado;
+        solo se prende solo si ESE cliente ya lo tuvo encendido antes."""
         self.ensure_one()
         if not self.partner_id:
-            return True
+            return False
         last_order = self.search([
             ('partner_id', '=', self.partner_id.id),
             ('custom_payment_method', '!=', False),
             ('id', '!=', self.id),
         ], order='date_order desc', limit=1)
-        return last_order.custom_itbms_required if last_order else True
+        return last_order.custom_itbms_required if last_order else False
 
     def _open_confirm_payment_wizard(self):
         """Abre el pop-up para elegir Forma de Pago (obligatoria, precargada

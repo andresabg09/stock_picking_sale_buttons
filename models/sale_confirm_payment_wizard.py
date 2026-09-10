@@ -25,10 +25,12 @@ class SaleConfirmPaymentWizard(models.TransientModel):
     )
     includes_itbms = fields.Boolean(
         string='Incluye ITBMS',
-        default=True,
+        default=False,
         help='Si este pedido lleva ITBMS o no. No cambia ningún cálculo de impuestos '
              'de la orden — es solo para que Dianke sepa si cobrarlo al entregar '
-             'la mercancía. Se incluye en el Excel que se les envía.',
+             'la mercancía. Se incluye en el Excel que se les envía. Se precarga con '
+             'la última elección de ESE cliente; si nunca lo tuvo encendido, arranca '
+             'apagado (el 99% de los clientes no quiere ITBMS).',
     )
 
     def action_confirm(self):

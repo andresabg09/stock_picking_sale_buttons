@@ -334,3 +334,12 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   (`SaleOrder._program_check_compute_points`) antes de escribir el
   cambio (regla 5) — no se reescribió esa lógica compleja, solo se
   recorta el conjunto de líneas que le llegan como entrada.
+- 2026-09-10: Fix del default de "Incluye ITBMS" — estaba encendido (True)
+  por defecto para un cliente sin historial, y eso confundía a los
+  vendedores (el 99% de los clientes de Andrés NO quiere ITBMS). Ahora el
+  default es apagado (False): `custom_itbms_required` en `sale.order`,
+  `includes_itbms` en el wizard, y `_last_itbms_choice_for_partner`
+  (cuando el cliente no tiene historial) — los tres cambiaron de True a
+  False. Se sigue precargando encendido SOLO si ese cliente específico ya
+  lo tuvo encendido en un pedido anterior (sin tocar esa parte de la
+  lógica, solo el fallback).
