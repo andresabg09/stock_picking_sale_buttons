@@ -53,8 +53,19 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
 - `ir.cron` en esta instalación (Odoo 18.0-20260513): NO tiene el campo `numbercall`
   (tumbó producción dos veces al intentar crear un cron con `numbercall` y luego con
   un `eval` de `nextcall` mal escrito). Antes de volver a crear un registro `ir.cron`,
-  confirmar por SSH los campos exactos con
-  `odoo shell -d shalom --no-http -c "print(env['ir.cron']._fields.keys())"`.
+  confirmar por SSH los campos exactos (ver comando correcto de `odoo shell` abajo).
+- `odoo shell` (dentro del contenedor `crm_odoo`) NO tiene una bandera `-c` para código
+  en línea como `python -c` — `-c`/`--config` ahí es el archivo de configuración, y usarlo
+  para pasar código da el error "config file ... doesn't exist". Para correr código hay
+  que pasarlo por stdin (heredoc). Además el nombre real del contenedor en Docker Swarm
+  lleva un sufijo (ej. `crm_odoo.1.vv46yklchkzgsa109o8hbuwn0`), no es solo `crm_odoo` — hay
+  que resolverlo primero, igual que hace `deploy.sh`. Patrón correcto:
+  ```bash
+  CID=$(docker ps --filter "name=crm_odoo." --format "{{.Names}}" | head -n1)
+  docker exec -i "$CID" odoo shell -d shalom --no-http <<'PYEOF'
+  print(env['ir.cron']._fields.keys())
+  PYEOF
+  ```
 
 ## Historial de cambios (resumen, no detalle)
 - 2026-08-20: Repo inicializado, primer commit hecho y subido a
