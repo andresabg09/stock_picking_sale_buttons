@@ -25,12 +25,12 @@ import re
 print("\n========== CLIENTES BUSCADOS (ruta B) ==========")
 buscar = [
     "buena suerte",
-    "angie",
-    "multipollo alex",
+    "marketing angy",
+    "multi pollo alex",
     "surtimax",
     "tommy",
-    "chavez",
-    "poderoso",  # aproximado para "su poderoso net" - confirmar nombre exacto
+    "chavez 2",
+    "poderoso net",
 ]
 
 Partner = env['res.partner']
