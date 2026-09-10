@@ -59,10 +59,19 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   para pasar código da el error "config file ... doesn't exist". Para correr código hay
   que pasarlo por stdin (heredoc). Además el nombre real del contenedor en Docker Swarm
   lleva un sufijo (ej. `crm_odoo.1.vv46yklchkzgsa109o8hbuwn0`), no es solo `crm_odoo` — hay
-  que resolverlo primero, igual que hace `deploy.sh`. Patrón correcto:
+  que resolverlo primero. Y el `odoo.conf` de adentro del contenedor NO trae host/usuario/
+  clave de la base (los pone EasyPanel como variables de entorno `HOST`/`PORT`/`USER`/
+  `PASSWORD`, no en el archivo) — sin pasarlas explícitas da
+  `psycopg2.OperationalError: ... /var/run/postgresql/.s.PGSQL.5432 ... No such file`.
+  Patrón correcto completo (mismo que ya usa `deploy.sh` para actualizar el módulo):
   ```bash
   CID=$(docker ps --filter "name=crm_odoo." --format "{{.Names}}" | head -n1)
-  docker exec -i "$CID" odoo shell -d shalom --no-http <<'PYEOF'
+  DB_HOST=$(docker exec "$CID" printenv HOST)
+  DB_PORT=$(docker exec "$CID" printenv PORT)
+  DB_USER=$(docker exec "$CID" printenv USER)
+  DB_PASS=$(docker exec "$CID" printenv PASSWORD)
+  docker exec -i "$CID" odoo shell -d shalom --no-http \
+    --db_host="$DB_HOST" --db_port="$DB_PORT" --db_user="$DB_USER" --db_password="$DB_PASS" <<'PYEOF'
   print(env['ir.cron']._fields.keys())
   PYEOF
   ```
