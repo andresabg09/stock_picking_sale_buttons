@@ -37,84 +37,91 @@ NOTA = (
 )
 
 # (product_id, cantidad, precio_override_o_None, nota_extra_o_None)
+# Reglas de negocio confirmadas por Andrés (2026-09-10) para que esta
+# canasta sea realista:
+#   - NUNCA poner decolorante (todas las presentaciones están
+#     descontinuadas/archivadas — no es solo que "casi no hay").
+#   - Aliset SIEMPRE en múltiplos de 12 (se pide por docena, no funciona
+#     de otra forma).
+#   - Tintes SIEMPRE en múltiplos de 5, EXCEPTO el Tinte Negro (NNP 1.0),
+#     que es el único que se puede sacar del múltiplo de 5 porque se usa
+#     para completar la promoción (y para los cambios).
+#   - Exactamente 3 de los 7 clientes tienen un "cambio" (Tinte Negro a
+#     $0 con la nota CAMBIO X CAMBIO); los otros 4 no tienen cambios.
+#   - Exactamente 2 de los 7 clientes llevan dos docenas (24 unidades)
+#     de tratamiento capilar, en variedades surtidas (no la misma que
+#     otro cliente) — el resto lleva media docena de una variedad, para
+#     que ningún pedido repita exactamente la misma canasta.
 ORDERS = [
     (1247, "MINI MARKET LA BUENA SUERTE", [
-        (3439, 20, None, None),   # TINTE NNP 1.0 NEGRO NATURAL
+        (3439, 22, None, None),   # TINTE NNP 1.0 NEGRO NATURAL (normal, no es cambio)
         (3456, 15, None, None),   # TINTE NNP 6.35 CHOCOLATE
         (3446, 15, None, None),   # TINTE NNP 3.0 CASTANO OSCURO
-        (2178, 24, None, None),   # ALISET NNP KERATINA SUPER 69GR
-        (2177, 24, None, None),   # ALISET NNP KERATINA REGULAR 69GR
+        (2178, 12, None, None),   # ALISET NNP KERATINA SUPER 69GR (docena)
+        (2177, 12, None, None),   # ALISET NNP KERATINA REGULAR 69GR (docena)
         (2976, 24, None, None),   # OXIGENTA CREMA NNP 40VOL 90ML
-        (2993, 12, None, None),   # POLVO DECOLORANTE NNP 50GR
-        (3614, 6, None, None),    # TRAT-SKALA MAIS CACHOS 1000GR
         (7253, 12, None, None),   # CERA CAPILAR WOKALI 150GR SURTIDAS
+        (3614, 6, None, None),    # TRAT-SKALA MAIS CACHOS 1000GR (media docena)
     ]),
     (1279, "MINI SUPER SHOP MARKETING ANGY", [
         (3439, 10, None, None),
         (3439, 5, 0.0, "CAMBIO X CAMBIO"),
-        (2178, 12, None, None),
-        (2976, 12, None, None),
         (3460, 10, None, None),   # TINTE NNP 7.3 RUBIO MEDIO DORADO
-        (2993, 8, None, None),
-        (7253, 6, None, None),
         (3462, 10, None, None),   # TINTE NNP 8.0 RUBIO CLARO
-        (3614, 4, None, None),
-        (2177, 8, None, None),
-        (2974, 8, None, None),    # OXIGENTA CREMA NNP 30VOL 90ML
+        (2178, 12, None, None),   # ALISET SUPER (docena)
+        (2177, 12, None, None),   # ALISET REGULAR (docena)
+        (2976, 12, None, None),   # OXIGENTA CREMA NNP 40VOL 90ML
+        (7253, 6, None, None),
+        (3590, 6, None, None),    # TRAT-SKALA KIDS MAIS CACHINHOS 1000GR (media docena)
     ]),
     (1283, "MULTI POLLO ALEX", [
-        (3439, 15, None, None),
+        (3439, 18, None, None),   # normal, no es cambio
         (3457, 10, None, None),   # TINTE NNP 6.66 RUBIO OSCURO ROJIZO PROFUNDO
-        (2177, 18, None, None),
-        (2974, 18, None, None),
-        (2993, 10, None, None),
+        (2178, 12, None, None),   # ALISET SUPER (docena)
+        (2177, 12, None, None),   # ALISET REGULAR (docena)
+        (2974, 12, None, None),   # OXIGENTA CREMA NNP 30VOL 90ML
         (7253, 10, None, None),
-        (3614, 5, None, None),
+        (3614, 12, None, None),   # TRAT-SKALA MAIS CACHOS 1000GR — docena 1 de 2
+        (8813, 12, None, None),   # TRAT-SKALA MELANCIA 1000GR — docena 2 de 2 (surtido)
     ]),
     (1304, "MINI SUPER SURTIMAX", [
-        (3439, 20, None, None),
-        (3446, 15, None, None),
+        (3439, 24, None, None),   # normal, no es cambio
+        (3446, 15, None, None),   # TINTE NNP 3.0 CASTANO OSCURO
         (3450, 15, None, None),   # TINTE NNP 5.0 CASTANO CLARO
-        (2178, 20, None, None),
-        (2177, 20, None, None),
-        (2976, 20, None, None),
-        (2993, 12, None, None),
+        (2178, 12, None, None),   # ALISET SUPER (docena)
+        (2177, 12, None, None),   # ALISET REGULAR (docena)
+        (2976, 24, None, None),   # OXIGENTA CREMA NNP 40VOL 90ML
         (7253, 12, None, None),
-        (3614, 7, None, None),
+        (3612, 6, None, None),    # TRAT-SKALA KIDS 1000GR (media docena)
     ]),
     (2266, "MINI SUPER TOMMY", [
         (3439, 15, None, None),
+        (3439, 5, 0.0, "CAMBIO X CAMBIO"),
         (3461, 10, None, None),   # TINTE NNP 7.66 RUBIO MEDIO ROJIZO INTENSO
-        (2178, 18, None, None),
-        (2976, 18, None, None),
-        (2993, 10, None, None),
+        (2178, 12, None, None),   # ALISET SUPER (docena) — este cliente no lleva Regular
+        (2976, 12, None, None),   # OXIGENTA CREMA NNP 40VOL 90ML
         (7253, 10, None, None),
-        (3614, 6, None, None),
-        (2177, 14, None, None),
-        (3439, 5, 0.0, "Producto gratis"),
+        (3593, 6, None, None),    # TRAT-SKALA POTAO DE AMOR 18 ELEMENTOS 1000GR (media docena)
     ]),
     (1224, "MINI SUPER CHAVEZ 2", [
-        (3439, 15, None, None),
-        (3462, 10, None, None),
+        (3439, 12, None, None),   # normal, no es cambio
+        (3462, 10, None, None),   # TINTE NNP 8.0 RUBIO CLARO
         (3465, 10, None, None),   # TINTE NNP 9.0 RUBIO MUY CLARO
-        (2178, 16, None, None),
-        (2177, 16, None, None),
-        (2976, 16, None, None),
-        (2993, 10, None, None),
+        (2178, 12, None, None),   # ALISET SUPER (docena)
+        (2177, 12, None, None),   # ALISET REGULAR (docena)
+        (2974, 12, None, None),   # OXIGENTA CREMA NNP 30VOL 90ML
         (7253, 10, None, None),
-        (3614, 4, None, None),
-        (3458, 10, None, None),   # TINTE NNP 7.0 RUBIO MEDIANO
+        (3606, 12, None, None),   # TRAT-SKALA DIVINO POTAO 1000GR — docena 1 de 2
+        (3609, 12, None, None),   # TRAT-SKALA HIDRONUTRITIVO ALOE VERA 1000GR — docena 2 de 2
     ]),
     (1237, "PODEROSO NET", [
         (3439, 10, None, None),
         (3439, 5, 0.0, "CAMBIO X CAMBIO"),
         (3443, 10, None, None),   # TINTE NNP 10.0 RUBIO EXTRA CLARO
-        (2178, 14, None, None),
-        (2177, 14, None, None),
-        (2974, 14, None, None),
-        (2993, 10, None, None),
+        (2177, 12, None, None),   # ALISET REGULAR (docena) — este cliente no lleva Super
+        (2974, 12, None, None),   # OXIGENTA CREMA NNP 30VOL 90ML
         (7253, 10, None, None),
-        (3614, 5, None, None),
+        (8813, 6, None, None),    # TRAT-SKALA MELANCIA 1000GR (media docena)
     ]),
 ]
 
