@@ -1,9 +1,14 @@
 #!/bin/bash
-# create_test_sales.sh — Crea 7 cotizaciones (sale.order en borrador) de
-# PRUEBA para los clientes de la ruta "9 - San Miguelito ruta B", con
-# productos surtidos entre los más vendidos, sumando ~$1,100 en total.
-# NO confirma las órdenes ni genera facturas — quedan en borrador, no
-# tocan contabilidad ni inventario, y se pueden eliminar sin problema.
+# create_test_sales.sh — Crea y CONFIRMA 7 órdenes de venta (sale.order,
+# estado 'sale') de PRUEBA para los clientes de la ruta "9 - San
+# Miguelito ruta B", con productos surtidos entre los más vendidos,
+# sumando ~$1,100 en total. Todas en Efectivo, sin ITBMS, con fecha
+# normal (sin fecha especial de entrega). NO genera facturas — eso
+# queda para cuando Andrés decida facturarlas manualmente.
+# OJO: al confirmarse, Odoo SÍ crea los traslados/entregas de Inventario
+# correspondientes y reserva stock real de estos productos, como
+# cualquier venta real. Si son solo de prueba, cancelar después las 7
+# órdenes (o sus traslados) para liberar ese stock reservado.
 # Pedido explícito de Andrés (2026-09-10) para probar el flujo de ventas.
 # Correr por SSH en la VM y pegar TODA la salida en el chat.
 
@@ -117,12 +122,14 @@ Product = env['product.product']
 SaleOrder = env['sale.order']
 grand_total = 0.0
 creados = []
+fallidos = []
 
 for partner_id, nombre_esperado, lineas in ORDERS:
     partner = env['res.partner'].browse(partner_id)
     if not partner.exists() or partner.name != nombre_esperado:
         print(f"!! SALTADO: partner {partner_id} no coincide (esperado {nombre_esperado!r}, "
               f"encontrado {partner.name!r}) — revisar antes de continuar.")
+        fallidos.append((nombre_esperado, "partner no coincide"))
         continue
 
     order_lines = []
@@ -140,21 +147,37 @@ for partner_id, nombre_esperado, lineas in ORDERS:
             'price_unit': precio,
         }))
 
-    so = SaleOrder.create({
-        'partner_id': partner.id,
-        'client_order_ref': REF,
-        'note': NOTA,
-        'order_line': order_lines,
-    })
-    grand_total += so.amount_total
-    creados.append((so.name, partner.name, so.amount_total))
-    print(f"Creada {so.name} | {partner.name} | total={so.amount_total:.2f} | id={so.id}")
+    try:
+        with env.cr.savepoint():
+            so = SaleOrder.create({
+                'partner_id': partner.id,
+                'client_order_ref': REF,
+                'note': NOTA,
+                'custom_payment_method': 'efectivo',
+                'custom_itbms_required': False,
+                'order_line': order_lines,
+            })
+            so.with_context(skip_payment_method_check=True).action_confirm()
+            grand_total += so.amount_total
+            creados.append((so.name, partner.name, so.amount_total, so.state))
+            print(f"Confirmada {so.name} | {partner.name} | total={so.amount_total:.2f} | "
+                  f"estado={so.state} | id={so.id}")
+    except Exception as e:
+        print(f"!! ERROR creando/confirmando orden de {nombre_esperado}: {e}")
+        fallidos.append((nombre_esperado, str(e)))
 
 env.cr.commit()
 
 print("\n========== RESUMEN ==========")
-for name, partner_name, total in creados:
-    print(f"  {name} | {partner_name} | ${total:.2f}")
-print(f"\nTOTAL DE LAS {len(creados)} COTIZACIONES: ${grand_total:.2f}")
+for name, partner_name, total, state in creados:
+    print(f"  {name} | {partner_name} | ${total:.2f} | {state}")
+if fallidos:
+    print("\n-- Con problemas (no se crearon) --")
+    for partner_name, motivo in fallidos:
+        print(f"  {partner_name}: {motivo}")
+print(f"\nTOTAL DE LAS {len(creados)} ÓRDENES CONFIRMADAS: ${grand_total:.2f}")
 print(f"\nBuscar en Odoo con la Referencia del cliente = '{REF}' para verlas todas juntas.")
+print("Recordatorio: al confirmarse se generaron los traslados de Inventario "
+      "correspondientes (reservan stock real) — si son solo de prueba, cancelar "
+      "después esas órdenes/traslados para liberar el stock.")
 PYEOF
