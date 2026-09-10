@@ -157,6 +157,40 @@ class SaleOrder(models.Model):
         }
 
     # ------------------------------------------------------------------
+    # Recompensas (compra X y llévate Y): que solo cuenten las líneas que
+    # también califican para la columna "Promo" (mismo criterio de precio)
+    # ------------------------------------------------------------------
+
+    def _get_not_rewarded_order_lines(self):
+        """Extiende el método nativo de Odoo (`loyalty`/`sale_loyalty`),
+        que hoy solo saca las líneas de regalo ya aplicadas. Acá además se
+        sacan las líneas cuyo precio NO califica para un programa
+        "compra X y llévate Y" — mismo criterio que ya usa la columna
+        "Promo" (`_price_qualifies_for_promo` en `sale.order.line`) — para
+        que el botón nativo de reclamar recompensa no deje que una línea
+        muy rebajada desbloquee el regalo. Solo afecta programas
+        `buy_x_get_y`; no toca otros tipos (ej. Tarjetas de regalo), que
+        no usan `rule_ids` con cantidad mínima. Pedido de Andrés
+        2026-09-10."""
+        lines = super()._get_not_rewarded_order_lines()
+        programs = self.env['loyalty.program'].search([
+            ('program_type', '=', 'buy_x_get_y'),
+            ('active', '=', True),
+        ])
+        if not programs:
+            return lines
+
+        SaleOrderLine = self.env['sale.order.line']
+        disqualified = self.env['sale.order.line']
+        for line in lines:
+            if line.display_type:
+                continue
+            program, rule = SaleOrderLine._get_matched_program(line, programs)
+            if program and rule and not SaleOrderLine._price_qualifies_for_promo(line, rule):
+                disqualified |= line
+        return lines - disqualified
+
+    # ------------------------------------------------------------------
     # Exportación a Dianke
     # ------------------------------------------------------------------
 

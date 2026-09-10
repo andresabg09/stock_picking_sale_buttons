@@ -318,3 +318,19 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   `_last_itbms_choice_for_partner` (mismo patrón que la Forma de Pago).
   En el Excel de Dianke se agregó como fila de casillas "Con ITBMS" /
   "Sin ITBMS" junto a "Tipo de pago".
+- 2026-09-10: El botón nativo de Odoo para reclamar recompensa ("compra X
+  y llévate Y") ahora respeta el mismo criterio de precio que ya usa la
+  columna "Promo" — pedido de Andrés: una línea con precio muy rebajado
+  no debe contar para desbloquear el regalo. Nuevo override de
+  `_get_not_rewarded_order_lines()` (método nativo de `loyalty`/
+  `sale_loyalty`, hoy solo saca las líneas de regalo ya aplicadas): además
+  saca las líneas que no pasan `_price_qualifies_for_promo` para algún
+  programa `buy_x_get_y` activo (mismas funciones que ya usa
+  `_compute_custom_promo_status`, sin duplicar lógica). Solo afecta
+  programas `buy_x_get_y` (los 8 activos hoy: pocket, Aliset, Big Puff
+  300/750ml, peróxidos/decolorante Nevada, trat-skala, tintes) — no toca
+  "Tarjetas de regalo" (`gift_card`), que no usa `rule_ids` con cantidad
+  mínima. Investigado por SSH el método real de Odoo 18.0-20260513
+  (`SaleOrder._program_check_compute_points`) antes de escribir el
+  cambio (regla 5) — no se reescribió esa lógica compleja, solo se
+  recorta el conjunto de líneas que le llegan como entrada.
