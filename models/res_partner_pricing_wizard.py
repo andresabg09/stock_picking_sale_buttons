@@ -1,6 +1,7 @@
 from collections import defaultdict
 
 from odoo import models, fields
+from odoo.exceptions import UserError
 
 
 class ResPartnerPricingWizard(models.TransientModel):
@@ -19,6 +20,13 @@ class ResPartnerPricingWizard(models.TransientModel):
              'distinta a la que genera este wizard — si guardas, se reemplaza.',
     )
     remaining_count = fields.Integer(string='Clientes restantes después de este', readonly=True)
+    found_any = fields.Boolean(
+        default=False,
+        help='Se pone en True la primera vez que se logra abrir un cliente con '
+             'facturas — sirve para distinguir "ya se terminó de procesar la '
+             'tanda" (cierre normal y silencioso) de "ninguno de los '
+             'seleccionados tenía facturas con producto" (hay que avisarlo).',
+    )
     line_ids = fields.One2many(
         'res.partner.pricing.wizard.line', 'wizard_id',
         string='Productos facturados a este cliente',
@@ -32,12 +40,18 @@ class ResPartnerPricingWizard(models.TransientModel):
         diferencias de centésimas de redondeo no cuenten como precios
         distintos). Devuelve una lista de tuplas
         (product, resumen_texto, precio_mas_reciente)."""
+        # OJO: NO filtrar por display_type=False aquí — en esta instalación
+        # (Odoo 18.0-20260513) las líneas de producto normales tienen
+        # display_type='product' (el texto), no False/vacío como en otras
+        # versiones. Confirmado por SSH (INV/2026/00586): sus líneas de
+        # producto reales traían display_type='product', y las que de
+        # verdad hay que excluir (pago/impuesto/sección) son las únicas
+        # con product_id=False — así que basta con exigir product_id.
         move_lines = self.env['account.move.line'].search([
             ('move_id.partner_id', '=', partner.id),
             ('move_id.move_type', '=', 'out_invoice'),
             ('move_id.state', '=', 'posted'),
             ('product_id', '!=', False),
-            ('display_type', '=', False),
         ])
 
         por_producto = defaultdict(list)
@@ -94,6 +108,7 @@ class ResPartnerPricingWizard(models.TransientModel):
                 'current_partner_id': partner.id,
                 'current_pricelist_name': aviso,
                 'remaining_count': len(pending),
+                'found_any': True,
                 'line_ids': [(5, 0, 0)] + [(0, 0, {
                     'product_id': product.id,
                     'historial_precios': resumen,
@@ -109,7 +124,8 @@ class ResPartnerPricingWizard(models.TransientModel):
                 'target': 'new',
             }
 
-        # No queda ningún cliente con facturas — nada que revisar, se cierra.
+        # No queda ningún cliente pendiente.
+        sin_avisos_previos = not self.found_any
         self.write({
             'partner_ids': [(6, 0, [])],
             'current_partner_id': False,
@@ -117,6 +133,16 @@ class ResPartnerPricingWizard(models.TransientModel):
             'remaining_count': 0,
             'line_ids': [(5, 0, 0)],
         })
+        if sin_avisos_previos:
+            # Ni este cliente ni ninguno anterior de la tanda tenía facturas
+            # de venta contabilizadas con producto — avisar en vez de
+            # quedarse mudo (antes se cerraba en silencio y parecía que el
+            # botón no hacía nada).
+            raise UserError(
+                "Ninguno de los clientes seleccionados tiene facturas de venta "
+                "contabilizadas con productos todavía — no hay de dónde traer "
+                "precios pactados."
+            )
         return {'type': 'ir.actions.act_window_close'}
 
     def action_save_and_continue(self):
