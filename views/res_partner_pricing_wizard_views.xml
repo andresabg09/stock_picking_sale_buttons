@@ -18,9 +18,10 @@
                     si guardas, se reemplaza por la nueva lista de precios pactados.
                 </div>
                 <field name="line_ids">
-                    <list editable="bottom">
+                    <list editable="bottom" decoration-warning="precio_actual and precio_actual != precio_elegido">
                         <field name="product_id" readonly="1"/>
                         <field name="historial_precios" readonly="1"/>
+                        <field name="precio_actual" readonly="1"/>
                         <field name="precio_elegido"/>
                         <field name="incluir"/>
                     </list>

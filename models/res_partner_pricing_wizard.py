@@ -58,6 +58,7 @@ class ResPartnerPricingWizard(models.TransientModel):
         for line in move_lines:
             por_producto[line.product_id].append(line)
 
+        fecha_minima = fields.Date.from_string('1900-01-01')
         resultado = []
         for product, lines in por_producto.items():
             por_precio = defaultdict(lambda: {'count': 0, 'ultima_fecha': None})
@@ -69,18 +70,26 @@ class ResPartnerPricingWizard(models.TransientModel):
                 if fecha and (not info['ultima_fecha'] or fecha > info['ultima_fecha']):
                     info['ultima_fecha'] = fecha
 
+            # Precio sugerido = el que más veces se repite (moda). Si dos
+            # precios distintos empatan en cantidad de veces usado,
+            # desempata el más reciente de esos dos — pedido de Andrés
+            # 2026-09-11 (antes se usaba solo "el más reciente a secas").
             precios_ordenados = sorted(
                 por_precio.items(),
-                key=lambda kv: kv[1]['ultima_fecha'] or fields.Date.from_string('1900-01-01'),
+                key=lambda kv: (kv[1]['count'], kv[1]['ultima_fecha'] or fecha_minima),
                 reverse=True,
             )
             resumen = ' · '.join(
                 f"${precio:.2f} (x{info['count']}, última {info['ultima_fecha'] or '?'})"
                 for precio, info in precios_ordenados
             )
-            precio_mas_reciente = precios_ordenados[0][0] if precios_ordenados else product.lst_price
-            resultado.append((product, resumen, precio_mas_reciente))
+            precio_mas_usado = precios_ordenados[0][0] if precios_ordenados else product.lst_price
+            resultado.append((product, resumen, precio_mas_usado))
 
+        # Orden alfabético por nombre de producto — pedido de Andrés
+        # 2026-09-11, la lista salía en el orden en que Python encontraba
+        # los productos, no en un orden legible.
+        resultado.sort(key=lambda tupla: tupla[0].display_name or '')
         return resultado
 
     def action_open_next_partner(self):
@@ -103,6 +112,19 @@ class ResPartnerPricingWizard(models.TransientModel):
             if pricelist_actual and pricelist_actual.custom_partner_id != partner:
                 aviso = pricelist_actual.name
 
+            # Lo que YA está pactado hoy para este cliente (si ya se corrió
+            # este wizard antes) — para que Andrés pueda comparar contra el
+            # precio recién sugerido y ver de un vistazo qué cambiaría si
+            # guarda de nuevo. Se busca la lista por custom_partner_id (la
+            # que genera este wizard), no necesariamente la que esté
+            # asignada ahora mismo en property_product_pricelist.
+            pricelist_propia = self.env['product.pricelist'].search(
+                [('custom_partner_id', '=', partner.id)], limit=1,
+            )
+            precios_actuales = {
+                item.product_id.id: item.fixed_price for item in pricelist_propia.item_ids
+            } if pricelist_propia else {}
+
             self.write({
                 'partner_ids': [(6, 0, pending.ids)],
                 'current_partner_id': partner.id,
@@ -112,6 +134,7 @@ class ResPartnerPricingWizard(models.TransientModel):
                 'line_ids': [(5, 0, 0)] + [(0, 0, {
                     'product_id': product.id,
                     'historial_precios': resumen,
+                    'precio_actual': precios_actuales.get(product.id, 0.0),
                     'precio_elegido': precio_sugerido,
                     'incluir': True,
                 }) for product, resumen, precio_sugerido in datos],
@@ -200,5 +223,12 @@ class ResPartnerPricingWizardLine(models.TransientModel):
     )
     product_id = fields.Many2one('product.product', string='Producto', readonly=True)
     historial_precios = fields.Char(string='Precios vistos en facturas', readonly=True)
+    precio_actual = fields.Float(
+        string='Ya pactado (actual)', readonly=True, digits='Product Price',
+        help='Precio que ya tiene guardado hoy en su lista de precios pactados '
+             '(0 si es un producto nuevo, sin precio pactado todavía). Sirve '
+             'para comparar contra "Precio a pactar" al volver a correr el '
+             'wizard más adelante.',
+    )
     precio_elegido = fields.Float(string='Precio a pactar', digits='Product Price')
     incluir = fields.Boolean(string='Incluir', default=True)
