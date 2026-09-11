@@ -5,3 +5,6 @@ from . import sale_dianke_email_wizard
 from . import sale_confirm_payment_wizard
 from . import purchase_order
 from . import purchase_bulk_email_wizard
+from . import product_pricelist
+from . import res_partner
+from . import res_partner_pricing_wizard

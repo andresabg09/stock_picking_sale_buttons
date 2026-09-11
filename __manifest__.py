@@ -19,6 +19,8 @@
         'views/report_saleorder_inherit.xml',
         'views/product_kanban_search_inherit.xml',
         'views/purchase_bulk_email_wizard_views.xml',
+        'views/res_partner_pricing_wizard_views.xml',
+        'views/res_partner_pricing_action.xml',
     ],
     'assets': {
         'web.assets_backend': [
