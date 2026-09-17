@@ -132,14 +132,16 @@
         </field>
     </record>
 
-    <!-- Forzar vista lista en ventas, sin paginación -->
+    <!-- Paginación normal en ventas: máx 80 por página (antes forzaba
+         limit=1000000 y traía prácticamente todas las ventas de un
+         jalón — eso era lo que trababa el celular al filtrar). -->
     <record id="sale.action_quotations_with_onboarding" model="ir.actions.act_window">
         <field name="view_mode">list,form</field>
-        <field name="limit">1000000</field>
+        <field name="limit">80</field>
     </record>
     <record id="sale.action_orders" model="ir.actions.act_window">
         <field name="view_mode">list,form</field>
-        <field name="limit">1000000</field>
+        <field name="limit">80</field>
     </record>
 
     <!-- ================================================================
