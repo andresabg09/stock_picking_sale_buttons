@@ -99,12 +99,16 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
 
 ## Historial de cambios (resumen, no detalle)
 - 2026-10-04: Rediseño de la tienda web (nombre comercial por ahora **SHALOM PANAMÁ**, paleta
-  blanco/azul oscuro `#0B1F3A`/negro). Fase 1 hecha por MCP, todo oculto: `ir.ui.view`
-  3328 + `website.page` 11 (`/inicio-nuevo`, sin publicar) = nuevo inicio; vistas INACTIVAS
-  3329 (tema CSS + barra superior) y 3330 (pie), heredan de `website.layout` (1013). El
-  inicio actual (`/shalom`, page 9 / view 2890) NO se tocó. Fase 2 = activar 3329/3330,
-  poner page 11 como inicio, arreglar menú (hoy hay 2 "Inicio"). Fase 3 = buscador
-  tolerante a errores/abreviaturas + pedido rápido (requiere código aquí + deploy).
+  blanco/azul oscuro `#0B1F3A`/negro), hecho por MCP. Fase 1+2 EN VIVO: `ir.ui.view` 3328 +
+  `website.page` 11 (`/inicio`) = nuevo inicio, `website.homepage_url='/inicio'`; vistas
+  activas 3329 (tema CSS que pisa la paleta oscura del sitio + barra superior) y 3330 (pie),
+  heredan de `website.layout` (1013); menú 7 renombrado "Catálogo"; `website.name` =
+  SHALOM PANAMÁ. Inicio viejo (`/shalom`, pages 8 y 9, view 2890) despublicado, NO borrado.
+  Revertir: desactivar 3329 y 3330, `homepage_url='/shalom'`, republicar pages 8 y 9, menú 7
+  → "Inicio", `website.name`='My Website'. La paleta oscura (negro, texto blanco) vive en
+  los ir.attachment 36083/27478 (`user_color_palette.scss`/`user_values.scss`), no se
+  tocaron. Fase 3 pendiente = buscador tolerante a errores/abreviaturas + pedido rápido
+  (requiere código aquí + deploy).
 - 2026-10-04: Conexión MCP a Odoo (conector "Odoo JSON-RPC" en AnythingMCP) — permite
   consultar campos, vistas y datos sin pasar por SSH (ver "Acceso a Odoo por MCP"). Causa
   del `Access Denied` inicial: faltaba la variable `ODOO_API_KEY` en Environment
