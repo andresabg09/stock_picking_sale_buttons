@@ -31,11 +31,16 @@ redimensionadas en Traslados (`stock.picking`), Ventas (`sale.order`), Facturas
    negocio final es de Andrés (no es programador de formación).
 4. Mantener este archivo **conciso** — no volcar contexto detallado de cada sesión aquí.
    Detalle largo va en memoria del harness (`memory/`), no en CLAUDE.md.
-5. **Sin acceso directo al servidor/código original de Odoo**: este módulo hereda/mejora
-   módulos base (stock, sale, account, purchase, product). Cuando falte un dato del lado
-   de Odoo (campo exacto, `xml id` de vista/reporte, ruta de módulo, estructura de modelo),
-   pedirle a Andrés el comando SSH exacto a correr y esperar que pegue la salida antes de
-   escribir el cambio. No asumir nombres sin confirmar.
+5. **Sin acceso al código fuente/servidor de Odoo, pero SÍ consulta de datos vía MCP**:
+   este módulo hereda/mejora módulos base (stock, sale, account, purchase, product).
+   Cuando falte un dato del lado de Odoo (campo exacto, estructura de modelo, datos de
+   prueba, `xml id` de vistas/reportes), **consultarlo primero por el conector MCP de
+   Odoo** (ver sección "Acceso a Odoo por MCP") — ya no pedirle a Andrés el comando SSH
+   para eso. Pedir SSH solo para lo que el MCP no alcanza: código fuente de módulos base
+   en disco, logs, `odoo shell`, y el despliegue. No asumir nombres sin confirmar.
+6. **Escrituras en Odoo por MCP** (`odoo_create`, `odoo_write`, `odoo_call_method`):
+   cambian la BD de producción y disparan automatizaciones. Nunca sin decirle a Andrés
+   qué se va a hacer y esperar su confirmación explícita, caso por caso.
 
 ## Infraestructura del servidor (Docker Swarm vía EasyPanel)
 - Servicio Odoo: `crm_odoo` · BD: `shalom` · Carpeta módulo en el host (VM, bind mount):
@@ -43,6 +48,22 @@ redimensionadas en Traslados (`stock.picking`), Ventas (`sale.order`), Facturas
 - Scripts listos en `scripts/`: `recon.sh` (recolectar estos datos si cambian),
   `setup_server_git.sh` (una sola vez: conectar la carpeta del servidor a este repo git),
   `deploy.sh` (rutina: pull → permisos → actualizar módulo → reiniciar servicio).
+
+## Acceso a Odoo por MCP (AnythingMCP)
+- Conector **"Odoo JSON-RPC"** en AnythingMCP (cloud.anythingmcp.com, cuenta de Andrés),
+  hacia el Odoo de producción (BD `shalom`), con el usuario `ventas@shalompma.com`
+  (uid 2). Hereda los permisos de ese usuario. Probado y funcionando (2026-10-04).
+- Herramientas de **lectura** (usar libremente): `odoo_search_read`, `odoo_read`,
+  `odoo_search_count`, `odoo_fields_get`, `odoo_list_*`. Siempre pasar `fields`.
+- Herramientas de **escritura**: ver regla 6 (confirmación explícita antes de cada una).
+- Credenciales: la clave API vive solo en AnythingMCP → conector → Environment Variables
+  (`ODOO_API_KEY`, junto a `ODOO_URL`, `ODOO_DB`, `ODOO_UID`). **Nunca pegarla en el
+  chat ni en el repo**; si se filtra, borrarla en Odoo (Preferencias → Seguridad de la
+  cuenta) y crear otra. `MOTIS_URL` en esas variables es un sobrante, ignorar.
+- Si da `Access Denied`: clave/uid/BD no coinciden (clave, usuario y base deben ser del
+  mismo usuario) o falta `ODOO_API_KEY` en las variables.
+- Límites: el MCP lee/escribe **datos**, no el código. Cambios al módulo siguen el flujo
+  de la regla 1 (commit + push → `deploy.sh` por SSH). Logs y `odoo shell` siguen por SSH.
 
 ## Errores conocidos SIN resolver
 _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
@@ -77,6 +98,10 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   ```
 
 ## Historial de cambios (resumen, no detalle)
+- 2026-10-04: Conexión MCP a Odoo (conector "Odoo JSON-RPC" en AnythingMCP) — permite
+  consultar campos, vistas y datos sin pasar por SSH (ver "Acceso a Odoo por MCP"). Causa
+  del `Access Denied` inicial: faltaba la variable `ODOO_API_KEY` en Environment
+  Variables (la clave que se pegaba en "Authentication" no es la que usa el conector).
 - 2026-08-20: Repo inicializado, primer commit hecho y subido a
   https://github.com/andresabg09/stock_picking_sale_buttons (público, remote `origin`,
   rama `master`).
