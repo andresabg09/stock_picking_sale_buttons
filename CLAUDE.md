@@ -98,7 +98,7 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   ```
 
 ## Historial de cambios (resumen, no detalle)
-- 2026-10-04: Rediseño de la tienda web (nombre comercial **DIANKE IMPORT GROUP**, paleta
+- 2026-10-04: Rediseño de la tienda web (nombre comercial por ahora **SHALOM PANAMÁ**, paleta
   blanco/azul oscuro `#0B1F3A`/negro). Fase 1 hecha por MCP, todo oculto: `ir.ui.view`
   3328 + `website.page` 11 (`/inicio-nuevo`, sin publicar) = nuevo inicio; vistas INACTIVAS
   3329 (tema CSS + barra superior) y 3330 (pie), heredan de `website.layout` (1013). El
