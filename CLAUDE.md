@@ -107,14 +107,18 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   Revertir: desactivar 3329 y 3330, `homepage_url='/shalom'`, republicar pages 8 y 9, menú 7
   → "Inicio", `website.name`='My Website'. La paleta oscura (negro, texto blanco) vive en
   los ir.attachment 36083/27478 (`user_color_palette.scss`/`user_values.scss`).
-  2026-10-04 (tarde): al seguir viéndose negros el catálogo y la ficha de producto, se
-  REESCRIBIERON esos 2 attachments con una paleta clara (copia exacta de los originales y de
-  los nuevos en `scripts/tienda_backup/`; para revertir, escribir los ORIGINAL_* en `datas`
-  en base64 y volver a tocar `ir.asset` 111/113/115). Pendiente de que Andrés confirme en
-  el navegador que ya se ve claro. Como la paleta NO se reflejó, se agregó a la vista 3329
-  un bloque CSS "Lectura clara" (fondo claro + texto negro en `main`, salvo `#dk-home`,
-  botones y `.o_cc3/.o_cc5`) — hecho a ciegas (el entorno no llega al dominio de la tienda;
-  pedir a Andrés agregarlo en Allowed domains). Fase 3 pendiente = buscador tolerante a errores/abreviaturas + pedido rápido
+  2026-10-04 (tarde): CAUSA REAL del fondo negro/texto blanco en catálogo, ficha, carrito y
+  login: el campo `website.custom_code_head` (id 1) traía un tema oscuro completo (3 `<style>`
+  con `#09090B !important`, tarjetas con brillo azul, animaciones `.animate-on-scroll`, AOS de
+  unpkg). Se REEMPLAZÓ por un comentario; copia exacta en
+  `scripts/tienda_backup/ORIGINAL_website_custom_code_head.html` (revertir = escribir ese
+  contenido en `custom_code_head`). También se reescribió la paleta (ir.attachment
+  36083/27478 → paleta clara; sí se aplicó, el bundle CSS cambió de hash; originales en
+  `scripts/tienda_backup/ORIGINAL_*.scss`) y se agregó a la vista 3329 un bloque CSS "Lectura
+  clara" (fondo claro + texto negro en `main`, salvo `#dk-home`, botones y `.o_cc3/.o_cc5`).
+  Verificado con navegador real contra la tienda (390 y 1280 px): 0 textos con bajo contraste.
+  El form de login nace `d-none` y Odoo lo muestra por JS (en pruebas tarda ~8 s, es normal).
+  Fase 3 pendiente = buscador tolerante a errores/abreviaturas + pedido rápido
   (requiere código aquí + deploy).
 - 2026-10-04: Conexión MCP a Odoo (conector "Odoo JSON-RPC" en AnythingMCP) — permite
   consultar campos, vistas y datos sin pasar por SSH (ver "Acceso a Odoo por MCP"). Causa

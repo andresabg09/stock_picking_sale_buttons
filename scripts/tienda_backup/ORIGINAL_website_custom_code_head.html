@@ -1,0 +1,529 @@
+<style id="custom_shalom_header_style">
+    /* Hacer el header nativo de Odoo Oscuro y Premium */
+    header#top, header#top .navbar, .o_header_standard {
+        background-color: #09090B !important;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05) !important;
+    }
+    header#top a.nav-link, header#top .navbar-light .navbar-nav .nav-link, header#top span {
+        color: #FFFFFF !important;
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+    header#top a.nav-link:hover, header#top .navbar-light .navbar-nav .nav-link:hover {
+        color: #3B82F6 !important;
+    }
+    header#top .navbar-brand.logo img {
+        filter: drop-shadow(0 0 5px rgba(255,255,255,0.2));
+    }
+    
+    /* Iconos del carrito, lupa o usuario */
+    header#top i.fa {
+        color: #FFFFFF !important;
+        transition: color 0.3s ease;
+    }
+    header#top a:hover i.fa {
+        color: #3B82F6 !important;
+    }
+    
+    /* Submenus (dropdowns) en version oscura */
+    header#top .dropdown-menu {
+        background-color: #09090B !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+    }
+    header#top .dropdown-menu .dropdown-item {
+        color: #FFFFFF !important;
+    }
+    header#top .dropdown-menu .dropdown-item:hover {
+        background-color: rgba(59, 130, 246, 0.2) !important;
+        color: #3B82F6 !important;
+    }
+    
+    /* Odoo E-commerce Shop - Asegurar que no se rompa */
+    .o_wsale_products_main_row {
+        background-color: #ffffff; /* El resto del e-commerce puede ser claro o oscuro segun prefieras */
+    }
+    
+    /* Footer native Odoo dark si aplica */
+    footer.o_footer {
+        background-color: #000000 !important;
+        color: #a1a1aa !important;
+    }
+    footer.o_footer a {
+        color: #ffffff !important;
+    }
+    footer.o_footer a:hover {
+        color: #3B82F6 !important;
+    }
+</style>
+
+
+<!-- SHALOM ECOMMERCE DARK THEME -->
+<style id="custom_shalom_ecommerce_style">
+    /* FONDO GENERAL DE LA TIENDA */
+    #wrapwrap > main, .o_wsale_products_main_row {
+        background-color: #09090B !important;
+        color: #e4e4e7 !important;
+    }
+    
+    /* TEXTOS GLOBALES TIENDA */
+    .o_wsale_products_main_row h1, .o_wsale_products_main_row h2, 
+    .o_wsale_products_main_row h3, .o_wsale_products_main_row h4, 
+    .o_wsale_products_main_row h5, .o_wsale_products_main_row h6 {
+        color: #ffffff !important;
+    }
+    .o_wsale_products_main_row p, .o_wsale_products_main_row span:not(.badge):not(.product_price) {
+        color: #a1a1aa !important;
+    }
+
+    /* FILTROS LATERALES (CATEGORÍAS) */
+    #wsale_products_attributes_collapse {
+        background-color: #18181b !important;
+        border: 1px solid rgba(255,255,255,0.05) !important;
+        border-radius: 12px;
+        padding: 15px;
+    }
+    .o_wsale_products_main_row .form-check-label {
+        color: #e4e4e7 !important;
+    }
+
+    /* BARRA SUPERIOR E-COMMERCE (BUSCAR, ORDENAR) */
+    .o_wsale_products_main_row .o_wsale_products_grid_table_wrapper {
+        background-color: transparent !important;
+    }
+    .o_wsale_products_main_row .btn-light {
+        background-color: #18181b !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: #ffffff !important;
+    }
+    .o_wsale_products_main_row .btn-light:hover {
+        background-color: #27272a !important;
+    }
+    .o_wsale_products_main_row input.form-control {
+        background-color: #18181b !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        color: #ffffff !important;
+    }
+
+    /* ──── TARJETAS DE PRODUCTO (PRODUCT CARDS) ──── */
+    .o_wsale_products_grid_table_wrapper .oe_product_cart {
+        background: rgba(255, 255, 255, 0.03) !important;
+        backdrop-filter: blur(10px);
+        -webkit-backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.05) !important;
+        border-radius: 16px !important;
+        overflow: hidden !important;
+        transition: all 0.4s ease !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.5) !important;
+    }
+    .o_wsale_products_grid_table_wrapper .oe_product_cart:hover {
+        transform: translateY(-8px) !important;
+        border-color: rgba(59, 130, 246, 0.4) !important;
+        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.8), 0 0 15px rgba(59, 130, 246, 0.2) !important;
+    }
+    
+    /* IMAGEN DEL PRODUCTO (FONDO CLARO/TRANSPARENTE) */
+    .oe_product_image {
+        background-color: rgba(255,255,255,0.02) !important;
+        padding: 1rem;
+        border-bottom: 1px solid rgba(255,255,255,0.05) !important;
+    }
+    .oe_product_image img {
+        filter: drop-shadow(0 10px 10px rgba(0,0,0,0.5));
+        transition: transform 0.5s ease;
+    }
+    .oe_product_cart:hover .oe_product_image img {
+        transform: scale(1.05);
+    }
+
+    /* INFO DEL PRODUCTO ABAJO DE LA IMAGEN */
+    .o_wsale_product_information {
+        background-color: transparent !important;
+        padding: 1.25rem !important;
+    }
+    .o_wsale_product_information .o_wsale_products_item_title a {
+        color: #ffffff !important;
+        font-weight: 600 !important;
+        font-size: 1.05rem !important;
+        text-decoration: none !important;
+        transition: color 0.3s;
+    }
+    .o_wsale_product_information .o_wsale_products_item_title a:hover {
+        color: #3B82F6 !important;
+    }
+    
+    /* PRECIO */
+    .product_price {
+        margin-top: 0.5rem !important;
+    }
+    .product_price .oe_currency_value {
+        color: #3B82F6 !important; /* Azul de acento */
+        font-size: 1.25rem !important;
+        font-weight: 700 !important;
+    }
+
+    /* ──── BOTONES AÑADIR AL CARRITO (SI ESTÁN ACTIVOS EN GRID) ──── */
+    .o_wsale_product_btn .btn {
+        background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
+        border: none !important;
+        border-radius: 50px !important;
+        color: white !important;
+        box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+    .o_wsale_product_btn .btn:hover {
+        transform: scale(1.1) !important;
+        box-shadow: 0 6px 20px rgba(59, 130, 246, 0.5) !important;
+    }
+
+    /* ──── PÁGINA DEL PRODUCTO INDIVIDUAL (/shop/product/...) ──── */
+    #product_detail {
+        background-color: #09090B !important;
+        color: #e4e4e7 !important;
+        padding-top: 2rem;
+    }
+    #product_detail h1[itemprop="name"] {
+        color: #ffffff !important;
+        font-weight: 700 !important;
+        font-size: 2.5rem !important;
+        margin-bottom: 1rem !important;
+    }
+    #product_detail .oe_price_h4 {
+        background-color: rgba(59, 130, 246, 0.1) !important;
+        padding: 1rem 1.5rem !important;
+        border-radius: 12px;
+        display: inline-block;
+        border: 1px solid rgba(59, 130, 246, 0.2);
+    }
+    #product_detail .oe_price_h4 .oe_currency_value {
+        color: #3B82F6 !important;
+        font-size: 2rem !important;
+        font-weight: 800 !important;
+    }
+    /* El selector de cantidad y boton principal */
+    #product_detail .css_quantity.input-group {
+        background-color: #18181b !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        border-radius: 8px !important;
+        overflow: hidden;
+    }
+    #product_detail .css_quantity input {
+        background-color: transparent !important;
+        color: #ffffff !important;
+        border: none !important;
+    }
+    #product_detail .css_quantity .btn {
+        background-color: transparent !important;
+        color: #ffffff !important;
+        border: none !important;
+    }
+    #product_detail #add_to_cart {
+        background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
+        border: none !important;
+        border-radius: 8px !important;
+        color: white !important;
+        padding: 0.8rem 2rem !important;
+        font-weight: 600 !important;
+        font-size: 1.1rem !important;
+        box-shadow: 0 10px 20px rgba(59, 130, 246, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+    #product_detail #add_to_cart:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 15px 25px rgba(59, 130, 246, 0.5) !important;
+    }
+
+    /* ──── CARRITO Y CHECKOUT ──── */
+    .oe_cart {
+        background-color: #09090B !important;
+    }
+    .oe_cart .card {
+        background-color: #18181b !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+    }
+    .oe_cart .table {
+        color: #e4e4e7 !important;
+    }
+    .oe_cart .table thead th {
+        border-bottom: 1px solid rgba(255,255,255,0.1) !important;
+        color: #ffffff !important;
+    }
+    .oe_cart .table td {
+        border-color: rgba(255,255,255,0.05) !important;
+    }
+    .oe_cart .table td a {
+        color: #ffffff !important;
+    }
+    #o_cart_summary {
+        background-color: #18181b !important;
+        border: 1px solid rgba(59, 130, 246, 0.3) !important;
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    #o_cart_summary .js_cart_summary > div {
+        color: #ffffff !important;
+    }
+    a[href="/shop/checkout"], button[name="o_payment_submit_button"] {
+        background: linear-gradient(135deg, #1E3A8A 0%, #3B82F6 100%) !important;
+        border: none !important;
+        color: white !important;
+        border-radius: 8px !important;
+        font-weight: bold !important;
+    }
+    
+    /* BREADCRUMBS */
+    .breadcrumb {
+        background-color: transparent !important;
+    }
+    .breadcrumb-item a {
+        color: #a1a1aa !important;
+    }
+    .breadcrumb-item.active {
+        color: #3B82F6 !important;
+    }
+</style>
+<!-- END SHALOM ECOMMERCE DARK THEME -->
+
+
+<!-- SHALOM MEJORAS VISUALES -->
+<style id="custom_shalom_mejoras">
+    /* 1. MEJORA RADICAL DE LEGIBILIDAD (CONTRASTE) */
+    /* Aseguramos que todo texto dentro de ecommerce y producto sea blanco/gris claro */
+    .o_wsale_products_main_row, #product_detail, .oe_cart {
+        color: #e4e4e7 !important;
+    }
+    
+    /* Titulos, headers y nombres de productos */
+    .o_wsale_products_main_row h1, .o_wsale_products_main_row h2, 
+    .o_wsale_products_main_row h3, .o_wsale_products_main_row h4, 
+    .o_wsale_products_main_row h5, .o_wsale_products_main_row h6,
+    .o_wsale_products_main_row b, .o_wsale_products_main_row strong,
+    #product_detail h1, #product_detail h2, #product_detail h3,
+    #product_detail b, #product_detail strong {
+        color: #ffffff !important;
+        text-shadow: 0 2px 4px rgba(0,0,0,0.5); /* Sombra para separar del fondo */
+    }
+
+    /* Categorias y Sidebar */
+    #wsale_products_categories_collapse li a, 
+    #wsale_products_attributes_collapse label,
+    #wsale_products_attributes_collapse .form-check-label,
+    .o_wsale_products_main_row .text-muted {
+        color: #ffffff !important;
+        font-weight: 500 !important;
+    }
+    
+    #wsale_products_categories_collapse li a:hover {
+        color: #3B82F6 !important;
+    }
+
+    /* Formularios, inputs y buscador */
+    .o_wsale_products_main_row input, .o_wsale_products_main_row select,
+    #product_detail input, #product_detail select, .oe_cart input {
+        background-color: #18181b !important;
+        color: #ffffff !important;
+        border: 1px solid rgba(255,255,255,0.2) !important;
+    }
+    
+    /* Descripciones y parrafos */
+    #product_detail p, #product_detail span:not(.badge):not(.oe_currency_value), 
+    .o_wsale_products_main_row p {
+        color: #e4e4e7 !important;
+    }
+    
+    /* Breadcrumbs (migas de pan) */
+    .breadcrumb-item a, .breadcrumb-item.active {
+        color: #d4d4d8 !important;
+        font-weight: bold;
+    }
+
+    /* 2. HACIENDO EL /SHOP MAS CREATIVO */
+    .o_wsale_products_main_row .o_wsale_products_grid_table_wrapper {
+        background: radial-gradient(circle at 50% 0%, rgba(30,58,138,0.15) 0%, transparent 70%);
+        padding: 2rem;
+        border-radius: 20px;
+    }
+    
+    /* Estilo neon para la barra lateral */
+    #wsale_products_attributes_collapse {
+        background: linear-gradient(145deg, rgba(24,24,27,0.6), rgba(9,9,11,0.8)) !important;
+        border-left: 3px solid #3B82F6 !important; /* Destaque lateral azul */
+        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    }
+    
+    /* Tarjetas de Producto - Mas esteticas */
+    .oe_product_cart {
+        background: linear-gradient(145deg, rgba(30,30,35,0.8), rgba(15,15,18,0.9)) !important;
+        border: 1px solid rgba(255,255,255,0.1) !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important;
+    }
+    .oe_product_cart:hover {
+        border-color: #3B82F6 !important;
+        box-shadow: 0 15px 35px rgba(59, 130, 246, 0.25) !important;
+    }
+
+    /* 3. ANIMACIONES DE SCROLL (Aparecer desde abajo suavemente) */
+    .animate-on-scroll {
+        opacity: 0;
+        transform: translateY(35px);
+        transition: opacity 0.7s cubic-bezier(0.25, 1, 0.5, 1), transform 0.7s cubic-bezier(0.25, 1, 0.5, 1);
+        visibility: hidden;
+    }
+    .animate-on-scroll.is-visible {
+        opacity: 1;
+        transform: translateY(0);
+        visibility: visible;
+    }
+    
+    /* Staggering (Retraso en cascada para grillas) */
+    .sl-grid .sl-flip:nth-child(1), .oe_product_cart:nth-child(1) { transition-delay: 0.1s; }
+    .sl-grid .sl-flip:nth-child(2), .oe_product_cart:nth-child(2) { transition-delay: 0.2s; }
+    .sl-grid .sl-flip:nth-child(3), .oe_product_cart:nth-child(3) { transition-delay: 0.3s; }
+    .sl-grid .sl-flip:nth-child(4), .oe_product_cart:nth-child(4) { transition-delay: 0.4s; }
+    .sl-grid .sl-flip:nth-child(5), .oe_product_cart:nth-child(5) { transition-delay: 0.5s; }
+    .sl-grid .sl-flip:nth-child(6), .oe_product_cart:nth-child(6) { transition-delay: 0.6s; }
+    
+    .sl-tgrid .sl-tcard:nth-child(1) { transition-delay: 0.1s; }
+    .sl-tgrid .sl-tcard:nth-child(2) { transition-delay: 0.3s; }
+    .sl-tgrid .sl-tcard:nth-child(3) { transition-delay: 0.5s; }
+    
+    /* Animacion tipo Zoom para el Hero */
+    .anim-zoom {
+        transform: scale(0.9);
+        opacity: 0;
+        transition: all 1s ease-out;
+    }
+    .anim-zoom.is-visible {
+        transform: scale(1);
+        opacity: 1;
+    }
+</style>
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Definimos qué elementos queremos que se animen al hacer scroll
+    const selectorsToAnimate = [
+        '.sl-htitle', '.sl-hdesc', '.sl-stats-in > div', 
+        '.sl-sec-hd', '.sl-flip', '.sl-bfeats', '.sl-bviz', 
+        '.sl-tcard', '.oe_product_cart', '.o_wsale_products_main_row h1',
+        '#product_detail .row > div'
+    ];
+    
+    // Seleccionamos y preparamos todos los elementos
+    let elementsToAnimate = [];
+    selectorsToAnimate.forEach(selector => {
+        const els = document.querySelectorAll(selector);
+        els.forEach(el => {
+            el.classList.add('animate-on-scroll');
+            elementsToAnimate.push(el);
+        });
+    });
+    
+    // Animacion especial para la imagen principal (Hero)
+    const heroImg = document.querySelector('.sl-hvis');
+    if(heroImg) {
+        heroImg.classList.add('anim-zoom');
+        elementsToAnimate.push(heroImg);
+    }
+
+    // Usamos IntersectionObserver para detectar el scroll
+    const observerOptions = {
+        threshold: 0.1, // Se activa cuando un 10% del elemento es visible
+        rootMargin: "0px 0px -50px 0px" // Margen inferior antes de activar
+    };
+
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+            if (entry.isIntersecting) {
+                entry.target.classList.add('is-visible');
+                // Opcional: Descomentar linea abajo si queremos que la animación ocurra solo 1 vez
+                // observer.unobserve(entry.target); 
+            } else {
+                // Removemos la clase para que se vuelva a animar cuando hagamos scroll hacia arriba y abajo
+                entry.target.classList.remove('is-visible');
+            }
+        });
+    }, observerOptions);
+
+    // Observamos todos los elementos
+    elementsToAnimate.forEach(el => observer.observe(el));
+});
+</script>
+<!-- END SHALOM MEJORAS VISUALES -->
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<!-- AOS ANIMATIONS & COUNTERS -->
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet"/>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    AOS.init({
+        once: true,
+        offset: 50,
+        easing: 'ease-out-cubic',
+        duration: 800
+    });
+
+    const statNums = document.querySelectorAll('.sl-snum');
+    if(statNums.length > 0 && typeof IntersectionObserver !== 'undefined'){
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if(entry.isIntersecting) {
+                    let num = entry.target;
+                    let target = parseInt(num.getAttribute('data-val') || "0");
+                    if(target > 0) {
+                        let count = 0;
+                        const duration = 2000;
+                        const increment = target / (duration / 16);
+                        const updateCount = () => {
+                            count += increment;
+                            if(count < target) {
+                                num.innerText = Math.ceil(count) + (num.getAttribute('data-suffix') || '');
+                                requestAnimationFrame(updateCount);
+                            } else {
+                                num.innerText = target + (num.getAttribute('data-suffix') || '');
+                            }
+                        };
+                        updateCount();
+                    }
+                    observer.unobserve(num);
+                }
+            });
+        });
+        statNums.forEach(num => observer.observe(num));
+    }
+});
+</script>
+<!-- END AOS ANIMATIONS -->
