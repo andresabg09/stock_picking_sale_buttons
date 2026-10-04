@@ -1,0 +1,19 @@
+
+$o-user-color-palette: map-merge($o-user-color-palette, o-map-omit((
+    'o-color-5': #000000,
+    'menu': 2,
+    'menu-custom': 'NULL',
+    'o-cc2-text': '200',
+    'o-cc2-bg': 'o-color-5',
+    'o-cc1-text': 'white',
+    'o-cc5-text': 'white',
+    'o-color-4': #6C757D,
+    'o-cc2-headings': 'white',
+    'o-cc4-text': 'white',
+    'o-cc5-headings': 'white',
+    'o-cc4-headings': 'white',
+    'o-cc3-headings': 'white',
+    'o-cc1-headings': 'white',
+    'menu-border-color': 'white',
+    // -- hook --
+)));

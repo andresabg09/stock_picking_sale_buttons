@@ -106,8 +106,12 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   SHALOM PANAMÁ. Inicio viejo (`/shalom`, pages 8 y 9, view 2890) despublicado, NO borrado.
   Revertir: desactivar 3329 y 3330, `homepage_url='/shalom'`, republicar pages 8 y 9, menú 7
   → "Inicio", `website.name`='My Website'. La paleta oscura (negro, texto blanco) vive en
-  los ir.attachment 36083/27478 (`user_color_palette.scss`/`user_values.scss`), no se
-  tocaron. Fase 3 pendiente = buscador tolerante a errores/abreviaturas + pedido rápido
+  los ir.attachment 36083/27478 (`user_color_palette.scss`/`user_values.scss`).
+  2026-10-04 (tarde): al seguir viéndose negros el catálogo y la ficha de producto, se
+  REESCRIBIERON esos 2 attachments con una paleta clara (copia exacta de los originales y de
+  los nuevos en `scripts/tienda_backup/`; para revertir, escribir los ORIGINAL_* en `datas`
+  en base64 y volver a tocar `ir.asset` 111/113/115). Pendiente de que Andrés confirme en
+  el navegador que ya se ve claro. Fase 3 pendiente = buscador tolerante a errores/abreviaturas + pedido rápido
   (requiere código aquí + deploy).
 - 2026-10-04: Conexión MCP a Odoo (conector "Odoo JSON-RPC" en AnythingMCP) — permite
   consultar campos, vistas y datos sin pasar por SSH (ver "Acceso a Odoo por MCP"). Causa
