@@ -11,3 +11,4 @@ from . import res_partner_pricing_wizard
 from . import shop_search_synonym
 from . import product_template_search
 from . import website_search
+from . import product_template_shop

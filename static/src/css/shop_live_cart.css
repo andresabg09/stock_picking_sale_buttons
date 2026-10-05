@@ -1,0 +1,200 @@
+/* Tienda — etapa 1 del rediseño: cantidad viva en tarjetas, etiquetas y píldora del carrito.
+ * Paleta Shalom: azul oscuro #0B1F3A, negro, blanco. Ver views/website_shop_templates.xml. */
+
+/* El ícono de carrito nativo de la tarjeta lo reemplaza el control de cantidad. */
+.oe_product_cart .o_wsale_product_btn {
+    display: none !important;
+}
+
+/* ---- Control de cantidad en la tarjeta ---- */
+.dk-buy {
+    margin-top: 10px;
+}
+.dk-buy.dk-busy {
+    opacity: .85;
+}
+.dk-add {
+    width: 100%;
+    height: 44px;
+    border: 0;
+    border-radius: 6px;
+    background: #0B1F3A;
+    color: #fff;
+    font-weight: 800;
+    font-size: 14px;
+    cursor: pointer;
+}
+.dk-add:hover {
+    background: #000;
+}
+.dk-buy[data-state="in"] .dk-add,
+.dk-buy[data-state="out"] .dk-live {
+    display: none;
+}
+.dk-stp {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 44px;
+    border: 1px solid #0B1F3A;
+    border-radius: 6px;
+    background: #fff;
+}
+.dk-stp button {
+    width: 44px;
+    height: 100%;
+    border: 0;
+    background: transparent;
+    color: #0B1F3A;
+    font-size: 20px;
+    line-height: 1;
+    cursor: pointer;
+}
+.dk-stp input.dk-q {
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+    color: #0A0A0A;
+    background: transparent;
+    box-shadow: none;
+}
+.dk-in {
+    margin-top: 6px;
+    font-size: 12px;
+    font-weight: 700;
+    color: #0B1F3A;
+}
+.dk-options {
+    display: block;
+    margin-top: 10px;
+    height: 44px;
+    line-height: 42px;
+    text-align: center;
+    border: 1px solid #0B1F3A;
+    border-radius: 6px;
+    color: #0B1F3A;
+    font-weight: 800;
+    font-size: 14px;
+    text-decoration: none;
+}
+.dk-options:hover {
+    background: #EAF0F8;
+    color: #0B1F3A;
+}
+/* Tarjeta con producto en el carrito: borde azul. */
+.oe_product_cart:has(.dk-buy[data-state="in"]) {
+    outline: 2px solid #0B1F3A;
+    outline-offset: -2px;
+    border-radius: 8px;
+}
+
+/* ---- Etiquetas Nuevo / Rebaja ---- */
+.dk-badge {
+    position: absolute;
+    top: 8px;
+    left: 8px;
+    z-index: 2;
+    padding: 3px 10px;
+    border-radius: 999px;
+    color: #fff;
+    font-size: 11px;
+    font-weight: 800;
+    line-height: 1.4;
+}
+.dk-badge-new {
+    background: #0B1F3A;
+}
+.dk-badge-sale {
+    background: #0A0A0A;
+}
+.dk-badge-new + .dk-badge-sale {
+    top: 34px;
+}
+
+/* ---- Píldora flotante del carrito ---- */
+.dk-pill,
+.dk-pill:hover,
+.dk-pill:focus {
+    color: #fff !important;
+    text-decoration: none !important;
+}
+.dk-pill {
+    position: fixed;
+    left: 50%;
+    bottom: 20px;
+    transform: translateX(-50%);
+    z-index: 1040;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    height: 56px;
+    padding: 0 10px 0 22px;
+    border-radius: 999px;
+    background: #0B1F3A;
+    box-shadow: 0 10px 30px rgba(11, 31, 58, .35);
+    white-space: nowrap;
+}
+.dk-pill:hover {
+    background: #000;
+}
+.dk-pill-txt {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+.dk-pill-txt b {
+    font-size: 15px;
+    color: #fff;
+}
+.dk-pill-txt small {
+    font-size: 12px;
+    color: #D5DEEE;
+}
+.dk-pill-go {
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 18px;
+    border-radius: 999px;
+    background: #fff;
+    color: #0B1F3A;
+    font-size: 14px;
+    font-weight: 800;
+}
+@media (max-width: 575.98px) {
+    .dk-pill {
+        left: 12px;
+        right: 12px;
+        bottom: 14px;
+        transform: none;
+        justify-content: space-between;
+    }
+}
+
+/* ---- Aviso breve (si algo falla al actualizar) ---- */
+.dk-toast {
+    position: fixed;
+    left: 50%;
+    bottom: 88px;
+    transform: translateX(-50%) translateY(10px);
+    z-index: 1050;
+    max-width: calc(100vw - 32px);
+    padding: 12px 18px;
+    border-radius: 8px;
+    background: #0A0A0A;
+    color: #fff;
+    font-size: 14px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity .2s, transform .2s;
+}
+.dk-toast.dk-show {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}

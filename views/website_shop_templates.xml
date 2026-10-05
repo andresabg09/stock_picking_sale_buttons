@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Etapa 1 del rediseño de la tienda: cantidad "viva" en cada tarjeta.
+         Lo que se escribe queda en el carrito al momento (controllers/shop_live_cart.py
+         + static/src/js/shop_live_cart.js). Se monta SOBRE la tarjeta nativa sin
+         reemplazar nada de ella: así no rompe otras vistas que se enganchen
+         (lista de deseos, comparar, etc.). El ícono de carrito nativo se oculta por CSS. -->
+    <template id="products_item_live_qty" inherit_id="website_sale.products_item" name="Tarjeta: cantidad viva y etiquetas">
+        <xpath expr="//a[hasclass('oe_product_image_link')]" position="inside">
+            <t t-set="dk_pv" t-value="get_product_prices(product)"/>
+            <span t-if="product.dk_is_new" class="dk-badge dk-badge-new">Nuevo</span>
+            <span t-if="dk_pv['price_reduce'] and 'base_price' in dk_pv and dk_pv['base_price'] &gt; dk_pv['price_reduce']" class="dk-badge dk-badge-sale">Rebaja</span>
+        </xpath>
+        <xpath expr="//div[hasclass('o_wsale_product_information')]" position="inside">
+            <t t-set="dk_variant" t-value="product._get_first_possible_variant_id()"/>
+            <t t-set="dk_can_add" t-value="dk_variant and product.product_variant_count == 1 and product._website_show_quick_add() and (get_product_prices(product)['price_reduce'] or not website.prevent_zero_price_sale)"/>
+            <t t-if="dk_can_add">
+                <t t-set="dk_order" t-value="website.sale_get_order()"/>
+                <t t-set="dk_line" t-value="dk_order.website_order_line.filtered_domain([('product_id', '=', dk_variant)])[:1]"/>
+                <t t-set="dk_qty" t-value="int(dk_line.product_uom_qty) if dk_line else 0"/>
+                <div class="dk-buy" t-att-data-product-id="dk_variant" t-att-data-qty="dk_qty" t-att-data-state="'in' if dk_qty else 'out'">
+                    <button type="button" class="dk-add">Agregar</button>
+                    <div class="dk-live">
+                        <div class="dk-stp">
+                            <button type="button" class="dk-minus" aria-label="Menos">&#8722;</button>
+                            <input type="text" inputmode="numeric" class="dk-q" t-att-value="dk_qty or 1" aria-label="Cantidad"/>
+                            <button type="button" class="dk-plus" aria-label="Más">+</button>
+                        </div>
+                        <div class="dk-in">
+                            <i class="fa fa-check" aria-hidden="true"/> En tu carrito<span class="dk-in-total" t-if="dk_line"> · <span t-out="dk_line._get_cart_display_price()" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/></span>
+                        </div>
+                    </div>
+                </div>
+            </t>
+            <t t-else="">
+                <a t-att-href="product_href" class="dk-options">Ver opciones</a>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Píldora flotante con el carrito (Ver carrito). No sale en el carrito ni en el pago. -->
+    <template id="layout_cart_pill" inherit_id="website.layout" name="Píldora flotante del carrito">
+        <xpath expr="//header" position="after">
+            <t t-if="website and website.has_ecommerce_access() and not request.httprequest.path.startswith(('/shop/cart', '/shop/checkout', '/shop/payment', '/shop/confirm', '/shop/address', '/shop/extra_info'))">
+                <t t-set="dk_o" t-value="website.sale_get_order()"/>
+                <a href="/shop/cart" id="dk-pill" t-attf-class="dk-pill #{'' if dk_o.website_order_line else 'd-none'}" aria-label="Ver carrito">
+                    <span class="dk-pill-txt">
+                        <b><span class="dk-pill-lines" t-out="len(dk_o.website_order_line)"/> productos · <span class="dk-pill-sub" t-out="dk_o.amount_untaxed" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/></b>
+                        <small><span class="dk-pill-units" t-out="int(dk_o.cart_quantity)"/> unidades en tu carrito</small>
+                    </span>
+                    <span class="dk-pill-go">Ver carrito</span>
+                </a>
+            </t>
+        </xpath>
+    </template>
+</odoo>
