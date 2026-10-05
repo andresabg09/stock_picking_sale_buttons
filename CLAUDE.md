@@ -206,8 +206,10 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   con permiso): categorías vía `t-call stock_picking_sale_buttons.dk_home_categories` y banner con 3
   mensajes de servicio (Pedido rápido / Despachos+WhatsApp / Repite tu pedido) en vez de repetir
   productos. Respaldo de la vista anterior: `scripts/tienda_backup/PREVIOUS_inicio_view3328_carrusel_productos.xml`;
-  la nueva: `NEW_inicio_view3328_banner_servicio.xml`. Pendiente (datos, con permiso): corregir
-  nombres de categorías ("Tratmientos", "Wipes ", "pies"); agrupar en familias queda para después.
+  la nueva: `NEW_inicio_view3328_banner_servicio.xml`. Nombres de categoría corregidos por MCP (con
+  permiso): ids 330 "Tratamientos", 331 "Wipes", 293 "Pies". OJO: el nombre es traducible y el sitio
+  solo tiene `es_419` activo — hay que escribir con `context.lang=es_419` (odoo_call_method/write), si no
+  solo cambia el idioma base y la tienda no lo muestra. Agrupar en familias queda para después.
 - 2026-10-04: Conexión MCP a Odoo (conector "Odoo JSON-RPC" en AnythingMCP) — permite
   consultar campos, vistas y datos sin pasar por SSH (ver "Acceso a Odoo por MCP"). Causa
   del `Access Denied` inicial: faltaba la variable `ODOO_API_KEY` en Environment
