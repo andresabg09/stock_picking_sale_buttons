@@ -164,8 +164,15 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   `shop_live_cart.css`, vistas en `views/website_shop_templates.xml` montadas SOBRE
   `website_sale.products_item` sin reemplazarla), etiquetas Nuevo (`product.template.dk_is_new`,
   <30 días, parámetro `stock_picking_sale_buttons.new_days`) y Rebaja, píldora flotante del
-  carrito. Pendientes: etapa 2 ficha de producto, etapa 3 carrito, etapa 4 secciones
-  Nuevos/Rebajas/Te puede interesar en tienda e inicio. "Rebaja" es solo precio tachado real
+  carrito. ETAPA 2 (hecha, v18.0.2.3.0) ficha de producto: caja de cantidad viva
+  (`.dk-pbox`, atajos 12/24/48/96, "Ver carrito"/"Finalizar compra") montada ANTES de
+  `#o_wsale_cta_wrapper` en `website_sale.product` (la caja nativa se oculta por CSS solo en
+  productos de 1 variante; con variantes sigue la nativa), referencia/código de barras bajo el
+  título, y secciones "De la misma línea" (`product._dk_siblings`: misma "línea" = palabras del
+  nombre hasta la medida, vía `search_index`) y "Te puede interesar" (`_dk_suggestions`:
+  comprados juntos en `sale.order.line` → misma categoría → nuevos). Tarjeta reutilizable
+  `dk_card`. Pendientes: etapa 3 carrito, etapa 4 secciones Nuevos/Rebajas/Te puede interesar
+  en tienda e inicio, mini carrito del encabezado, menú "Pedido rápido". "Rebaja" es solo precio tachado real
   (base_price > price_reduce); los precios de las maquetas con rebaja eran de ejemplo.
   Andrés autorizó (2026-10-05) subir a master automáticamente cada cambio (avance directo).
   LECCIÓN de contraste: el tema (vista 3329, bloque "Lectura clara") fuerza texto NEGRO con

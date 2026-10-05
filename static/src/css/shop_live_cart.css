@@ -202,3 +202,196 @@
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
+
+/* ================= Etapa 2: ficha de producto ================= */
+
+/* La caja nativa (cantidad + "Añadir al carrito") se oculta cuando existe la nuestra. */
+.dk-pbox ~ #o_wsale_cta_wrapper {
+    display: none !important;
+}
+.dk-meta {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 10px;
+    margin: 6px 0 4px;
+    font-size: 13px;
+    color: #2B3445;
+}
+.dk-meta b {
+    color: #0A0A0A;
+}
+.dk-badge-inline,
+.dk-badge-inline:hover {
+    background: #0B1F3A !important;
+    color: #fff !important;
+    font-size: 11px;
+    font-weight: 800;
+    border-radius: 999px;
+    padding: 4px 10px;
+}
+.dk-pbox {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    margin: 18px 0;
+    padding: 20px;
+    border: 2px solid #0B1F3A;
+    border-radius: 8px;
+    background: #fff;
+}
+.dk-pbox-title {
+    font-size: 14px;
+    font-weight: 800;
+}
+.dk-buy-lg {
+    margin-top: 0;
+}
+.dk-buy-lg .dk-add {
+    height: 52px;
+    font-size: 16px;
+}
+.dk-buy-lg .dk-live {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 10px 16px;
+}
+.dk-buy-lg[data-state="out"] .dk-live {
+    display: none;
+}
+.dk-buy-lg .dk-stp {
+    width: 200px;
+    height: 52px;
+}
+.dk-buy-lg .dk-stp input.dk-q {
+    font-size: 20px;
+}
+.dk-buy-lg .dk-in {
+    margin-top: 0;
+    font-size: 14px;
+}
+.dk-presets {
+    display: flex;
+    gap: 8px;
+    margin-top: 12px;
+}
+.dk-pre {
+    flex: 1;
+    height: 44px;
+    border: 1px solid #B8C0CE;
+    border-radius: 6px;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 700;
+    cursor: pointer;
+}
+.dk-pre:hover {
+    border-color: #0B1F3A;
+}
+.dk-pre.act {
+    border: 2px solid #0B1F3A;
+    background: #EAF0F8;
+}
+.dk-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    padding-top: 14px;
+    border-top: 1px solid #E3E6EB;
+}
+.dk-actions .btn {
+    flex: 1 1 160px;
+    height: 48px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 800;
+}
+
+/* ---- Secciones de sugerencias y tarjetas ---- */
+.dk-sections {
+    padding-top: 8px;
+    padding-bottom: 40px;
+}
+.dk-sec {
+    margin-top: 36px;
+}
+.dk-sec-head h2 {
+    margin: 0 0 14px;
+    font-size: 22px;
+    font-weight: 800;
+}
+.dk-grid {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 16px;
+}
+@media (max-width: 991.98px) {
+    .dk-grid {
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+    }
+}
+@media (max-width: 575.98px) {
+    .dk-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 10px;
+    }
+    .dk-sec-head h2 {
+        font-size: 19px;
+    }
+}
+.dk-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    border: 1px solid #E3E6EB;
+    border-radius: 8px;
+    background: #fff;
+}
+.dk-card:has(.dk-buy[data-state="in"]) {
+    outline: 2px solid #0B1F3A;
+    outline-offset: -2px;
+}
+.dk-card-img {
+    position: relative;
+    display: block;
+    margin: 10px 10px 0;
+    aspect-ratio: 1 / 1;
+    background: #fff;
+}
+.dk-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
+}
+.dk-card-body {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    gap: 8px;
+    padding: 12px 14px 14px;
+}
+.dk-card-name {
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 1.3;
+    color: #0A0A0A;
+    overflow-wrap: anywhere;
+    text-decoration: none;
+}
+.dk-card-price {
+    margin-top: auto;
+    font-size: 20px;
+    font-weight: 800;
+}
+.dk-card-price del {
+    margin-left: 6px;
+    font-size: 13px;
+    font-weight: 500;
+}
+.dk-card .dk-buy {
+    margin-top: 2px;
+}

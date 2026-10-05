@@ -39,6 +39,9 @@
     function render(box, qty, total) {
         var input = box.querySelector('.dk-q');
         box.dataset.state = qty > 0 ? 'in' : 'out';
+        all('.dk-pre', box).forEach(function (b) {
+            b.classList.toggle('act', qty > 0 && parseInt(b.dataset.qty, 10) === qty);
+        });
         if (qty > 0) {
             if (document.activeElement !== input) {
                 input.value = String(qty);
@@ -70,6 +73,9 @@
         all('.my_cart_quantity').forEach(function (el) {
             el.textContent = String(d.cart_quantity);
             el.classList.toggle('d-none', !d.cart_quantity);
+        });
+        all('.dk-actions').forEach(function (el) {
+            el.classList.toggle('d-none', !d.cart_lines);
         });
         var pill = document.getElementById('dk-pill');
         if (pill) {
@@ -111,6 +117,11 @@
             }
             boxes.forEach(function (b) { render(b, d.qty, d.line_total); });
             updateCart(d);
+            if (qty > 0 && d.qty < qty) {
+                toast(d.qty > 0
+                    ? 'Solo hay ' + d.qty + ' disponibles de este producto.'
+                    : 'Este producto no tiene disponibilidad por ahora.');
+            }
         }).catch(function (err) {
             if (mine !== seq[pid]) {
                 return;
@@ -138,16 +149,38 @@
         timers[pid] = setTimeout(function () { send(pid, qty); }, DEBOUNCE_MS);
     }
 
+    function initPresets() {
+        all('.dk-buy[data-state="in"]').forEach(function (b) {
+            var q = parseInt(b.dataset.qty, 10) || 0;
+            all('.dk-pre', b).forEach(function (p) {
+                p.classList.toggle('act', parseInt(p.dataset.qty, 10) === q);
+            });
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initPresets);
+    } else {
+        initPresets();
+    }
+
     document.addEventListener('click', function (ev) {
-        var btn = ev.target.closest ? ev.target.closest('.dk-add, .dk-minus, .dk-plus') : null;
+        var btn = ev.target.closest ? ev.target.closest('.dk-add, .dk-minus, .dk-plus, .dk-pre') : null;
         var box = btn && btn.closest('.dk-buy');
         if (!box) {
             return;
         }
         ev.preventDefault();
         var cur = currentQty(box);
-        var next = btn.classList.contains('dk-add') ? 1
-            : btn.classList.contains('dk-plus') ? cur + 1 : Math.max(0, cur - 1);
+        var next;
+        if (btn.classList.contains('dk-pre')) {
+            next = parseInt(btn.dataset.qty, 10) || 1;
+        } else if (btn.classList.contains('dk-add')) {
+            next = 1;
+        } else if (btn.classList.contains('dk-plus')) {
+            next = cur + 1;
+        } else {
+            next = Math.max(0, cur - 1);
+        }
         change(box, next);
     });
 

@@ -53,4 +53,121 @@
             </t>
         </xpath>
     </template>
+
+    <!-- ================= Etapa 2: ficha de producto ================= -->
+
+    <!-- Tarjeta reutilizable (secciones de sugerencias): foto, nombre, precio y cantidad viva. -->
+    <template id="dk_card" name="Tarjeta de producto con cantidad viva">
+        <t t-set="dk_info" t-value="p._get_combination_info(only_template=True)"/>
+        <t t-set="dk_variant" t-value="p._get_first_possible_variant_id()"/>
+        <t t-set="dk_can_add" t-value="dk_variant and p.product_variant_count == 1 and p._website_show_quick_add() and (dk_info['price'] or not website.prevent_zero_price_sale)"/>
+        <t t-set="dk_order" t-value="website.sale_get_order()"/>
+        <t t-set="dk_line" t-value="dk_order.website_order_line.filtered_domain([('product_id', '=', dk_variant)])[:1] if dk_variant else False"/>
+        <t t-set="dk_qty" t-value="int(dk_line.product_uom_qty) if dk_line else 0"/>
+        <article class="dk-card">
+            <a class="dk-card-img" t-att-href="p.website_url">
+                <img t-att-src="website.image_url(p, 'image_512')" t-att-alt="p.name" loading="lazy"/>
+                <span t-if="p.dk_is_new" class="badge dk-badge dk-badge-new">Nuevo</span>
+                <span t-if="dk_info.get('has_discounted_price')" class="badge dk-badge dk-badge-sale">Rebaja</span>
+            </a>
+            <div class="dk-card-body">
+                <a class="dk-card-name" t-att-href="p.website_url" t-out="p.name.capitalize()"/>
+                <div class="dk-card-price">
+                    <span t-out="dk_info['price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
+                    <del t-if="dk_info.get('has_discounted_price')"><span t-out="dk_info['list_price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/></del>
+                </div>
+                <t t-if="dk_can_add">
+                    <div class="dk-buy" t-att-data-product-id="dk_variant" t-att-data-qty="dk_qty" t-att-data-state="'in' if dk_qty else 'out'">
+                        <button type="button" class="dk-add btn btn-primary">Agregar</button>
+                        <div class="dk-live">
+                            <div class="dk-stp">
+                                <button type="button" class="dk-minus" aria-label="Menos">&#8722;</button>
+                                <input type="text" inputmode="numeric" class="dk-q" t-att-value="dk_qty or 1" aria-label="Cantidad"/>
+                                <button type="button" class="dk-plus" aria-label="Más">+</button>
+                            </div>
+                            <div class="dk-in">
+                                <i class="fa fa-check" aria-hidden="true"/> En tu carrito<span class="dk-in-total" t-if="dk_line"> · <span t-out="dk_line._get_cart_display_price()" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/></span>
+                            </div>
+                        </div>
+                    </div>
+                </t>
+                <t t-else="">
+                    <a t-att-href="p.website_url" class="dk-options btn btn-outline-primary">Ver opciones</a>
+                </t>
+            </div>
+        </article>
+    </template>
+
+    <!-- Secciones debajo de la ficha: misma línea + "Te puede interesar". -->
+    <template id="dk_product_sections" name="Ficha: secciones de sugerencias">
+        <t t-set="dk_sibs" t-value="product._dk_siblings(8)"/>
+        <t t-set="dk_sugs" t-value="product._dk_suggestions(8, dk_sibs)"/>
+        <div class="dk-sections container">
+            <section t-if="dk_sibs" class="dk-sec">
+                <div class="dk-sec-head"><h2>De la misma línea</h2></div>
+                <div class="dk-grid">
+                    <t t-foreach="dk_sibs" t-as="sp">
+                        <t t-call="stock_picking_sale_buttons.dk_card"><t t-set="p" t-value="sp"/></t>
+                    </t>
+                </div>
+            </section>
+            <section t-if="dk_sugs" class="dk-sec">
+                <div class="dk-sec-head"><h2>Te puede interesar</h2></div>
+                <div class="dk-grid">
+                    <t t-foreach="dk_sugs" t-as="sg">
+                        <t t-call="stock_picking_sale_buttons.dk_card"><t t-set="p" t-value="sg"/></t>
+                    </t>
+                </div>
+            </section>
+        </div>
+    </template>
+
+    <!-- Ficha: cantidad viva (queda en el carrito al momento) montada ANTES de la caja nativa,
+         que se oculta por CSS cuando existe (.dk-pbox ~ #o_wsale_cta_wrapper). Solo productos de
+         una sola variante; con variantes se sigue usando la caja nativa. -->
+    <template id="product_live_buybox" inherit_id="website_sale.product" name="Ficha: cantidad viva y sugerencias">
+        <xpath expr="//h1[@itemprop='name']" position="after">
+            <div class="dk-meta">
+                <span t-if="product.dk_is_new" class="badge dk-badge-inline">Nuevo</span>
+                <span>Referencia <b t-out="product.name"/></span>
+                <span t-if="product_variant.barcode">· Código de barras <b t-out="product_variant.barcode"/></span>
+            </div>
+        </xpath>
+        <xpath expr="//div[@id='o_wsale_cta_wrapper']" position="before">
+            <t t-if="product._is_add_to_cart_possible() and product.product_variant_count == 1 and product_variant and not combination_info['prevent_zero_price_sale']">
+                <t t-set="dk_order" t-value="website.sale_get_order()"/>
+                <t t-set="dk_line" t-value="dk_order.website_order_line.filtered_domain([('product_id', '=', product_variant.id)])[:1]"/>
+                <t t-set="dk_qty" t-value="int(dk_line.product_uom_qty) if dk_line else 0"/>
+                <div class="dk-pbox">
+                    <div class="dk-pbox-title">Cantidad</div>
+                    <div class="dk-buy dk-buy-lg" t-att-data-product-id="product_variant.id" t-att-data-qty="dk_qty" t-att-data-state="'in' if dk_qty else 'out'">
+                        <button type="button" class="dk-add btn btn-primary btn-lg">Agregar al carrito</button>
+                        <div class="dk-live">
+                            <div class="dk-stp">
+                                <button type="button" class="dk-minus" aria-label="Menos">&#8722;</button>
+                                <input type="text" inputmode="numeric" class="dk-q" t-att-value="dk_qty or 1" aria-label="Cantidad"/>
+                                <button type="button" class="dk-plus" aria-label="Más">+</button>
+                            </div>
+                            <div class="dk-in">
+                                <i class="fa fa-check" aria-hidden="true"/> En tu carrito<span class="dk-in-total" t-if="dk_line"> · <span t-out="dk_line._get_cart_display_price()" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/></span>
+                            </div>
+                        </div>
+                        <div class="dk-presets">
+                            <button type="button" class="dk-pre" data-qty="12">12</button>
+                            <button type="button" class="dk-pre" data-qty="24">24</button>
+                            <button type="button" class="dk-pre" data-qty="48">48</button>
+                            <button type="button" class="dk-pre" data-qty="96">96</button>
+                        </div>
+                    </div>
+                    <div t-attf-class="dk-actions #{'' if dk_order.website_order_line else 'd-none'}">
+                        <a href="/shop/cart" class="btn btn-outline-primary">Ver carrito</a>
+                        <a href="/shop/checkout?try_skip_step=true" class="btn btn-primary">Finalizar compra</a>
+                    </div>
+                </div>
+            </t>
+        </xpath>
+        <xpath expr="//div[@id='product_full_description']" position="after">
+            <t t-call="stock_picking_sale_buttons.dk_product_sections"/>
+        </xpath>
+    </template>
 </odoo>
