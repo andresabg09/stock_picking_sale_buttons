@@ -130,6 +130,13 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   Revertir buscador: desactivar 3331. Revertir inicio: restaurar
   `scripts/tienda_backup/PREVIOUS_inicio_view3328_con_buscador_arriba.xml` en la vista 3328.
   Ojo: el buscador del header sigue siendo el estándar de Odoo (la tolerancia es Fase 3).
+  2026-10-05 (después): Por pedido de Andrés se QUITARON las promociones visibles del inicio
+  (banners laterales + sección "Promociones"; ya no se lee `loyalty.program` ahí). El banner
+  ahora es un carrusel de 5 slides (Nuevos productos, Shampús, Tintes NNP, Tratamientos,
+  Corporales; fotos reales por categoría) que avanza solo cada 5 s, con flechas (escritorio),
+  puntos, deslizable con el dedo; se pausa al pasar el mouse/tocar y respeta
+  `prefers-reduced-motion`. JS inline al final de la vista 3328. Revertir: restaurar
+  `scripts/tienda_backup/PREVIOUS_inicio_view3328_con_promociones.xml` en la vista 3328.
 - 2026-10-04: Conexión MCP a Odoo (conector "Odoo JSON-RPC" en AnythingMCP) — permite
   consultar campos, vistas y datos sin pasar por SSH (ver "Acceso a Odoo por MCP"). Causa
   del `Access Denied` inicial: faltaba la variable `ODOO_API_KEY` en Environment

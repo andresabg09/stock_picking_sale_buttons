@@ -1,0 +1,161 @@
+<t name="Inicio" t-name="website.inicio"><t t-call="website.layout"><div id="wrap" class="oe_structure oe_empty"><div id="dk-home">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap");
+#dk-home{font-family:'Manrope',system-ui,sans-serif;color:#0A0A0A;background:#F4F5F7;padding:20px 0 64px}
+#dk-home *{box-sizing:border-box}
+#dk-home .dk-wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:40px}
+#dk-home h1,#dk-home h2{font-family:inherit;margin:0;color:#0A0A0A;letter-spacing:-.01em}
+#dk-home h2{font-size:24px;font-weight:800}
+#dk-home a{text-decoration:none}
+#dk-home .dk-hero{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,1fr);gap:16px}
+#dk-home .dk-banner-main{background:#0B1F3A;color:#fff;border-radius:10px;padding:36px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;min-height:300px;overflow:hidden}
+#dk-home .dk-bcopy{flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:12px}
+#dk-home .dk-eyebrow{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#B8C7E0}
+#dk-home .dk-banner-main h1{color:#fff;font-size:clamp(30px,5vw,46px);font-weight:800;line-height:1.05}
+#dk-home .dk-banner-main p{margin:0;font-size:16px;line-height:1.5;color:#D5DEEE;max-width:360px}
+#dk-home .dk-cta{align-self:flex-start;margin-top:6px;padding:13px 24px;border-radius:6px;background:#fff;color:#0B1F3A;font-weight:800;font-size:14px}
+#dk-home .dk-bimgs{flex:1 1 260px;min-width:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#dk-home .dk-bimg{background:#fff;border-radius:8px;aspect-ratio:3/4;padding:8px;display:flex;align-items:center;justify-content:center}
+#dk-home .dk-bimg img{width:100%;height:100%;object-fit:contain;display:block}
+#dk-home .dk-hero-side{display:grid;grid-template-rows:1fr 1fr;gap:16px}
+#dk-home .dk-promo{background:#fff;border:1px solid #E3E6EB;border-radius:10px;display:flex;align-items:center;gap:16px;padding:16px;color:#0A0A0A;min-width:0}
+#dk-home .dk-promo-img{flex:0 0 96px;height:96px;background:#fff;border:1px solid #E3E6EB;border-radius:8px;padding:6px;display:flex;align-items:center;justify-content:center}
+#dk-home .dk-promo-img img{width:100%;height:100%;object-fit:contain;display:block}
+#dk-home .dk-promo-body{display:flex;flex-direction:column;gap:3px;min-width:0}
+#dk-home .dk-tag{font-size:11px;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#5A6577}
+#dk-home .dk-big{font-size:30px;font-weight:800;line-height:1;color:#0B1F3A}
+#dk-home .dk-pname{font-size:15px;font-weight:700;overflow-wrap:anywhere}
+#dk-home .dk-sub{font-size:12px;color:#5A6577;overflow-wrap:anywhere}
+#dk-home .dk-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:16px}
+#dk-home .dk-head a{font-weight:700;font-size:14px;color:#0B1F3A}
+#dk-home .dk-snap{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px;-webkit-overflow-scrolling:touch}
+#dk-home .dk-snap>*{scroll-snap-align:start}
+#dk-home .dk-snap .dk-promo{flex:0 0 clamp(270px,80vw,340px)}
+#dk-home .dk-snap .dk-card{flex:0 0 clamp(220px,64vw,250px)}
+#dk-home .dk-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+#dk-home .dk-cat{background:#fff;border:1px solid #E3E6EB;border-radius:8px;overflow:hidden;color:#0A0A0A;display:flex;flex-direction:column}
+#dk-home .dk-cat i{display:block;height:120px;background:#EDF0F5;padding:10px}
+#dk-home .dk-cat i img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
+#dk-home .dk-cat span{padding:12px 14px;font-size:14px;font-weight:700;overflow-wrap:anywhere}
+#dk-home .dk-card{background:#fff;border:1px solid #E3E6EB;border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+#dk-home .dk-img{display:block;height:180px;background:#fff;padding:12px}
+#dk-home .dk-img img{width:100%;height:100%;object-fit:contain;display:block}
+#dk-home .dk-body{padding:14px;display:flex;flex-direction:column;gap:8px;flex:1}
+#dk-home .dk-name{font-size:15px;font-weight:700;line-height:1.3;color:#0A0A0A;overflow-wrap:anywhere}
+#dk-home .dk-price{margin-top:auto;font-size:22px;font-weight:800}
+#dk-home .dk-price small{font-size:13px;font-weight:500;color:#5A6577}
+#dk-home .dk-add{display:flex;gap:8px;margin:0}
+#dk-home .dk-qty{width:64px;height:44px;border:1px solid #B8C0CE;border-radius:6px;text-align:center;font:inherit;font-weight:700;background:#fff;color:#0A0A0A}
+#dk-home .dk-btn{flex:1;height:44px;border:0;border-radius:6px;background:#0B1F3A;color:#fff;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+#dk-home .dk-btn:hover{background:#000}
+#dk-home .dk-brands{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+#dk-home .dk-brand{height:76px;background:#fff;border:1px solid #E3E6EB;border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 8px;font-weight:800;font-size:16px;letter-spacing:.06em;color:#0B1F3A;text-transform:uppercase;overflow-wrap:anywhere}
+#dk-home .dk-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+#dk-home .dk-link{background:#fff;border:1px solid #E3E6EB;border-radius:8px;padding:22px;display:flex;flex-direction:column;gap:6px;color:#0A0A0A}
+#dk-home .dk-link b{font-size:18px}
+#dk-home .dk-link span{font-size:14px;color:#5A6577}
+@media(max-width:900px){#dk-home .dk-hero{grid-template-columns:1fr}#dk-home .dk-hero-side{grid-template-rows:none;grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}#dk-home .dk-banner-main{padding:26px;min-height:0}}
+</style>
+<t t-set="dk_new" t-value="request.env['product.template'].search([('is_published','=',True),('sale_ok','=',True),('image_128','!=',False),('public_categ_ids','!=',False)], limit=12, order='id desc')"/>
+<t t-set="dk_progs" t-value="request.env['loyalty.program'].sudo().search([('active','=',True),('program_type','=','buy_x_get_y')], order='id')"/>
+<div class="dk-wrap">
+
+<section class="dk-hero">
+<a class="dk-banner-main" href="/shop?order=create_date+desc">
+<div class="dk-bcopy">
+<span class="dk-eyebrow">Recién llegados</span>
+<h1>Nuevos productos</h1>
+<p>Lo último que entró a nuestro catálogo, listo para pedir.</p>
+<span class="dk-cta">Ver novedades</span>
+</div>
+<div class="dk-bimgs">
+<t t-foreach="dk_new[:3]" t-as="p">
+<span class="dk-bimg"><img t-att-src="website.image_url(p, 'image_256')" t-att-alt="p.name" loading="lazy"/></span>
+</t>
+</div>
+</a>
+<div class="dk-hero-side">
+<t t-foreach="dk_progs[:2]" t-as="pg">
+<t t-set="dk_pn" t-value="pg.name.split(' ', 1)"/>
+<t t-set="rw" t-value="pg.reward_ids[:1].reward_product_id.product_tmpl_id"/>
+<a class="dk-promo" t-att-href="rw.website_url if rw else '/shop'">
+<span class="dk-promo-img"><img t-if="rw" t-att-src="website.image_url(rw, 'image_256')" alt="" loading="lazy"/></span>
+<span class="dk-promo-body">
+<span class="dk-tag">Compra y llévate</span>
+<span class="dk-big" t-out="dk_pn[0]"/>
+<span class="dk-pname" t-out="(dk_pn[1] if len(dk_pn) &gt; 1 else '').capitalize()"/>
+</span>
+</a>
+</t>
+</div>
+</section>
+
+<section>
+<div class="dk-head"><h2>Promociones</h2><a href="/shop">Ver la tienda</a></div>
+<div class="dk-snap">
+<t t-foreach="dk_progs" t-as="pg">
+<t t-set="dk_pn" t-value="pg.name.split(' ', 1)"/>
+<t t-set="rw" t-value="pg.reward_ids[:1].reward_product_id.product_tmpl_id"/>
+<a class="dk-promo" t-att-href="rw.website_url if rw else '/shop'">
+<span class="dk-promo-img"><img t-if="rw" t-att-src="website.image_url(rw, 'image_256')" alt="" loading="lazy"/></span>
+<span class="dk-promo-body">
+<span class="dk-tag">Compra y llévate</span>
+<span class="dk-big" t-out="dk_pn[0]"/>
+<span class="dk-pname" t-out="(dk_pn[1] if len(dk_pn) &gt; 1 else '').capitalize()"/>
+<span class="dk-sub" t-if="rw" t-out="'Gratis: ' + rw.name.capitalize()"/>
+</span>
+</a>
+</t>
+</div>
+</section>
+
+<section>
+<div class="dk-head"><h2>Nuevos productos</h2><a href="/shop?order=create_date+desc">Ver todos</a></div>
+<div class="dk-snap">
+<t t-foreach="dk_new" t-as="p">
+<t t-set="dk_info" t-value="p._get_combination_info(only_template=True)"/>
+<article class="dk-card">
+<a class="dk-img" t-att-href="p.website_url"><img t-att-src="website.image_url(p, 'image_512')" t-att-alt="p.name" loading="lazy"/></a>
+<div class="dk-body">
+<a class="dk-name" t-att-href="p.website_url" t-att-title="p.name" t-out="p.name.capitalize()"/>
+<div class="dk-price"><span t-out="'$%.2f' % dk_info['price']"/> <small>c/u</small></div>
+<form class="dk-add" action="/shop/cart/update" method="post">
+<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+<input type="hidden" name="product_id" t-att-value="p.product_variant_id.id"/>
+<input type="hidden" name="product_template_id" t-att-value="p.id"/>
+<input class="dk-qty" type="number" name="add_qty" value="1" min="1" aria-label="Cantidad"/>
+<button class="dk-btn" type="submit">Agregar</button>
+</form>
+</div>
+</article>
+</t>
+</div>
+</section>
+
+<section>
+<div class="dk-head"><h2>Categorías</h2><a href="/shop">Ver todo el catálogo</a></div>
+<div class="dk-cats">
+<t t-set="dk_cats" t-value="[('Shampús',322),('Acondicionadores',269),('Tratamientos',330),('Corporales',272),('Faciales',274),('Perfumes económicos',310),('Nevada',276),('Skala',305),('Tintes NNP',326),('Salon Line',277),('Wipes',331),('Productos para bb',270)]"/>
+<t t-foreach="dk_cats" t-as="c">
+<t t-set="dk_cp" t-value="request.env['product.template'].search([('public_categ_ids','child_of',c[1]),('is_published','=',True),('sale_ok','=',True),('image_128','!=',False)], limit=1)"/>
+<a class="dk-cat" t-attf-href="/shop/category/#{c[1]}"><i><img t-if="dk_cp" t-att-src="website.image_url(dk_cp, 'image_256')" alt="" loading="lazy"/></i><span t-out="c[0]"/></a>
+</t>
+</div>
+</section>
+
+<section>
+<div class="dk-head"><h2>Marcas</h2></div>
+<div class="dk-brands">
+<t t-foreach="['Nevada','Skala','Salon Line','NNP','X.Care','Eleve']" t-as="m">
+<a class="dk-brand" t-attf-href="/shop?search=#{m}" t-out="m"/>
+</t>
+</div>
+</section>
+
+<section class="dk-links">
+<a class="dk-link" href="/my/orders"><b>Mis pedidos</b><span>Revisa y repite tus pedidos anteriores.</span></a>
+<a class="dk-link" href="https://wa.me/50768337354" target="_blank"><b>Atención por WhatsApp</b><span>Despachos de lunes a sábado, de 8:00 a. m. a 5:00 p. m.</span></a>
+</section>
+
+</div>
+</div></div></t></t>
