@@ -1,0 +1,8 @@
+<data>
+<xpath expr="." position="inside">
+<form class="dk-hsearch" action="/shop" method="get" role="search">
+<input type="search" name="search" class="dk-hsearch-input" placeholder="Buscar productos…" aria-label="Buscar productos" autocomplete="off"/>
+<button type="submit" class="dk-hsearch-btn" aria-label="Buscar"><i class="fa fa-search"/></button>
+</form>
+</xpath>
+</data>

@@ -1,0 +1,9 @@
+<data>
+<xpath expr="//div[@id='footer']" position="inside">
+<div class="dk-footer"><div class="container">
+<div><div class="dk-fb">SHALOM PANAMÁ</div><p style="margin-top:8px;max-width:280px">Distribuidor de productos Nevada a nivel nacional. Calidad, precio y servicio profesional.</p></div>
+<div><h6>Tienda</h6><ul><li><a href="/shop">Catálogo</a></li><li><a href="/my/orders">Mis pedidos</a></li><li><a href="/contactus">Contáctanos</a></li></ul></div>
+<div><h6>Contacto</h6><ul><li><a href="mailto:ventas@shalompma.com">ventas@shalompma.com</a></li><li><a href="https://wa.me/50768337354" target="_blank">WhatsApp +507 6833-7354</a></li><li>Ciudad de Panamá, Rep. de Panamá</li></ul></div>
+</div></div>
+</xpath>
+</data>
