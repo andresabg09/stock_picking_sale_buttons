@@ -279,7 +279,7 @@
 }
 /* Texto de garantía/envío en inglés y botones de compartir del tema: fuera de la ficha */
 .o_wsale_product_page #o_product_terms_and_share {
-    display: none;
+    display: none !important; /* el contenedor trae .d-flex (!important) */
 }
 .dk-note {
     font-size: 12px;
