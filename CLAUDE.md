@@ -137,6 +137,25 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   puntos, deslizable con el dedo; se pausa al pasar el mouse/tocar y respeta
   `prefers-reduced-motion`. JS inline al final de la vista 3328. Revertir: restaurar
   `scripts/tienda_backup/PREVIOUS_inicio_view3328_con_promociones.xml` en la vista 3328.
+- 2026-10-05: Fase 3 de la tienda (código en el módulo, versión 18.0.2.1.0, nueva dependencia
+  `website_sale`) — buscador tolerante + Pedido rápido. Verificado por SSH el código real de
+  Odoo (regla 5): `website._search_with_fuzzy` → `_search_exact` → `product.template._search_fetch`;
+  `_search_build_domain` acepta `search_extra(env, término)` por palabra (se suma con OR).
+  Piezas: modelo `shop.search.synonym` (sinónimos editables: Ventas → Configuración →
+  "Sinónimos de búsqueda (tienda)", datos iniciales `noupdate`: SHP/TRAT/ACD/PRF/AMB/DEO/COS/
+  EST/BELL); campo almacenado `product.template.search_index` (nombre sin tildes, nombre pegado
+  "xcare", categorías, código de barras principal + `barcode_ids`); override de
+  `_search_get_detail` (agrega `search_extra`, NO toca `search_fields` para no ensuciar el
+  corrector) y de `website._search_with_fuzzy` (busca primero lo escrito con sinónimos y solo si
+  no hay nada deja actuar al corrector de Odoo). Página `/pedido-rapido` (solo con sesión;
+  `controllers/quick_order.py`): interpreta líneas "código x cantidad" / "nombre cantidad",
+  muestra qué entendió y agrega al carrito con la misma llamada que `/shop/cart/update`.
+  Ningún producto tiene `default_code`; los códigos útiles son `barcode` y `barcode_ids`.
+  Pendiente tras el deploy: autocompletado en el buscador del encabezado (vista 3331, usar el
+  formulario nativo `website.website_search_box_input`), enlace "Pedido rápido" en el menú
+  (`website.menu`), probar "Agregar" del inicio (nunca se probó de punta a punta).
+  Rediseño de catálogo/ficha/carrito: 3 opciones en maqueta (artifact "Tienda: Catálogo,
+  Producto y Carrito"), esperando elección de Andrés; nada tocado en la tienda.
 - 2026-10-04: Conexión MCP a Odoo (conector "Odoo JSON-RPC" en AnythingMCP) — permite
   consultar campos, vistas y datos sin pasar por SSH (ver "Acceso a Odoo por MCP"). Causa
   del `Access Denied` inicial: faltaba la variable `ODOO_API_KEY` en Environment
