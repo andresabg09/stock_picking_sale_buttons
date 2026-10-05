@@ -120,6 +120,16 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   El form de login nace `d-none` y Odoo lo muestra por JS (en pruebas tarda ~8 s, es normal).
   Fase 3 pendiente = buscador tolerante a errores/abreviaturas + pedido rápido
   (requiere código aquí + deploy).
+  2026-10-05: Buscador en el encabezado + inicio estilo banners (pedido de Andrés, ref.
+  carbonestore.com), hecho por MCP: vista nueva `ir.ui.view` 3331 (`website.dianke_header_search`,
+  hereda 1056 `placeholder_header_brand`) = barra "Buscar productos…" junto al logo (GET /shop);
+  la lupa vieja, el teléfono y el botón CTA del header se ocultan por CSS en la vista 3329
+  (que además lleva la barra superior con teléfono/WhatsApp). Vista 3328 (`/inicio`) ahora abre
+  con banner "Nuevos productos" + 2 promos, carrusel Promociones (de `loyalty.program`
+  buy_x_get_y activos), carrusel Nuevos productos (12), categorías con foto y marcas.
+  Revertir buscador: desactivar 3331. Revertir inicio: restaurar
+  `scripts/tienda_backup/PREVIOUS_inicio_view3328_con_buscador_arriba.xml` en la vista 3328.
+  Ojo: el buscador del header sigue siendo el estándar de Odoo (la tolerancia es Fase 3).
 - 2026-10-04: Conexión MCP a Odoo (conector "Odoo JSON-RPC" en AnythingMCP) — permite
   consultar campos, vistas y datos sin pasar por SSH (ver "Acceso a Odoo por MCP"). Causa
   del `Access Denied` inicial: faltaba la variable `ODOO_API_KEY` en Environment
