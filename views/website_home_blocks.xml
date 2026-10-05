@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Bloques reutilizables del INICIO (la vista "Inicio" website.inicio los llama con t-call).
+         Categorías del inicio: las 8 que más se venden (últimos 90 días), automático. Si aún no
+         hay ventas, las primeras 8 en el orden normal. -->
+    <template id="dk_home_categories" name="Inicio: categorías más vendidas">
+        <t t-set="dk_roots" t-value="request.env['product.public.category'].search([('parent_id', '=', False)] + website.website_domain(), order='sequence, name')"/>
+        <t t-set="dk_top" t-value="request.env['product.public.category']._dk_top_categories(8) &amp; dk_roots"/>
+        <t t-set="dk_top" t-value="dk_top or dk_roots[:8]"/>
+        <div class="dk-cats">
+            <t t-foreach="dk_top" t-as="c">
+                <t t-set="dk_cp" t-value="request.env['product.template'].search([('public_categ_ids', 'child_of', c.id), ('is_published', '=', True), ('sale_ok', '=', True), ('image_128', '!=', False)], limit=1)"/>
+                <a class="dk-cat" t-attf-href="/shop/category/#{c.id}"><i><img t-if="dk_cp" t-att-src="website.image_url(dk_cp, 'image_256')" alt="" loading="lazy"/></i><span t-out="(c.name or '').strip()"/></a>
+            </t>
+        </div>
+    </template>
+</odoo>

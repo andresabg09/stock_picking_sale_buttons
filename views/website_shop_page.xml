@@ -13,6 +13,9 @@
             <div id="wrap" class="js_sale o_wsale_products_page dk-shop">
                 <div class="oe_structure oe_empty oe_structure_not_nearest" id="oe_structure_website_sale_products_1"/>
                 <t t-set="dk_cats" t-value="request.env['product.public.category'].search([('parent_id', '=', False)] + website.website_domain(), order='sequence, name')"/>
+                <t t-set="dk_top" t-value="request.env['product.public.category']._dk_top_categories(8) &amp; dk_cats"/>
+                <t t-set="dk_top" t-value="dk_top or dk_cats[:8]"/>
+                <t t-set="dk_rest" t-value="dk_cats - dk_top"/>
                 <t t-set="dk_page" t-value="pager['page']['num'] if pager and pager.get('page') else 1"/>
                 <t t-set="dk_front" t-value="not search and not category and dk_page == 1 and not request.params.get('order')"/>
                 <t t-set="dk_total" t-value="search_count or len(products or [])"/>
@@ -26,13 +29,21 @@
 
                     <div class="dk-shop-layout">
                         <aside class="dk-side" aria-label="Categorías">
-                            <div class="dk-side-h">Categorías</div>
+                            <div class="dk-side-h">Más vendidas</div>
                             <div class="dk-side-list">
                                 <a href="/shop" t-attf-class="#{'' if category else 'act'}">Todos los productos</a>
-                                <t t-foreach="dk_cats" t-as="c">
-                                    <a t-att-href="'/shop/category/%s' % slug(c)" t-attf-class="#{'act' if category and category.id == c.id else ''}" t-out="c.name"/>
+                                <t t-foreach="dk_top" t-as="c">
+                                    <a t-att-href="'/shop/category/%s' % slug(c)" t-attf-class="#{'act' if category and category.id == c.id else ''}" t-out="(c.name or '').strip()"/>
                                 </t>
                             </div>
+                            <details t-if="dk_rest" class="dk-more" t-att-open="'open' if category and category in dk_rest else None">
+                                <summary>Más categorías (<t t-out="len(dk_rest)"/>)</summary>
+                                <div class="dk-side-list">
+                                    <t t-foreach="dk_rest" t-as="c">
+                                        <a t-att-href="'/shop/category/%s' % slug(c)" t-attf-class="#{'act' if category and category.id == c.id else ''}" t-out="(c.name or '').strip()"/>
+                                    </t>
+                                </div>
+                            </details>
                         </aside>
 
                         <div class="dk-main">
@@ -52,8 +63,8 @@
 
                             <nav class="dk-chips" aria-label="Categorías">
                                 <a href="/shop" t-attf-class="dk-chip #{'' if category else 'act'}">Todos</a>
-                                <t t-foreach="dk_cats" t-as="c">
-                                    <a t-att-href="'/shop/category/%s' % slug(c)" t-attf-class="dk-chip #{'act' if category and category.id == c.id else ''}" t-out="c.name"/>
+                                <t t-foreach="dk_top | dk_rest" t-as="c">
+                                    <a t-att-href="'/shop/category/%s' % slug(c)" t-attf-class="dk-chip #{'act' if category and category.id == c.id else ''}" t-out="(c.name or '').strip()"/>
                                 </t>
                             </nav>
 

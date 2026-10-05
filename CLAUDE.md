@@ -199,6 +199,15 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   menú nuevo "Pedido rápido" (id 9), pie (vista 3330) con "Tienda"/"Pedido rápido", parámetro
   `stock_picking_sale_buttons.new_days`=120 (id 65). Respaldos de 3330/3331 en `scripts/tienda_backup/`.
   "Nuevos en la tienda" no sale porque los productos recientes no tienen categoría web.
+- 2026-10-06 (noche): Categorías por ventas + banner de servicio (v18.0.2.6.0). `product.public.category
+  ._dk_top_categories(8, 90)` (models/product_public_category.py) = las 8 más vendidas (líneas de
+  pedido confirmado, 90 días, sin precio 0), automático. Tienda: barra lateral "Más vendidas" + "Más
+  categorías" plegable (chips del celular en el mismo orden). Inicio (vista 3328, escrita por MCP
+  con permiso): categorías vía `t-call stock_picking_sale_buttons.dk_home_categories` y banner con 3
+  mensajes de servicio (Pedido rápido / Despachos+WhatsApp / Repite tu pedido) en vez de repetir
+  productos. Respaldo de la vista anterior: `scripts/tienda_backup/PREVIOUS_inicio_view3328_carrusel_productos.xml`;
+  la nueva: `NEW_inicio_view3328_banner_servicio.xml`. Pendiente (datos, con permiso): corregir
+  nombres de categorías ("Tratmientos", "Wipes ", "pies"); agrupar en familias queda para después.
 - 2026-10-04: Conexión MCP a Odoo (conector "Odoo JSON-RPC" en AnythingMCP) — permite
   consultar campos, vistas y datos sin pasar por SSH (ver "Acceso a Odoo por MCP"). Causa
   del `Access Denied` inicial: faltaba la variable `ODOO_API_KEY` en Environment

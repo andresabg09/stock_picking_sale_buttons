@@ -12,3 +12,4 @@ from . import shop_search_synonym
 from . import product_template_search
 from . import website_search
 from . import product_template_shop
+from . import product_public_category

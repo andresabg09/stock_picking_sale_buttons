@@ -561,3 +561,51 @@ header#top .dk-hsearch .dk-hsearch-btn {
 #o_search_modal .o_searchbar_form {
     position: relative;
 }
+
+/* Barra lateral: "Más categorías" plegable */
+.dk-more {
+    border-top: 1px solid #E3E6EB;
+    padding-top: 10px;
+}
+.dk-more summary {
+    cursor: pointer;
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 800;
+    color: #0B1F3A;
+    list-style: none;
+}
+.dk-more summary::-webkit-details-marker {
+    display: none;
+}
+.dk-more summary::before {
+    content: "+ ";
+}
+.dk-more[open] summary::before {
+    content: "\2212  ";
+}
+.dk-more summary:hover {
+    background: #F4F5F7;
+}
+.dk-more .dk-side-list {
+    max-height: 36vh;
+    margin-top: 4px;
+}
+
+/* Banner del inicio con mensajes de servicio: ícono grande en vez de fotos de productos */
+#dk-home .dk-bicon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    grid-column: 1 / -1;
+    aspect-ratio: auto;
+    min-height: 180px;
+    border-radius: 12px;
+    background: #fff;
+    color: #0B1F3A;
+    font-size: 84px;
+}
+#dk-home .dk-bicon .fa {
+    color: #0B1F3A;
+}

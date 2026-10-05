@@ -1,0 +1,163 @@
+<t name="Inicio" t-name="website.inicio"><t t-call="website.layout"><div id="wrap" class="oe_structure oe_empty"><div id="dk-home">
+<style>
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap");
+#dk-home{font-family:'Manrope',system-ui,sans-serif;color:#0A0A0A;background:#F4F5F7;padding:20px 0 64px}
+#dk-home *{box-sizing:border-box}
+#dk-home .dk-wrap{max-width:1200px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:40px}
+#dk-home h1,#dk-home h2{font-family:inherit;margin:0;color:#0A0A0A;letter-spacing:-.01em}
+#dk-home h2{font-size:24px;font-weight:800}
+#dk-home a{text-decoration:none}
+#dk-home .dk-hero{position:relative}
+#dk-home .dk-slides{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;scrollbar-width:none;-ms-overflow-style:none;border-radius:10px;-webkit-overflow-scrolling:touch}
+#dk-home .dk-slides::-webkit-scrollbar{display:none}
+#dk-home .dk-banner-main{flex:0 0 100%;scroll-snap-align:start;scroll-snap-stop:always;background:#0B1F3A;color:#fff;padding:40px 72px 56px;display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:24px;min-height:340px}
+#dk-home .dk-nav{position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;border-radius:50%;border:0;background:#fff;color:#0B1F3A;font-size:26px;line-height:1;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;padding:0 0 3px;box-shadow:0 2px 8px rgba(0,0,0,.25)}
+#dk-home .dk-nav:hover{background:#E3E6EB}
+#dk-home .dk-prev{left:14px}
+#dk-home .dk-next{right:14px}
+#dk-home .dk-dots{position:absolute;left:0;right:0;bottom:14px;display:flex;justify-content:center;gap:6px}
+#dk-home .dk-dot{width:28px;height:28px;border:0;background:transparent;padding:0;cursor:pointer;display:flex;align-items:center;justify-content:center}
+#dk-home .dk-dot::before{content:"";width:10px;height:10px;border-radius:50%;background:rgba(255,255,255,.45);transition:all .25s}
+#dk-home .dk-dot.on::before{background:#fff;width:26px;border-radius:6px}
+@media(max-width:900px){#dk-home .dk-banner-main{padding:28px 24px 56px;min-height:0}#dk-home .dk-nav{display:none}}
+#dk-home .dk-bcopy{flex:1 1 240px;min-width:0;display:flex;flex-direction:column;gap:12px}
+#dk-home .dk-eyebrow{font-size:12px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:#B8C7E0}
+#dk-home .dk-banner-main h1{color:#fff;font-size:clamp(30px,5vw,46px);font-weight:800;line-height:1.05}
+#dk-home .dk-banner-main p{margin:0;font-size:16px;line-height:1.5;color:#D5DEEE;max-width:360px}
+#dk-home .dk-cta{align-self:flex-start;margin-top:6px;padding:13px 24px;border-radius:6px;background:#fff;color:#0B1F3A;font-weight:800;font-size:14px}
+#dk-home .dk-bimgs{flex:1 1 260px;min-width:0;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+#dk-home .dk-bimg{background:#fff;border-radius:8px;aspect-ratio:3/4;padding:8px;display:flex;align-items:center;justify-content:center}
+#dk-home .dk-bimg img{width:100%;height:100%;object-fit:contain;display:block}
+#dk-home .dk-head{display:flex;align-items:baseline;justify-content:space-between;gap:16px;margin-bottom:16px}
+#dk-home .dk-head a{font-weight:700;font-size:14px;color:#0B1F3A}
+#dk-home .dk-snap{display:flex;gap:16px;overflow-x:auto;scroll-snap-type:x mandatory;padding-bottom:10px;-webkit-overflow-scrolling:touch}
+#dk-home .dk-snap>*{scroll-snap-align:start}
+#dk-home .dk-snap .dk-card{flex:0 0 clamp(220px,64vw,250px)}
+#dk-home .dk-cats{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:12px}
+#dk-home .dk-cat{background:#fff;border:1px solid #E3E6EB;border-radius:8px;overflow:hidden;color:#0A0A0A;display:flex;flex-direction:column}
+#dk-home .dk-cat i{display:block;height:120px;background:#EDF0F5;padding:10px}
+#dk-home .dk-cat i img{width:100%;height:100%;object-fit:contain;display:block;background:#fff}
+#dk-home .dk-cat span{padding:12px 14px;font-size:14px;font-weight:700;overflow-wrap:anywhere}
+#dk-home .dk-card{background:#fff;border:1px solid #E3E6EB;border-radius:8px;overflow:hidden;display:flex;flex-direction:column}
+#dk-home .dk-img{display:block;height:180px;background:#fff;padding:12px}
+#dk-home .dk-img img{width:100%;height:100%;object-fit:contain;display:block}
+#dk-home .dk-body{padding:14px;display:flex;flex-direction:column;gap:8px;flex:1}
+#dk-home .dk-name{font-size:15px;font-weight:700;line-height:1.3;color:#0A0A0A;overflow-wrap:anywhere}
+#dk-home .dk-price{margin-top:auto;font-size:22px;font-weight:800}
+#dk-home .dk-price small{font-size:13px;font-weight:500;color:#5A6577}
+#dk-home .dk-add{display:flex;gap:8px;margin:0}
+#dk-home .dk-qty{width:64px;height:44px;border:1px solid #B8C0CE;border-radius:6px;text-align:center;font:inherit;font-weight:700;background:#fff;color:#0A0A0A}
+#dk-home .dk-btn{flex:1;height:44px;border:0;border-radius:6px;background:#0B1F3A;color:#fff;font:inherit;font-weight:700;font-size:14px;cursor:pointer}
+#dk-home .dk-btn:hover{background:#000}
+#dk-home .dk-brands{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:12px}
+#dk-home .dk-brand{height:76px;background:#fff;border:1px solid #E3E6EB;border-radius:8px;display:flex;align-items:center;justify-content:center;text-align:center;padding:0 8px;font-weight:800;font-size:16px;letter-spacing:.06em;color:#0B1F3A;text-transform:uppercase;overflow-wrap:anywhere}
+#dk-home .dk-links{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:16px}
+#dk-home .dk-link{background:#fff;border:1px solid #E3E6EB;border-radius:8px;padding:22px;display:flex;flex-direction:column;gap:6px;color:#0A0A0A}
+#dk-home .dk-link b{font-size:18px}
+#dk-home .dk-link span{font-size:14px;color:#5A6577}
+</style>
+<t t-set="dk_new" t-value="request.env['product.template'].search([('is_published','=',True),('sale_ok','=',True),('image_128','!=',False),('public_categ_ids','!=',False)], limit=12, order='id desc')"/>
+<div class="dk-wrap">
+
+<section class="dk-hero" aria-roledescription="carrusel" aria-label="Destacados">
+<div class="dk-slides" id="dk-slides">
+<t t-set="dk_slides" t-value="[('Recién llegados','Nuevos productos','Lo último que entró a nuestro catálogo, listo para pedir.','Ver novedades','/shop?order=create_date+desc',None),('Cuidado capilar','Shampús','Limpieza y cuidado diario para cada tipo de cabello.','Ver shampús','/shop/category/322',322),('Color','Tintes NNP','Toda la gama de tonos, lista para el salón.','Ver tintes','/shop/category/326',326),('Tratamiento','Tratamientos','Hidratación y reparación para resultados profesionales.','Ver tratamientos','/shop/category/330',330),('Cuidado de la piel','Corporales','Cremas y lociones para tus clientes.','Ver corporales','/shop/category/272',272)]"/>
+<t t-foreach="dk_slides" t-as="sl">
+<t t-set="dk_sp" t-value="dk_new[:3] if not sl[5] else request.env['product.template'].search([('public_categ_ids','child_of',sl[5]),('is_published','=',True),('sale_ok','=',True),('image_128','!=',False)], limit=3, order='id desc')"/>
+<a class="dk-banner-main" t-att-href="sl[4]">
+<div class="dk-bcopy">
+<span class="dk-eyebrow" t-out="sl[0]"/>
+<h1 t-out="sl[1]"/>
+<p t-out="sl[2]"/>
+<span class="dk-cta" t-out="sl[3]"/>
+</div>
+<div class="dk-bimgs">
+<t t-foreach="dk_sp" t-as="p">
+<span class="dk-bimg"><img t-att-src="website.image_url(p, 'image_256')" t-att-alt="p.name" t-att-loading="'eager' if sl_index == 0 else 'lazy'"/></span>
+</t>
+</div>
+</a>
+</t>
+</div>
+<button type="button" class="dk-nav dk-prev" aria-label="Anterior">&#8249;</button>
+<button type="button" class="dk-nav dk-next" aria-label="Siguiente">&#8250;</button>
+<div class="dk-dots">
+<t t-foreach="dk_slides" t-as="sl"><button type="button" class="dk-dot" t-att-aria-label="'Ir al banner %s' % (sl_index + 1)"/></t>
+</div>
+</section>
+
+<section>
+<div class="dk-head"><h2>Nuevos productos</h2><a href="/shop?order=create_date+desc">Ver todos</a></div>
+<div class="dk-snap">
+<t t-foreach="dk_new" t-as="p">
+<t t-set="dk_info" t-value="p._get_combination_info(only_template=True)"/>
+<article class="dk-card">
+<a class="dk-img" t-att-href="p.website_url"><img t-att-src="website.image_url(p, 'image_512')" t-att-alt="p.name" loading="lazy"/></a>
+<div class="dk-body">
+<a class="dk-name" t-att-href="p.website_url" t-att-title="p.name" t-out="p.name.capitalize()"/>
+<div class="dk-price"><span t-out="'$%.2f' % dk_info['price']"/> <small>c/u</small></div>
+<form class="dk-add" action="/shop/cart/update" method="post">
+<input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+<input type="hidden" name="product_id" t-att-value="p.product_variant_id.id"/>
+<input type="hidden" name="product_template_id" t-att-value="p.id"/>
+<input class="dk-qty" type="number" name="add_qty" value="1" min="1" aria-label="Cantidad"/>
+<button class="dk-btn" type="submit">Agregar</button>
+</form>
+</div>
+</article>
+</t>
+</div>
+</section>
+
+<section>
+<div class="dk-head"><h2>Categorías</h2><a href="/shop">Ver todo el catálogo</a></div>
+<div class="dk-cats">
+<t t-set="dk_cats" t-value="[('Shampús',322),('Acondicionadores',269),('Tratamientos',330),('Corporales',272),('Faciales',274),('Perfumes económicos',310),('Nevada',276),('Skala',305),('Tintes NNP',326),('Salon Line',277),('Wipes',331),('Productos para bb',270)]"/>
+<t t-foreach="dk_cats" t-as="c">
+<t t-set="dk_cp" t-value="request.env['product.template'].search([('public_categ_ids','child_of',c[1]),('is_published','=',True),('sale_ok','=',True),('image_128','!=',False)], limit=1)"/>
+<a class="dk-cat" t-attf-href="/shop/category/#{c[1]}"><i><img t-if="dk_cp" t-att-src="website.image_url(dk_cp, 'image_256')" alt="" loading="lazy"/></i><span t-out="c[0]"/></a>
+</t>
+</div>
+</section>
+
+<section>
+<div class="dk-head"><h2>Marcas</h2></div>
+<div class="dk-brands">
+<t t-foreach="['Nevada','Skala','Salon Line','NNP','X.Care','Eleve']" t-as="m">
+<a class="dk-brand" t-attf-href="/shop?search=#{m}" t-out="m"/>
+</t>
+</div>
+</section>
+
+<section class="dk-links">
+<a class="dk-link" href="/my/orders"><b>Mis pedidos</b><span>Revisa y repite tus pedidos anteriores.</span></a>
+<a class="dk-link" href="https://wa.me/50768337354" target="_blank"><b>Atención por WhatsApp</b><span>Despachos de lunes a sábado, de 8:00 a. m. a 5:00 p. m.</span></a>
+</section>
+
+</div>
+<script>
+(function(){
+  var tr=document.getElementById('dk-slides'); if(!tr) return;
+  var dots=document.querySelectorAll('#dk-home .dk-dot'), n=tr.children.length, idx=0, hold=false, timer=null, resume=null;
+  var reduce=window.matchMedia&amp;&amp;window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  function mark(i){ for(var k=0;k&lt;dots.length;k++){ dots[k].classList.toggle('on',k===i); } }
+  function go(i){ idx=(i+n)%n; tr.scrollTo({left:idx*tr.clientWidth,behavior:'smooth'}); mark(idx); }
+  function sync(){ var i=Math.round(tr.scrollLeft/(tr.clientWidth||1)); if(i!==idx){ idx=i; mark(idx); } }
+  function pause(sec){ hold=true; clearTimeout(resume); if(sec){ resume=setTimeout(function(){ hold=false; },sec); } }
+  tr.addEventListener('scroll',sync,{passive:true});
+  tr.addEventListener('mouseenter',function(){ pause(0); });
+  tr.addEventListener('mouseleave',function(){ pause(2000); });
+  tr.addEventListener('touchstart',function(){ pause(0); },{passive:true});
+  tr.addEventListener('touchend',function(){ pause(6000); },{passive:true});
+  tr.addEventListener('focusin',function(){ pause(0); });
+  tr.addEventListener('focusout',function(){ pause(2000); });
+  for(var k=0;k&lt;dots.length;k++){ (function(j){ dots[j].addEventListener('click',function(){ go(j); pause(6000); }); })(k); }
+  var p=document.querySelector('#dk-home .dk-prev'), q=document.querySelector('#dk-home .dk-next');
+  if(p) p.addEventListener('click',function(){ go(idx-1); pause(6000); });
+  if(q) q.addEventListener('click',function(){ go(idx+1); pause(6000); });
+  window.addEventListener('resize',function(){ tr.scrollTo({left:idx*tr.clientWidth}); });
+  mark(0);
+  if(!reduce){ timer=setInterval(function(){ if(!hold&amp;&amp;!document.hidden){ go(idx+1); } },5000); }
+})();
+</script>
+</div></div></t></t>
