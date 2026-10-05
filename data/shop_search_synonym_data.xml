@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <!-- Grupos iniciales (aprobados por Andrés). noupdate: si se editan en Odoo,
+         las actualizaciones del módulo no los pisan. -->
+    <record id="synonym_shampu" model="shop.search.synonym">
+        <field name="name">Shampú</field>
+        <field name="words">shp, shampu, champu, shampoo, shampo</field>
+    </record>
+    <record id="synonym_tratamiento" model="shop.search.synonym">
+        <field name="name">Tratamiento</field>
+        <field name="words">trat, tratamiento, mascarilla</field>
+    </record>
+    <record id="synonym_acondicionador" model="shop.search.synonym">
+        <field name="name">Acondicionador</field>
+        <field name="words">acd, acondicionador, condicionador</field>
+    </record>
+    <record id="synonym_perfume" model="shop.search.synonym">
+        <field name="name">Perfume</field>
+        <field name="words">prf, perfume</field>
+    </record>
+    <record id="synonym_ambientador" model="shop.search.synonym">
+        <field name="name">Ambientador</field>
+        <field name="words">amb, ambientador, aromatizante</field>
+    </record>
+    <record id="synonym_desodorante" model="shop.search.synonym">
+        <field name="name">Desodorante</field>
+        <field name="words">deo, desodorante</field>
+    </record>
+    <record id="synonym_cosmeticos" model="shop.search.synonym">
+        <field name="name">Cosméticos</field>
+        <field name="words">cos, cosmetico, maquillaje</field>
+    </record>
+    <record id="synonym_estuche" model="shop.search.synonym">
+        <field name="name">Estuche</field>
+        <field name="words">est, estuche</field>
+    </record>
+    <record id="synonym_accesorios" model="shop.search.synonym">
+        <field name="name">Accesorios</field>
+        <field name="words">bell, accesorio, bisuteria</field>
+    </record>
+</odoo>

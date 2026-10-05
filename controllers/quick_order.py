@@ -1,0 +1,147 @@
+import json
+import re
+
+from odoo import http
+from odoo.http import request
+from odoo.osv import expression
+
+from ..models.shop_search_synonym import normalize_text
+
+MAX_LINES = 200
+MAX_OPTIONS = 8
+MAX_QTY = 9999
+
+# "6 x trat skala", "6x trat skala"
+QTY_BEFORE = re.compile(r'^(?P<qty>\d{1,4})\s*[xX×*]\s*(?P<text>.+)$')
+# "847610010414 x 6", "trat skala x6", "trat skala acai 3" (sin x solo vale hasta 2 cifras,
+# para no confundir "shp x.care 665" con 665 unidades)
+QTY_AFTER_X = re.compile(r'^(?P<text>.+?)\s*[xX×*]\s*(?P<qty>\d{1,4})$')
+QTY_AFTER_BARE = re.compile(r'^(?P<text>.+?)\s+(?P<qty>\d{1,2})$')
+
+
+class QuickOrder(http.Controller):
+
+    @http.route('/pedido-rapido', type='http', auth='user', website=True, sitemap=False)
+    def quick_order_page(self, **kw):
+        return request.render('stock_picking_sale_buttons.quick_order_page', {})
+
+    @http.route('/pedido-rapido/revisar', type='http', auth='user', website=True,
+                methods=['POST'], sitemap=False)
+    def quick_order_review(self, texto='', **kw):
+        parsed = self._parse_lines(texto)
+        lines = [self._resolve_line(raw, text, qty) for raw, text, qty in parsed[:MAX_LINES]]
+        return request.make_json_response({
+            'lines': lines,
+            'truncated': len(parsed) > MAX_LINES,
+        })
+
+    @http.route('/pedido-rapido/agregar', type='http', auth='user', website=True,
+                methods=['POST'], sitemap=False)
+    def quick_order_add(self, items='[]', **kw):
+        try:
+            items = json.loads(items)
+        except ValueError:
+            items = []
+        Template = request.env['product.template']
+        base_domain = request.website.sale_product_domain()
+        order = request.website.sale_get_order(force_create=True)
+        added, skipped = 0, []
+        for item in items[:MAX_LINES]:
+            try:
+                tmpl_id = int(item.get('template_id'))
+                qty = max(1, min(int(item.get('qty') or 1), MAX_QTY))
+            except (TypeError, ValueError, AttributeError):
+                continue
+            tmpl = Template.search(expression.AND([base_domain, [('id', '=', tmpl_id)]]), limit=1)
+            if not tmpl or tmpl.product_variant_count != 1:
+                skipped.append(item.get('name') or tmpl_id)
+                continue
+            order._cart_update(product_id=tmpl.product_variant_id.id, add_qty=qty)
+            added += 1
+        return request.make_json_response({'added': added, 'skipped': skipped})
+
+    # ------------------------------------------------------------------ helpers
+
+    @staticmethod
+    def _parse_lines(texto):
+        """Devuelve [(línea original, texto a buscar, cantidad)] sin líneas vacías."""
+        parsed = []
+        for raw in (texto or '').splitlines():
+            line = re.sub(r'[\t;]+', ' ', raw).strip()
+            if not line:
+                continue
+            qty = 1
+            text = line
+            for pattern in (QTY_BEFORE, QTY_AFTER_X, QTY_AFTER_BARE):
+                match = pattern.match(line)
+                if match and match.group('text').strip():
+                    text = match.group('text').strip()
+                    qty = max(1, int(match.group('qty')))
+                    break
+            parsed.append((raw.strip(), text, qty))
+        return parsed
+
+    def _option(self, tmpl):
+        info = tmpl._get_combination_info(only_template=True)
+        return {
+            'template_id': tmpl.id,
+            'name': tmpl.name,
+            'price': info.get('price') or 0.0,
+            'image': '/web/image/product.template/%s/image_128' % tmpl.id,
+            'url': tmpl.website_url,
+            'variants': tmpl.product_variant_count != 1,
+        }
+
+    def _resolve_line(self, raw, text, qty):
+        Template = request.env['product.template']
+        base_domain = request.website.sale_product_domain()
+        result = {'raw': raw, 'text': text, 'qty': qty, 'status': 'missing', 'options': [],
+                  'fuzzy': False}
+
+        # 1) ¿Es un código? Se busca exacto en código de barras, códigos extra y referencia.
+        if re.fullmatch(r'[0-9A-Za-z\-]{5,}', text) and re.search(r'\d', text):
+            code_domain = ['|', '|',
+                           ('product_variant_ids.barcode', '=', text),
+                           ('product_variant_ids.barcode_ids.name', '=', text),
+                           ('default_code', '=', text)]
+            by_code = Template.search(expression.AND([base_domain, code_domain]), limit=MAX_OPTIONS)
+            if by_code:
+                result['options'] = [self._option(t) for t in by_code]
+                result['status'] = 'ok' if len(by_code) == 1 else 'choose'
+                return result
+
+        # 2) Por nombre: mismo buscador de la tienda (sinónimos, tildes y corrector).
+        options = {
+            'displayDescription': False, 'displayDetail': False, 'displayExtraLink': False,
+            'displayImage': False, 'allowFuzzy': True, 'category': None, 'tags': None,
+            'min_price': 0.0, 'max_price': 0.0, 'attrib_values': None,
+            'display_currency': request.website.currency_id,
+        }
+        count, details, fuzzy = request.website._search_with_fuzzy(
+            'products_only', text, limit=MAX_OPTIONS * 4, order='name asc', options=options)
+        found = details[0].get('results', Template) if details else Template
+        if not found:
+            return result
+
+        ranked = self._rank(found, fuzzy or text)[:MAX_OPTIONS]
+        result['options'] = [self._option(t) for t in ranked]
+        result['fuzzy'] = fuzzy or False
+        result['total'] = count
+        # Un solo resultado, o uno cuyo nombre es exactamente lo escrito: se da por entendido.
+        exact = [t for t in ranked if normalize_text(t.name) == normalize_text(text)]
+        result['status'] = 'ok' if (count == 1 or len(exact) == 1) else 'choose'
+        if result['status'] == 'ok' and exact:
+            result['options'] = [self._option(exact[0])]
+        return result
+
+    @staticmethod
+    def _rank(templates, text):
+        """Primero los que contienen TODAS las palabras escritas como palabras completas."""
+        words = normalize_text(text).split()
+
+        def score(tmpl):
+            tokens = normalize_text(tmpl.name).split()
+            whole = all(w in tokens for w in words)
+            return (0 if whole else 1, len(tokens), tmpl.name)
+
+        return sorted(templates, key=score)

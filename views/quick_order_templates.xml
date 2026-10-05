@@ -1,0 +1,168 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Página /pedido-rapido (solo usuarios con sesión: se aplican sus precios).
+         Usa id="dk-home" para quedar fuera de las reglas "lectura clara" del tema,
+         igual que el inicio; los estilos de abajo cubren todo. -->
+    <template id="quick_order_page" name="Pedido rápido">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Pedido rápido</t>
+            <div id="wrap" class="oe_structure">
+                <div id="dk-home" class="qo">
+                    <style>
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap");
+#dk-home.qo{font-family:'Manrope',system-ui,sans-serif;color:#0A0A0A;background:#F4F5F7;padding:28px 0 64px}
+#dk-home.qo *{box-sizing:border-box}
+#dk-home.qo .qo-wrap{max-width:980px;margin:0 auto;padding:0 24px;display:flex;flex-direction:column;gap:16px}
+#dk-home.qo h1{font-family:inherit;margin:0;font-size:clamp(26px,4vw,34px);font-weight:800;color:#0A0A0A;letter-spacing:-.01em}
+#dk-home.qo p{margin:0;font-size:15px;line-height:1.5;color:#2B3445}
+#dk-home.qo .qo-help{background:#fff;border:1px solid #E3E6EB;border-radius:8px;padding:14px 16px;font-size:14px;line-height:1.7;color:#0A0A0A}
+#dk-home.qo .qo-help code{background:#EAF0F8;color:#0B1F3A;padding:2px 7px;border-radius:4px;font-size:13px}
+#dk-home.qo textarea{width:100%;min-height:190px;border:1px solid #B8C0CE;border-radius:8px;padding:14px;font:inherit;font-size:16px;line-height:1.6;color:#0A0A0A;background:#fff;resize:vertical}
+#dk-home.qo textarea:focus{outline:2px solid #0B1F3A;outline-offset:1px}
+#dk-home.qo .qo-btn{height:48px;padding:0 26px;border:0;border-radius:6px;background:#0B1F3A;color:#fff;font:inherit;font-weight:800;font-size:15px;cursor:pointer;align-self:flex-start}
+#dk-home.qo .qo-btn:hover{background:#000}
+#dk-home.qo .qo-btn:disabled{background:#8A93A3;cursor:default}
+#dk-home.qo .qo-list{background:#fff;border:1px solid #E3E6EB;border-radius:8px;overflow:hidden}
+#dk-home.qo .qo-row{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,2fr) 92px 44px;gap:12px;align-items:center;padding:14px 16px;border-bottom:1px solid #E3E6EB}
+#dk-home.qo .qo-row:last-child{border-bottom:0}
+#dk-home.qo .qo-row.skip{opacity:.45}
+#dk-home.qo .qo-raw{font-size:14px;font-weight:700;overflow-wrap:anywhere}
+#dk-home.qo .qo-note{font-size:12px;color:#2B3445;margin-top:3px}
+#dk-home.qo .qo-mid{display:flex;flex-direction:column;gap:8px;min-width:0}
+#dk-home.qo .qo-chip{align-self:flex-start;font-size:12px;font-weight:800;padding:3px 10px;border-radius:999px}
+#dk-home.qo .qo-chip.bad{background:#FBE3E3;color:#7A1212}
+#dk-home.qo .qo-sel{width:100%;height:44px;border:1px solid #B8C0CE;border-radius:6px;padding:0 10px;font:inherit;font-size:14px;color:#0A0A0A;background:#fff}
+#dk-home.qo .qo-prod{display:flex;align-items:center;gap:12px;min-width:0}
+#dk-home.qo .qo-prod img{width:52px;height:52px;object-fit:contain;background:#fff;border:1px solid #E3E6EB;border-radius:6px;padding:3px;flex:0 0 52px}
+#dk-home.qo .qo-pname{font-size:14px;font-weight:700;overflow-wrap:anywhere}
+#dk-home.qo .qo-price{font-size:13px;color:#2B3445}
+#dk-home.qo .qo-price a{color:#0B1F3A;font-weight:700}
+#dk-home.qo .qo-qty{width:92px;height:44px;border:1px solid #B8C0CE;border-radius:6px;text-align:center;font:inherit;font-weight:700;font-size:16px;color:#0A0A0A;background:#fff}
+#dk-home.qo .qo-x{width:44px;height:44px;border:0;background:transparent;font-size:24px;line-height:1;color:#2B3445;cursor:pointer}
+#dk-home.qo .qo-sum{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:12px 24px;background:#fff;border:1px solid #E3E6EB;border-radius:8px;padding:16px}
+#dk-home.qo .qo-sumtxt{font-size:14px;line-height:1.6}
+#dk-home.qo .qo-total{font-size:24px;font-weight:800}
+@media(max-width:700px){#dk-home.qo .qo-row{grid-template-columns:minmax(0,1fr) 92px 44px}#dk-home.qo .qo-left{grid-column:1 / -1}#dk-home.qo .qo-mid{grid-column:1 / 2}}
+                    </style>
+                    <div class="qo-wrap">
+                        <h1>Pedido rápido</h1>
+                        <p>Escribe o pega tu lista, un producto por línea. Revisamos qué producto es cada línea y, si todo está bien, lo agregamos al carrito de una vez.</p>
+                        <div class="qo-help">
+                            Puedes usar el <strong>código de barras</strong> o el <strong>nombre</strong> (con abreviaturas como SHP o TRAT), y la cantidad al final o al inicio:<br/>
+                            <code>847610010414 x 6</code> &#160; <code>trat skala acai 3</code> &#160; <code>12 x shp xcare coconut</code>
+                        </div>
+                        <input type="hidden" id="qo-csrf" t-att-value="request.csrf_token()"/>
+                        <textarea id="qo-text" aria-label="Lista de productos" placeholder="847610010414 x 6&#10;trat skala acai 3&#10;shp xcare coconut 12"></textarea>
+                        <button type="button" class="qo-btn" id="qo-review">Revisar pedido</button>
+                        <div id="qo-out" aria-live="polite"></div>
+                    </div>
+                    <script>
+(function(){
+  var txt=document.getElementById('qo-text'), go=document.getElementById('qo-review'),
+      out=document.getElementById('qo-out'), csrf=document.getElementById('qo-csrf').value;
+  var lines=[];
+  function el(tag,cls,text){var e=document.createElement(tag); if(cls){e.className=cls;} if(text!==undefined){e.textContent=text;} return e;}
+  function money(n){return '$'+Number(n).toFixed(2);}
+  function current(l){
+    if(l.skip||l.pick===null){return null;}
+    var o=l.options[l.pick];
+    return (o&amp;&amp;!o.variants)?o:null;
+  }
+  function render(){
+    out.textContent='';
+    if(!lines.length){return;}
+    var list=el('div','qo-list'), total=0, ready=0, pending=0, missing=0;
+    lines.forEach(function(l){
+      var row=el('div','qo-row'+(l.skip?' skip':''));
+      var left=el('div','qo-left');
+      left.appendChild(el('div','qo-raw',l.raw));
+      if(l.fuzzy){left.appendChild(el('div','qo-note','Buscado como «'+l.fuzzy+'»'));}
+      row.appendChild(left);
+      var mid=el('div','qo-mid');
+      if(l.status==='missing'){
+        mid.appendChild(el('span','qo-chip bad','No encontrado'));
+        if(!l.skip){missing++;}
+      } else {
+        if(l.options.length&gt;1){
+          var sel=el('select','qo-sel');
+          var ph=el('option',null,'Elige el producto…'); ph.value=''; sel.appendChild(ph);
+          l.options.forEach(function(o,k){
+            var op=el('option',null,o.name+' — '+money(o.price)); op.value=String(k);
+            if(l.pick===k){op.selected=true;}
+            sel.appendChild(op);
+          });
+          sel.addEventListener('change',function(){l.pick=(sel.value===''?null:parseInt(sel.value,10)); render();});
+          mid.appendChild(sel);
+        }
+        var o=(l.pick===null)?null:l.options[l.pick];
+        if(o){
+          var prod=el('div','qo-prod'), img=el('img'); img.src=o.image; img.alt=''; prod.appendChild(img);
+          var info=el('div'); info.appendChild(el('div','qo-pname',o.name));
+          var pr=el('div','qo-price');
+          if(o.variants){
+            var a=el('a',null,'Tiene variantes: ábrelo en la tienda'); a.href=o.url; pr.appendChild(a);
+          } else { pr.textContent=money(o.price)+' c/u'; }
+          info.appendChild(pr); prod.appendChild(info); mid.appendChild(prod);
+        }
+        if(!l.skip){
+          var cur=current(l);
+          if(cur){ready++; total+=cur.price*l.qty;} else {pending++;}
+        }
+      }
+      row.appendChild(mid);
+      var qty=el('input','qo-qty'); qty.type='number'; qty.min='1'; qty.max='9999'; qty.value=l.qty;
+      qty.setAttribute('aria-label','Cantidad');
+      qty.addEventListener('change',function(){var v=parseInt(qty.value,10); l.qty=(v&gt;0?v:1); render();});
+      row.appendChild(qty);
+      var x=el('button','qo-x',l.skip?'↺':'×'); x.type='button';
+      x.setAttribute('aria-label',l.skip?'Volver a incluir':'Quitar línea');
+      x.addEventListener('click',function(){l.skip=!l.skip; render();});
+      row.appendChild(x);
+      list.appendChild(row);
+    });
+    out.appendChild(list);
+    var sum=el('div','qo-sum'), st=el('div','qo-sumtxt');
+    st.appendChild(el('div',null,ready+' listas'+(pending?' · '+pending+' por elegir':'')+(missing?' · '+missing+' no encontradas':'')));
+    st.appendChild(el('div','qo-total',money(total)));
+    sum.appendChild(st);
+    var add=el('button','qo-btn','Agregar al carrito'); add.type='button'; add.disabled=(ready===0);
+    add.addEventListener('click',function(){addAll(add);});
+    sum.appendChild(add);
+    out.appendChild(sum);
+  }
+  function addAll(btn){
+    var items=[];
+    lines.forEach(function(l){var o=current(l); if(o){items.push({template_id:o.template_id,qty:l.qty,name:o.name});}});
+    if(!items.length){return;}
+    btn.disabled=true; btn.textContent='Agregando…';
+    var fd=new FormData(); fd.append('csrf_token',csrf); fd.append('items',JSON.stringify(items));
+    fetch('/pedido-rapido/agregar',{method:'POST',body:fd,credentials:'same-origin'})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.skipped&amp;&amp;d.skipped.length){alert('No se pudieron agregar: '+d.skipped.join(', '));}
+        window.location.href='/shop/cart';
+      })
+      .catch(function(){btn.disabled=false; btn.textContent='Agregar al carrito'; alert('No se pudo agregar al carrito. Intenta de nuevo.');});
+  }
+  go.addEventListener('click',function(){
+    var t=txt.value.trim();
+    if(!t){txt.focus(); return;}
+    go.disabled=true; go.textContent='Revisando…';
+    var fd=new FormData(); fd.append('csrf_token',csrf); fd.append('texto',t);
+    fetch('/pedido-rapido/revisar',{method:'POST',body:fd,credentials:'same-origin'})
+      .then(function(r){return r.json();})
+      .then(function(d){
+        lines=d.lines.map(function(l){l.skip=false; l.pick=(l.status==='ok')?0:null; return l;});
+        go.disabled=false; go.textContent='Revisar de nuevo';
+        render();
+        if(d.truncated){alert('Solo se revisaron las primeras 200 líneas.');}
+      })
+      .catch(function(){go.disabled=false; go.textContent='Revisar pedido'; alert('No se pudo revisar la lista. Intenta de nuevo.');});
+  });
+})();
+                    </script>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
