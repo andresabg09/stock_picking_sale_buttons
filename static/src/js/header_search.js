@@ -11,12 +11,20 @@
     var seq = 0;
     var cache = {};
 
+    // Campo propio del encabezado + los buscadores nativos que Odoo deja en el menú del celular
+    // (las tres líneas) y en el modal de la lupa: todos se atienden igual.
+    var FIELD_SEL = '.dk-hsearch-input, #top_menu_collapse_mobile .oe_search_box, #o_search_modal .oe_search_box';
+
     function isField(el) {
-        return !!(el && el.classList && el.classList.contains('dk-hsearch-input'));
+        return !!(el && el.matches && el.matches(FIELD_SEL));
+    }
+
+    function formOf(input) {
+        return input.closest('form');
     }
 
     function listFor(input) {
-        var form = input.closest('.dk-hsearch');
+        var form = formOf(input);
         var list = form.querySelector('.dk-sug');
         if (!list) {
             list = document.createElement('div');
@@ -29,7 +37,7 @@
     }
 
     function hide(input) {
-        var list = input.closest('.dk-hsearch').querySelector('.dk-sug');
+        var list = formOf(input).querySelector('.dk-sug');
         if (list) {
             list.hidden = true;
         }
@@ -127,7 +135,7 @@
             return;
         }
         stop(ev);
-        var list = ev.target.closest('.dk-hsearch').querySelector('.dk-sug');
+        var list = formOf(ev.target).querySelector('.dk-sug');
         if (list && list.children.length && ev.target.value.trim().length >= MIN_CHARS) {
             list.hidden = false;
         }
@@ -145,7 +153,7 @@
             return;
         }
         stop(ev); // nunca se cancela Retroceso/Suprimir: el campo se comporta normal
-        var list = input.closest('.dk-hsearch').querySelector('.dk-sug');
+        var list = formOf(input).querySelector('.dk-sug');
         var open = list && !list.hidden;
         if (ev.key === 'Escape') {
             hide(input);
@@ -173,7 +181,7 @@
     }, true);
 
     document.addEventListener('click', function (ev) {
-        all('.dk-hsearch').forEach(function (form) {
+        all('form:has(.dk-sug)').forEach(function (form) {
             if (!form.contains(ev.target)) {
                 var list = form.querySelector('.dk-sug');
                 if (list) {

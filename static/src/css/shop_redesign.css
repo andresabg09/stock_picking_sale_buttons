@@ -493,6 +493,7 @@ header#top .dk-hsearch .dk-hsearch-btn {
     display: none;
 }
 .dk-sug {
+    text-align: left;
     position: absolute;
     inset: calc(100% + 6px) 0 auto 0;
     z-index: 1050;
@@ -553,4 +554,10 @@ header#top .dk-hsearch .dk-hsearch-btn {
 .dk-sug-none {
     font-weight: 500;
     color: #2B3445;
+}
+
+/* Buscadores nativos del menú del celular y del modal: el formulario es la referencia de la lista */
+#top_menu_collapse_mobile .o_searchbar_form,
+#o_search_modal .o_searchbar_form {
+    position: relative;
 }
