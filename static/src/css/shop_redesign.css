@@ -594,18 +594,43 @@ header#top .dk-hsearch .dk-hsearch-btn {
 }
 
 /* Banner del inicio con mensajes de servicio: ícono grande en vez de fotos de productos */
-#dk-home .dk-bicon {
-    display: flex;
-    align-items: center;
-    justify-content: center;
+#dk-home .dk-bimgs .dk-bicon {
     grid-column: 1 / -1;
-    aspect-ratio: auto;
-    min-height: 180px;
-    border-radius: 12px;
+    aspect-ratio: auto !important;
+    width: 100%;
+    max-width: 300px;
+    height: 210px;
+    margin-left: auto;
+    padding: 0;
+    border-radius: 14px;
     background: #fff;
     color: #0B1F3A;
     font-size: 84px;
 }
-#dk-home .dk-bicon .fa {
+#dk-home .dk-bimgs .dk-bicon .fa {
     color: #0B1F3A;
+}
+@media (max-width: 900px) {
+    #dk-home .dk-bimgs .dk-bicon {
+        max-width: none;
+        height: 140px;
+        margin-left: 0;
+        font-size: 64px;
+    }
+}
+
+/* Categorías del inicio: 8 en 4 columnas x 2 filas (2 columnas en celular) */
+#dk-home .dk-cats {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+}
+#dk-home .dk-cat i {
+    height: 150px;
+}
+@media (max-width: 767.98px) {
+    #dk-home .dk-cats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+    #dk-home .dk-cat i {
+        height: 120px;
+    }
 }
