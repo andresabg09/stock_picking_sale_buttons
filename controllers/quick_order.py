@@ -45,6 +45,10 @@ class QuickOrder(http.Controller):
         Template = request.env['product.template']
         base_domain = request.website.sale_product_domain()
         order = request.website.sale_get_order(force_create=True)
+        if order.state != 'draft':
+            # Mismo manejo que /shop/cart/update: si el carrito ya no es editable, uno nuevo.
+            request.session['sale_order_id'] = None
+            order = request.website.sale_get_order(force_create=True)
         added, skipped = 0, []
         for item in items[:MAX_LINES]:
             try:
@@ -58,6 +62,8 @@ class QuickOrder(http.Controller):
                 continue
             order._cart_update(product_id=tmpl.product_variant_id.id, add_qty=qty)
             added += 1
+        # El numerito del carrito en el encabezado sale de aquí (igual que /shop/cart/update).
+        request.session['website_sale_cart_quantity'] = order.cart_quantity
         return request.make_json_response({'added': added, 'skipped': skipped})
 
     # ------------------------------------------------------------------ helpers
