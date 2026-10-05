@@ -191,6 +191,14 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   CSS en `shop_redesign.css`. Revertir = desactivar `dk_shop_page`, `dk_product_page`,
   `dk_cart_lines`, `dk_cart_page` (Ajustes → Técnico → Vistas). La ficha oculta por CSS el texto
   en inglés de "garantía 30 días / envío 2-3 días" del tema. Pendiente: probar en producción.
+- 2026-10-06: Buscador del encabezado — el autocompletado nativo (vista 3331 con `s_searchbar_input`)
+  se trababa al borrar y no cargaba en tienda/ficha/carrito. Ahora las sugerencias son propias:
+  `controllers/shop_suggest.py` (`/shop/dk/suggest`, mismo buscador tolerante) + `header_search.js`
+  (frena los eventos del campo en captura para que el widget nativo no intervenga) + CSS en
+  `shop_redesign.css` (v18.0.2.5.0). Hechos por MCP con confirmación de Andrés: menú 7 → "Tienda",
+  menú nuevo "Pedido rápido" (id 9), pie (vista 3330) con "Tienda"/"Pedido rápido", parámetro
+  `stock_picking_sale_buttons.new_days`=120 (id 65). Respaldos de 3330/3331 en `scripts/tienda_backup/`.
+  "Nuevos en la tienda" no sale porque los productos recientes no tienen categoría web.
 - 2026-10-04: Conexión MCP a Odoo (conector "Odoo JSON-RPC" en AnythingMCP) — permite
   consultar campos, vistas y datos sin pasar por SSH (ver "Acceso a Odoo por MCP"). Causa
   del `Access Denied` inicial: faltaba la variable `ODOO_API_KEY` en Environment

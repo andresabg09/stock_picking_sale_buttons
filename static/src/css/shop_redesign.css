@@ -472,9 +472,9 @@
     }
 }
 
-/* ======================= BUSCADOR DEL ENCABEZADO: lista de sugerencias ======================= */
-/* La caja (.dk-hsearch, definida en el tema) recorta con overflow:hidden y 44px de alto: la lista
- * del autocompletado nativo quedaba atrapada adentro. Aquí cae debajo como un desplegable. */
+/* ======================= BUSCADOR DEL ENCABEZADO: sugerencias propias ======================= */
+/* La caja (.dk-hsearch, definida en el tema) recorta con overflow:hidden y 44px de alto: se
+ * deja visible para que la lista caiga debajo como un desplegable. */
 header#top .dk-hsearch {
     position: relative;
     overflow: visible !important;
@@ -485,36 +485,72 @@ header#top .dk-hsearch .dk-hsearch-input {
 header#top .dk-hsearch .dk-hsearch-btn {
     border-radius: 0 5px 5px 0;
 }
-header#top .dk-hsearch .dropdown-menu,
-header#top .dk-hsearch .o_dropdown_menu {
-    position: absolute !important;
-    inset: calc(100% + 6px) 0 auto 0 !important;
-    transform: none !important;
-    width: 100%;
+/* Sin la "X" nativa del navegador: se borra con Retroceso, como en cualquier campo */
+.dk-hsearch-input::-webkit-search-cancel-button,
+.dk-hsearch-input::-webkit-search-decoration {
+    -webkit-appearance: none;
+    appearance: none;
+    display: none;
+}
+.dk-sug {
+    position: absolute;
+    inset: calc(100% + 6px) 0 auto 0;
+    z-index: 1050;
     max-height: min(70vh, 520px);
     overflow-y: auto;
-    margin: 0;
     padding: 6px;
-    z-index: 1050;
     border: 1px solid #E3E6EB;
     border-radius: 8px;
     background: #fff;
     box-shadow: 0 12px 32px rgba(11, 31, 58, .18);
 }
-header#top .dk-hsearch .dropdown-item,
-header#top .dk-hsearch .o_search_result_item {
-    display: block;
+.dk-sug[hidden] {
+    display: none;
+}
+.dk-sug-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
     padding: 8px 10px;
     border-radius: 6px;
-    white-space: normal;
+    color: #0A0A0A;
+    text-decoration: none;
+}
+.dk-sug-item:hover,
+.dk-sug-item.dk-act {
+    background: #EAF0F8;
     color: #0A0A0A;
 }
-header#top .dk-hsearch .dropdown-item:hover,
-header#top .dk-hsearch .dropdown-item:focus {
-    background: #EAF0F8;
-}
-header#top .dk-hsearch .dropdown-item img {
+.dk-sug-item img {
+    flex: 0 0 48px;
     width: 48px;
     height: 48px;
     object-fit: contain;
+}
+.dk-sug-name {
+    flex: 1;
+    min-width: 0;
+    font-size: 14px;
+    font-weight: 600;
+    line-height: 1.3;
+}
+.dk-sug-price {
+    flex: 0 0 auto;
+    font-size: 14px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.dk-sug-all,
+.dk-sug-none {
+    display: block;
+    padding: 12px 10px 8px;
+    font-size: 13px;
+    font-weight: 700;
+    color: #0B1F3A;
+    text-align: center;
+    text-decoration: none;
+}
+.dk-sug-none {
+    font-weight: 500;
+    color: #2B3445;
 }
