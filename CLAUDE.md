@@ -154,8 +154,20 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   Pendiente tras el deploy: autocompletado en el buscador del encabezado (vista 3331, usar el
   formulario nativo `website.website_search_box_input`), enlace "Pedido rápido" en el menú
   (`website.menu`), probar "Agregar" del inicio (nunca se probó de punta a punta).
-  Rediseño de catálogo/ficha/carrito: 3 opciones en maqueta (artifact "Tienda: Catálogo,
-  Producto y Carrito"), esperando elección de Andrés; nada tocado en la tienda.
+  Rediseño de la tienda (diseño APROBADO por Andrés el 2026-10-05, maqueta en el artifact
+  "Tienda — Propuesta estilo tienda"): estilo tienda tipo Amazon, NO catálogo de venta en
+  calle (la sección se llama "Tienda", nunca "Catálogo"). Regla de negocio: al escribir una
+  cantidad en cualquier producto ya queda en el carrito (sin botón de confirmar; la cotización
+  en Ventas la crea Odoo). Sugerencias: otras fragancias del producto, misma marca, nuevos,
+  comprados juntos. Por etapas, cada una con deploy: ETAPA 1 (hecha, v18.0.2.2.0) tarjetas
+  con Agregar→cantidad viva (`/shop/dk/set_qty`, JS `shop_live_cart.js`, CSS
+  `shop_live_cart.css`, vistas en `views/website_shop_templates.xml` montadas SOBRE
+  `website_sale.products_item` sin reemplazarla), etiquetas Nuevo (`product.template.dk_is_new`,
+  <30 días, parámetro `stock_picking_sale_buttons.new_days`) y Rebaja, píldora flotante del
+  carrito. Pendientes: etapa 2 ficha de producto, etapa 3 carrito, etapa 4 secciones
+  Nuevos/Rebajas/Te puede interesar en tienda e inicio. "Rebaja" es solo precio tachado real
+  (base_price > price_reduce); los precios de las maquetas con rebaja eran de ejemplo.
+  Andrés autorizó (2026-10-05) subir a master automáticamente cada cambio (avance directo).
 - 2026-10-04: Conexión MCP a Odoo (conector "Odoo JSON-RPC" en AnythingMCP) — permite
   consultar campos, vistas y datos sin pasar por SSH (ver "Acceso a Odoo por MCP"). Causa
   del `Access Denied` inicial: faltaba la variable `ODOO_API_KEY` en Environment
