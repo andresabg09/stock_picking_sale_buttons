@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Rediseño de la TIENDA (/shop, /shop/category/..., resultados de búsqueda).
+         REEMPLAZA el cuerpo de website_sale.products por el diseño aprobado (maqueta
+         "Tienda — Propuesta estilo tienda"): barra lateral de categorías, título con conteo y
+         orden, secciones "Nuevos" y "Lo más pedido", cuadrícula de tarjetas grandes con cantidad
+         viva (dk_card) y paginado nativo.
+         priority=99: se aplica DESPUÉS de las demás vistas que heredan website_sale.products
+         (atributos, miniaturas...), así sus xpath corren sobre la plantilla original y el
+         reemplazo final no las rompe. Para volver a la tienda de antes: desactivar esta vista. -->
+    <template id="dk_shop_page" inherit_id="website_sale.products" priority="99" name="Tienda rediseñada (estilo tienda)">
+        <xpath expr="//div[@id='wrap']" position="replace">
+            <div id="wrap" class="js_sale o_wsale_products_page dk-shop">
+                <div class="oe_structure oe_empty oe_structure_not_nearest" id="oe_structure_website_sale_products_1"/>
+                <t t-set="dk_cats" t-value="request.env['product.public.category'].search([('parent_id', '=', False)] + website.website_domain(), order='sequence, name')"/>
+                <t t-set="dk_page" t-value="pager['page']['num'] if pager and pager.get('page') else 1"/>
+                <t t-set="dk_front" t-value="not search and not category and dk_page == 1 and not request.params.get('order')"/>
+                <t t-set="dk_total" t-value="search_count or len(products or [])"/>
+                <t t-set="dk_new" t-value="request.env['product.template']._dk_new_products(4) if dk_front else request.env['product.template']"/>
+                <t t-set="dk_best" t-value="request.env['product.template']._dk_bestsellers(4) if dk_front else request.env['product.template']"/>
+
+                <div class="dk-shop-in container">
+                    <div class="dk-crumb">
+                        <a href="/">Inicio</a> / <a href="/shop">Tienda</a><t t-if="category"> / <span t-out="category.name"/></t>
+                    </div>
+
+                    <div class="dk-shop-layout">
+                        <aside class="dk-side" aria-label="Categorías">
+                            <div class="dk-side-h">Categorías</div>
+                            <div class="dk-side-list">
+                                <a href="/shop" t-attf-class="#{'' if category else 'act'}">Todos los productos</a>
+                                <t t-foreach="dk_cats" t-as="c">
+                                    <a t-att-href="'/shop/category/%s' % slug(c)" t-attf-class="#{'act' if category and category.id == c.id else ''}" t-out="c.name"/>
+                                </t>
+                            </div>
+                        </aside>
+
+                        <div class="dk-main">
+                            <div class="dk-head">
+                                <div class="dk-head-t">
+                                    <h1 t-if="search">Resultados para «<t t-out="search"/>»</h1>
+                                    <h1 t-elif="category" t-out="category.name"/>
+                                    <h1 t-else="">Tienda</h1>
+                                    <span class="dk-count"><t t-out="dk_total"/> productos</span>
+                                </div>
+                                <div class="dk-sort">
+                                    <t t-if="is_view_active('website_sale.sort')" t-call="website_sale.sort">
+                                        <t t-set="_classes" t-valuef="d-inline-block"/>
+                                    </t>
+                                </div>
+                            </div>
+
+                            <nav class="dk-chips" aria-label="Categorías">
+                                <a href="/shop" t-attf-class="dk-chip #{'' if category else 'act'}">Todos</a>
+                                <t t-foreach="dk_cats" t-as="c">
+                                    <a t-att-href="'/shop/category/%s' % slug(c)" t-attf-class="dk-chip #{'act' if category and category.id == c.id else ''}" t-out="c.name"/>
+                                </t>
+                            </nav>
+
+                            <div t-if="original_search and products" class="alert alert-warning mb-0">
+                                No hay resultados para «<span t-out="original_search"/>». Mostrando resultados para «<span t-out="search"/>».
+                            </div>
+
+                            <section t-if="dk_new" class="dk-sec">
+                                <div class="dk-sec-head"><h2>Nuevos en la tienda</h2><a href="/shop?order=create_date+desc">Ver todos →</a></div>
+                                <div class="dk-grid">
+                                    <t t-foreach="dk_new" t-as="np">
+                                        <t t-call="stock_picking_sale_buttons.dk_card"><t t-set="p" t-value="np"/></t>
+                                    </t>
+                                </div>
+                            </section>
+
+                            <section t-if="products" class="dk-sec">
+                                <div class="dk-sec-head" t-if="dk_front"><h2>Todos los productos</h2></div>
+                                <div class="dk-grid">
+                                    <t t-foreach="products" t-as="pr">
+                                        <t t-call="stock_picking_sale_buttons.dk_card"><t t-set="p" t-value="pr"/></t>
+                                    </t>
+                                </div>
+                            </section>
+                            <div t-else="" class="dk-empty">
+                                <h3 t-if="not search">Todavía no hay productos aquí</h3>
+                                <h3 t-else="">Sin resultados</h3>
+                                <p t-if="search">No encontramos nada para «<strong t-out="search"/>». Prueba con otra palabra o revisa las categorías.</p>
+                                <a href="/shop" class="btn btn-primary">Ver toda la tienda</a>
+                            </div>
+
+                            <div class="products_pager dk-pager">
+                                <t t-call="website.pager"/>
+                            </div>
+
+                            <section t-if="dk_best" class="dk-sec">
+                                <div class="dk-sec-head"><h2>Lo más pedido</h2></div>
+                                <div class="dk-grid">
+                                    <t t-foreach="dk_best" t-as="bp">
+                                        <t t-call="stock_picking_sale_buttons.dk_card"><t t-set="p" t-value="bp"/></t>
+                                    </t>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                </div>
+                <div class="oe_structure oe_empty oe_structure_not_nearest" id="oe_structure_website_sale_products_2"/>
+            </div>
+        </xpath>
+    </template>
+</odoo>

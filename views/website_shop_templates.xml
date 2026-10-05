@@ -126,9 +126,14 @@
          que se oculta por CSS cuando existe (.dk-pbox ~ #o_wsale_cta_wrapper). Solo productos de
          una sola variante; con variantes se sigue usando la caja nativa. -->
     <template id="product_live_buybox" inherit_id="website_sale.product" name="Ficha: cantidad viva y sugerencias">
+        <xpath expr="//h1[@itemprop='name']" position="before">
+            <div class="dk-eyebrow">
+                <span t-if="product.dk_is_new" class="badge dk-badge-inline">Nuevo</span>
+                <span t-if="product.public_categ_ids" t-out="product.public_categ_ids[0].name"/>
+            </div>
+        </xpath>
         <xpath expr="//h1[@itemprop='name']" position="after">
             <div class="dk-meta">
-                <span t-if="product.dk_is_new" class="badge dk-badge-inline">Nuevo</span>
                 <span>Referencia <b t-out="product.name"/></span>
                 <span t-if="product_variant.barcode">· Código de barras <b t-out="product_variant.barcode"/></span>
             </div>
@@ -163,6 +168,7 @@
                         <a href="/shop/cart" class="btn btn-outline-primary">Ver carrito</a>
                         <a href="/shop/checkout?try_skip_step=true" class="btn btn-primary">Finalizar compra</a>
                     </div>
+                    <div class="dk-note">Despachos de lunes a sábado, de 8:00 a. m. a 5:00 p. m.</div>
                 </div>
             </t>
         </xpath>

@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Rediseño de la FICHA DE PRODUCTO y del CARRITO (maqueta "Tienda — Propuesta estilo tienda").
+         Se montan con priority=99 para aplicarse DESPUÉS de las demás vistas que heredan las
+         plantillas nativas. Siguen usando los ganchos nativos de Odoo (formulario, variantes,
+         js_quantity, js_delete_product), así que el JS de Odoo sigue funcionando.
+         Para volver a como estaba: desactivar estas vistas. -->
+
+    <!-- ===== Ficha: migas de pan propias en vez de la fila nativa (migas + buscador + lista de precios) ===== -->
+    <template id="dk_product_page" inherit_id="website_sale.product" priority="99" name="Ficha rediseñada (estilo tienda)">
+        <xpath expr="//section[@id='product_detail']/div[hasclass('row')][1]" position="replace">
+            <div class="dk-crumb">
+                <a href="/">Inicio</a> / <a href="/shop">Tienda</a>
+                <t t-if="product.public_categ_ids"> / <a t-att-href="'/shop/category/%s' % slug(product.public_categ_ids[0])" t-out="product.public_categ_ids[0].name"/></t>
+                / <span t-out="product.name"/>
+            </div>
+        </xpath>
+        <xpath expr="//section[@id='product_detail']" position="after">
+            <section class="dk-details container">
+                <div class="dk-details-card">
+                    <h2>Detalles</h2>
+                    <div class="dk-kv"><span>Referencia</span><span t-out="product.name"/></div>
+                    <div class="dk-kv" t-if="product_variant and product_variant.barcode"><span>Código de barras</span><span t-out="product_variant.barcode"/></div>
+                    <div class="dk-kv" t-if="product.public_categ_ids"><span>Categoría</span><span t-out="', '.join(product.public_categ_ids.mapped('name'))"/></div>
+                    <div class="dk-kv"><span>Despacho</span><span>Lunes a sábado, 8:00 a. m. a 5:00 p. m.</span></div>
+                </div>
+            </section>
+        </xpath>
+    </template>
+
+    <!-- ===== Carrito: líneas como tarjetas con foto grande ===== -->
+    <template id="dk_cart_lines" inherit_id="website_sale.cart_lines" priority="99" name="Carrito: líneas en tarjetas">
+        <xpath expr="//div[@id='cart_products']" position="replace">
+            <div id="cart_products" t-if="website_sale_order and website_sale_order.website_order_line" class="js_cart_lines dk-cart-lines">
+                <t t-set="show_qty" t-value="is_view_active('website_sale.product_quantity')"/>
+                <article t-foreach="website_sale_order.website_order_line" t-as="line" t-attf-class="o_cart_product dk-cline #{line.linked_line_id and 'optional_product info'}" t-attf-data-product-id="#{line.product_id and line.product_id.id}">
+                    <t t-if="line.product_id">
+                        <div class="dk-cline-img">
+                            <img t-if="line._is_not_sellable_line() and line.product_id.image_256" t-att-src="image_data_uri(line.product_id.image_256)" t-att-alt="line.name_short"/>
+                            <div t-elif="line.product_id.image_256" t-field="line.product_id.image_256" t-options="{'widget': 'image', 'qweb_img_responsive': False}"/>
+                        </div>
+                        <div class="dk-cline-main">
+                            <t t-call="website_sale.cart_line_product_link">
+                                <span t-field="line.name_short" class="dk-cline-name"/>
+                            </t>
+                            <t t-call="website_sale.cart_line_description_following_lines">
+                                <t t-set="div_class" t-value="''"/>
+                            </t>
+                            <div name="o_wsale_cart_line_button_container" class="dk-cline-del">
+                                <a href="#" class="js_delete_product" aria-label="Quitar del carrito" title="Quitar del carrito"><i class="fa fa-trash-o" aria-hidden="true"/> Quitar</a>
+                            </div>
+                            <t t-if="line.product_type == 'combo'">
+                                <div t-foreach="line.linked_line_ids" t-as="combo_item_line">
+                                    <t t-call="website_sale.cart_combo_item_line"/>
+                                </div>
+                            </t>
+                        </div>
+                        <div class="dk-cline-side">
+                            <div class="css_quantity input-group" name="website_sale_cart_line_quantity">
+                                <t t-if="not line._is_not_sellable_line()">
+                                    <t t-if="show_qty">
+                                        <a href="#" class="js_add_cart_json btn btn-link" aria-label="Quitar uno" title="Quitar uno"><i class="fa fa-minus" aria-hidden="true"/></a>
+                                        <input type="text" class="js_quantity quantity form-control" t-att-data-max="line._get_max_line_qty()" t-att-data-line-id="line.id" t-att-data-product-id="line.product_id.id" t-att-value="line._get_displayed_quantity()"/>
+                                        <t t-if="line._get_shop_warning(clear=False)">
+                                            <a href="#" class="btn btn-link"><i class="fa fa-warning text-warning" t-att-title="line._get_shop_warning()" role="img" aria-label="Aviso"/></a>
+                                        </t>
+                                        <a t-else="" href="#" class="js_add_cart_json btn btn-link" aria-label="Agregar uno" title="Agregar uno"><i class="fa fa-plus" aria-hidden="true"/></a>
+                                    </t>
+                                    <t t-else="">
+                                        <input type="hidden" class="js_quantity form-control quantity" t-att-data-line-id="line.id" t-att-data-product-id="line.product_id.id" t-att-value="line._get_displayed_quantity()"/>
+                                    </t>
+                                </t>
+                                <t t-else="">
+                                    <span class="w-100 text-muted" t-esc="int(line.product_uom_qty)"/>
+                                    <input type="hidden" class="js_quantity quantity form-control" t-att-data-line-id="line.id" t-att-data-product-id="line.product_id.id" t-att-value="line._get_displayed_quantity()"/>
+                                </t>
+                            </div>
+                            <div class="availability_messages"/>
+                            <div class="dk-cline-price" name="website_sale_cart_line_price">
+                                <t t-if="line.discount and not line.is_reward_line">
+                                    <del style="white-space: nowrap;" t-out="line._get_displayed_unit_price() * line.product_uom_qty" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
+                                </t>
+                                <t t-set="product_price" t-value="line._get_cart_display_price()"/>
+                                <t t-call="website_sale.cart_product_price"/>
+                            </div>
+                        </div>
+                    </t>
+                </article>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- ===== Carrito: título claro + "Te puede interesar" ===== -->
+    <template id="dk_cart_page" inherit_id="website_sale.cart" priority="99" name="Carrito rediseñado (estilo tienda)">
+        <xpath expr="//h3[hasclass('mb-4')]" position="replace">
+            <div class="dk-cart-head">
+                <h1>Tu carrito</h1>
+                <span t-if="website_sale_order and website_sale_order.website_order_line">
+                    <t t-out="len(website_sale_order.website_order_line)"/> productos · <t t-out="int(website_sale_order.cart_quantity)"/> unidades
+                </span>
+            </div>
+        </xpath>
+        <xpath expr="//div[hasclass('clearfix')]" position="after">
+            <t t-set="dk_cart_sugs" t-value="request.env['product.template']._dk_cart_suggestions(website_sale_order, 4)"/>
+            <section t-if="dk_cart_sugs" class="dk-sec dk-cart-sugs">
+                <div class="dk-sec-head"><h2>Te puede interesar</h2></div>
+                <div class="dk-grid dk-grid-cart">
+                    <t t-foreach="dk_cart_sugs" t-as="cs">
+                        <t t-call="stock_picking_sale_buttons.dk_card"><t t-set="p" t-value="cs"/></t>
+                    </t>
+                </div>
+            </section>
+        </xpath>
+    </template>
+</odoo>

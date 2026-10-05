@@ -181,6 +181,16 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   btn-primary` (o `badge`), o sus letras salen negras sobre azul (pasó con "Agregar" y las
   etiquetas Nuevo/Rebaja en la etapa 1; corregido). La píldora del carrito no muestra dinero
   (pedido de Andrés): solo "N productos" y "N unidades en tu carrito".
+- 2026-10-05 (noche): REDISEÑO COMPLETO de tienda/ficha/carrito (v18.0.2.4.0) — Andrés dijo que
+  las etapas 1-2 se veían "igual que antes"; ahora se REEMPLAZA el diseño nativo, como las maquetas.
+  `views/website_shop_page.xml` (`dk_shop_page`, reemplaza `#wrap` de `website_sale.products`:
+  barra lateral de categorías, Nuevos / Todos / Lo más pedido, paginado), y
+  `views/website_shop_product_cart.xml` (ficha: migas propias + tarjeta Detalles; carrito: líneas
+  en tarjetas con ganchos nativos `js_quantity`/`js_delete_product`/stock/loyalty + "Te puede
+  interesar" vía `_dk_cart_suggestions`). Todas priority=99 (corren después de las nativas).
+  CSS en `shop_redesign.css`. Revertir = desactivar `dk_shop_page`, `dk_product_page`,
+  `dk_cart_lines`, `dk_cart_page` (Ajustes → Técnico → Vistas). La ficha oculta por CSS el texto
+  en inglés de "garantía 30 días / envío 2-3 días" del tema. Pendiente: probar en producción.
 - 2026-10-04: Conexión MCP a Odoo (conector "Odoo JSON-RPC" en AnythingMCP) — permite
   consultar campos, vistas y datos sin pasar por SSH (ver "Acceso a Odoo por MCP"). Causa
   del `Access Denied` inicial: faltaba la variable `ODOO_API_KEY` en Environment

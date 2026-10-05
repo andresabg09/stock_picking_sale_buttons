@@ -1,0 +1,473 @@
+/* Rediseño de la tienda (estilo tienda) — página de la tienda, ficha y carrito.
+ * Paleta Shalom: azul oscuro #0B1F3A, negro, blanco. Las tarjetas (.dk-card), la cantidad viva
+ * (.dk-buy) y la píldora están en shop_live_cart.css. Ver views/website_shop_page.xml.
+ * Recordatorio: el tema fuerza texto negro dentro de <main> salvo en .btn/.badge; por eso los
+ * elementos activos NO usan texto blanco sobre azul (usan borde + fondo claro). */
+
+/* ======================= TIENDA ======================= */
+.dk-shop {
+    background: #F4F5F7;
+}
+.dk-shop .dk-shop-in {
+    max-width: 1200px;
+    padding-top: 22px;
+    padding-bottom: 70px;
+}
+.dk-crumb {
+    margin-bottom: 18px;
+    font-size: 13px;
+    color: #2B3445;
+}
+.dk-crumb a {
+    color: #2B3445;
+    text-decoration: none;
+}
+.dk-crumb a:hover {
+    text-decoration: underline;
+}
+.dk-shop-layout {
+    display: flex;
+    align-items: flex-start;
+    gap: 28px;
+}
+.dk-side {
+    position: sticky;
+    top: 16px;
+    flex: 0 0 236px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    max-height: calc(100vh - 32px);
+    padding: 16px;
+    border: 1px solid #E3E6EB;
+    border-radius: 8px;
+    background: #fff;
+}
+.dk-side-h {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #2B3445;
+}
+.dk-side-list {
+    overflow-y: auto;
+    margin: 0 -6px;
+    padding: 0 6px;
+}
+.dk-side-list a {
+    display: block;
+    padding: 9px 12px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0A0A0A;
+    text-decoration: none;
+}
+.dk-side-list a:hover {
+    background: #F4F5F7;
+}
+.dk-side-list a.act {
+    background: #EAF0F8;
+    font-weight: 800;
+    box-shadow: inset 3px 0 0 #0B1F3A;
+}
+.dk-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 30px;
+}
+.dk-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    justify-content: space-between;
+    gap: 12px 20px;
+}
+.dk-head-t {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+}
+.dk-head h1 {
+    margin: 0;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -.01em;
+    line-height: 1.1;
+}
+.dk-count {
+    font-size: 14px;
+    color: #2B3445;
+}
+.dk-chips {
+    display: none;
+    gap: 8px;
+    margin: 0 -16px;
+    padding: 0 16px 4px;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+.dk-chips::-webkit-scrollbar {
+    display: none;
+}
+.dk-chip {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    height: 40px;
+    padding: 0 16px;
+    border: 1px solid #B8C0CE;
+    border-radius: 999px;
+    background: #fff;
+    font-size: 14px;
+    font-weight: 600;
+    color: #0A0A0A;
+    text-decoration: none;
+    white-space: nowrap;
+}
+.dk-chip.act {
+    border: 2px solid #0B1F3A;
+    background: #EAF0F8;
+    font-weight: 800;
+    padding: 0 15px;
+}
+.dk-empty {
+    padding: 60px 20px;
+    text-align: center;
+    border: 1px solid #E3E6EB;
+    border-radius: 8px;
+    background: #fff;
+}
+.dk-empty h3 {
+    margin: 0 0 8px;
+}
+.dk-empty p {
+    margin: 0 0 18px;
+    color: #2B3445;
+}
+.dk-pager {
+    display: flex;
+    justify-content: center;
+    margin-top: -6px;
+}
+.dk-shop .pagination {
+    margin: 0;
+    gap: 6px;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+.dk-shop .page-link {
+    min-width: 44px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border: 1px solid #E3E6EB;
+    border-radius: 6px !important;
+    font-weight: 700;
+}
+.dk-shop .page-item.active .page-link {
+    border: 2px solid #0B1F3A;
+    background: #EAF0F8 !important;
+    color: #0A0A0A !important;
+}
+/* Encabezado de sección: título a la izquierda, "Ver todos" a la derecha */
+.dk-sec-head {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 14px;
+}
+.dk-sec-head h2 {
+    margin: 0;
+}
+.dk-sec-head a {
+    font-size: 14px;
+    font-weight: 700;
+    color: #0B1F3A;
+    white-space: nowrap;
+}
+.dk-main .dk-sec {
+    margin-top: 0;
+}
+/* Orden: el desplegable nativo, a juego con el diseño */
+.dk-sort .btn,
+.dk-sort .dropdown-toggle {
+    height: 44px;
+    border: 1px solid #B8C0CE;
+    border-radius: 6px;
+    background: #fff;
+    font-weight: 600;
+}
+
+@media (max-width: 991.98px) {
+    .dk-side {
+        display: none;
+    }
+    .dk-chips {
+        display: flex;
+    }
+    .dk-shop-layout {
+        display: block;
+    }
+    .dk-head h1 {
+        font-size: 28px;
+    }
+    .dk-main {
+        gap: 24px;
+    }
+}
+@media (max-width: 575.98px) {
+    .dk-shop .dk-shop-in {
+        padding-top: 14px;
+        padding-bottom: 110px;
+    }
+    .dk-crumb {
+        display: none;
+    }
+}
+
+/* ======================= FICHA DE PRODUCTO ======================= */
+.o_wsale_product_page {
+    background: #F4F5F7;
+}
+.o_wsale_product_page #product_detail {
+    max-width: 1200px;
+    padding-top: 22px;
+}
+.o_wsale_product_page .o_wsale_product_images {
+    padding: 16px;
+    border: 1px solid #E3E6EB;
+    border-radius: 8px;
+    background: #fff;
+}
+.o_wsale_product_page #product_details {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.o_wsale_product_page #product_details h1 {
+    margin: 0;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -.01em;
+    line-height: 1.12;
+}
+.dk-eyebrow {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #2B3445;
+}
+.o_wsale_product_page .js_main_product .product_price,
+.o_wsale_product_page .js_main_product .oe_price,
+.o_wsale_product_page .js_main_product .oe_currency_value {
+    font-size: 40px;
+    font-weight: 800;
+    color: #0A0A0A;
+}
+.o_wsale_product_page .js_main_product .product_price {
+    margin: 6px 0 4px;
+}
+/* Texto de garantía/envío en inglés y botones de compartir del tema: fuera de la ficha */
+.o_wsale_product_page #o_product_terms_and_share {
+    display: none;
+}
+.dk-note {
+    font-size: 12px;
+    color: #2B3445;
+}
+.dk-details {
+    padding-bottom: 8px;
+}
+.dk-details-card {
+    padding: 26px;
+    border: 1px solid #E3E6EB;
+    border-radius: 8px;
+    background: #fff;
+}
+.dk-details-card h2 {
+    margin: 0 0 6px;
+    font-size: 20px;
+    font-weight: 800;
+}
+.dk-kv {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    padding: 11px 0;
+    border-bottom: 1px solid #E3E6EB;
+    font-size: 14px;
+}
+.dk-kv:last-child {
+    border-bottom: 0;
+}
+.dk-kv span:first-child {
+    color: #2B3445;
+}
+.dk-kv span:last-child {
+    font-weight: 700;
+    text-align: right;
+}
+
+/* ======================= CARRITO ======================= */
+.o_website_sale_checkout .dk-cart-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    gap: 4px 16px;
+    margin-bottom: 18px;
+}
+.o_website_sale_checkout .dk-cart-head h1 {
+    margin: 0;
+    font-size: 34px;
+    font-weight: 800;
+    letter-spacing: -.01em;
+}
+.dk-cart-head span {
+    font-size: 14px;
+    color: #2B3445;
+}
+.dk-cart-lines {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    margin-bottom: 24px;
+}
+.dk-cline {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 14px;
+    border: 1px solid #E3E6EB;
+    border-radius: 8px;
+    background: #fff;
+}
+.dk-cline-img {
+    flex: 0 0 96px;
+    width: 96px;
+    height: 96px;
+}
+.dk-cline-img img,
+.dk-cline-img > div,
+.dk-cline-img > div img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+.dk-cline-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+.dk-cline-name {
+    font-size: 15px;
+    font-weight: 700;
+    line-height: 1.3;
+    overflow-wrap: anywhere;
+}
+.dk-cline-del a {
+    font-size: 13px;
+    color: #2B3445;
+}
+.dk-cline-side {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 8px;
+}
+.dk-cline-price {
+    font-size: 18px;
+    font-weight: 800;
+    white-space: nowrap;
+}
+.dk-cline .css_quantity {
+    flex-wrap: nowrap;
+    width: 150px;
+    height: 44px;
+    border: 1px solid #0B1F3A;
+    border-radius: 6px;
+    background: #fff;
+    overflow: hidden;
+}
+.dk-cline .css_quantity .btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 44px;
+    padding: 0;
+    border: 0;
+    color: #0B1F3A;
+}
+.dk-cline .css_quantity input.quantity {
+    flex: 1;
+    min-width: 0;
+    padding: 0;
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    text-align: center;
+    font-size: 16px;
+    font-weight: 700;
+}
+/* Resumen del pedido: tarjeta con botón grande */
+.o_website_sale_checkout #o_cart_summary .o_total_card,
+.o_website_sale_checkout #o_wsale_total_accordion .o_total_card {
+    border: 1px solid #E3E6EB;
+    border-radius: 8px;
+    background: #fff;
+}
+.o_website_sale_checkout [name="website_sale_main_button"] {
+    height: 52px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 16px;
+    font-weight: 800;
+}
+.dk-cart-sugs {
+    margin-top: 12px;
+}
+.dk-grid-cart {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+@media (max-width: 991.98px) {
+    .o_wsale_product_page #product_details h1,
+    .o_website_sale_checkout .dk-cart-head h1 {
+        font-size: 28px;
+    }
+    .o_wsale_product_page .js_main_product .product_price,
+    .o_wsale_product_page .js_main_product .oe_price,
+    .o_wsale_product_page .js_main_product .oe_currency_value {
+        font-size: 34px;
+    }
+}
+@media (max-width: 575.98px) {
+    .dk-cline {
+        flex-wrap: wrap;
+        align-items: flex-start;
+    }
+    .dk-cline-img {
+        flex-basis: 72px;
+        width: 72px;
+        height: 72px;
+    }
+    .dk-cline-side {
+        flex: 1 0 100%;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+    }
+}

@@ -107,3 +107,56 @@ class ProductTemplate(models.Model):
             ])
             picked |= self.search(domain, limit=limit - len(picked), order='create_date desc')
         return picked
+
+    # ---------------------------------------------------------------- secciones de la tienda
+
+    @api.model
+    def _dk_new_days(self):
+        raw = self.env['ir.config_parameter'].sudo().get_param(NEW_DAYS_PARAM)
+        try:
+            return int(raw) if raw else NEW_DAYS_DEFAULT
+        except ValueError:
+            return NEW_DAYS_DEFAULT
+
+    @api.model
+    def _dk_new_products(self, limit=4):
+        """Lo más reciente de la tienda (creado dentro de los días de "Nuevo")."""
+        since = fields.Datetime.now() - timedelta(days=self._dk_new_days())
+        domain = expression.AND([
+            self._dk_shop_domain(),
+            [('create_date', '>=', since), ('public_categ_ids', '!=', False)],
+        ])
+        return self.search(domain, limit=limit, order='create_date desc')
+
+    @api.model
+    def _dk_bestsellers(self, limit=4, days=90):
+        """Lo más pedido en los últimos `days` días (unidades en pedidos confirmados)."""
+        Line = self.env['sale.order.line'].sudo()
+        since = fields.Datetime.now() - timedelta(days=days)
+        groups = Line._read_group(
+            [('state', 'in', ('sale', 'done')), ('create_date', '>=', since), ('price_unit', '>', 0)],
+            ['product_id'], ['product_uom_qty:sum'],
+            order='product_uom_qty:sum desc', limit=limit * 6)
+        ranked = []
+        for product, _qty in groups:
+            tmpl_id = product.product_tmpl_id.id if product else False
+            if tmpl_id and tmpl_id not in ranked:
+                ranked.append(tmpl_id)
+        if not ranked:
+            return self.browse()
+        found = self.search(expression.AND([self._dk_shop_domain(), [('id', 'in', ranked)]]))
+        return found.sorted(key=lambda t: ranked.index(t.id))[:limit]
+
+    @api.model
+    def _dk_cart_suggestions(self, order, limit=4):
+        """"Te puede interesar" del carrito: lo que otros compraron junto con lo que ya está en
+        el carrito; si faltan, lo nuevo. Nunca repite lo que ya está en el carrito."""
+        in_cart = order.website_order_line.product_id.product_tmpl_id if order else self.browse()
+        picked = self.browse()
+        for tmpl in in_cart[:5]:
+            picked |= tmpl._dk_also_bought(limit)
+        picked = (picked - in_cart)[:limit]
+        if len(picked) < limit:
+            extra = self._dk_new_products(limit * 3) - in_cart - picked
+            picked |= extra[:limit - len(picked)]
+        return picked
