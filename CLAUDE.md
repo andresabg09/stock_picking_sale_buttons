@@ -168,6 +168,12 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   Nuevos/Rebajas/Te puede interesar en tienda e inicio. "Rebaja" es solo precio tachado real
   (base_price > price_reduce); los precios de las maquetas con rebaja eran de ejemplo.
   Andrés autorizó (2026-10-05) subir a master automáticamente cada cambio (avance directo).
+  LECCIÓN de contraste: el tema (vista 3329, bloque "Lectura clara") fuerza texto NEGRO con
+  `!important` a todo lo que esté dentro de `main` y no sea `.btn`, `.badge`, `.fa`, `img`/`svg`,
+  `.o_cc3/.o_cc5`. Cualquier botón/etiqueta nuevo con fondo oscuro DEBE llevar la clase `btn
+  btn-primary` (o `badge`), o sus letras salen negras sobre azul (pasó con "Agregar" y las
+  etiquetas Nuevo/Rebaja en la etapa 1; corregido). La píldora del carrito no muestra dinero
+  (pedido de Andrés): solo "N productos" y "N unidades en tu carrito".
 - 2026-10-04: Conexión MCP a Odoo (conector "Odoo JSON-RPC" en AnythingMCP) — permite
   consultar campos, vistas y datos sin pasar por SSH (ver "Acceso a Odoo por MCP"). Causa
   del `Access Denied` inicial: faltaba la variable `ODOO_API_KEY` en Environment

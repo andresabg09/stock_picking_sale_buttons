@@ -79,9 +79,12 @@
                     n.textContent = text;
                 }
             };
-            set('.dk-pill-lines', String(d.cart_lines));
-            set('.dk-pill-sub', d.subtotal);
-            set('.dk-pill-units', String(Math.round(d.cart_quantity)));
+            var lines = d.cart_lines;
+            var units = Math.round(d.cart_quantity);
+            set('.dk-pill-lines', String(lines));
+            set('.dk-pill-word', lines === 1 ? 'producto' : 'productos');
+            set('.dk-pill-units', String(units));
+            set('.dk-pill-uword', units === 1 ? 'unidad' : 'unidades');
             pill.classList.toggle('d-none', !d.cart_lines);
         }
     }

@@ -53,5 +53,4 @@ class ShopLiveCart(http.Controller):
             'line_total': format_amount(request.env, line._get_cart_display_price(), currency) if line else '',
             'cart_quantity': order.cart_quantity,
             'cart_lines': len(lines),
-            'subtotal': format_amount(request.env, order.amount_untaxed, currency),
         }

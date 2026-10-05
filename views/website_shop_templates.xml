@@ -8,8 +8,8 @@
     <template id="products_item_live_qty" inherit_id="website_sale.products_item" name="Tarjeta: cantidad viva y etiquetas">
         <xpath expr="//a[hasclass('oe_product_image_link')]" position="inside">
             <t t-set="dk_pv" t-value="get_product_prices(product)"/>
-            <span t-if="product.dk_is_new" class="dk-badge dk-badge-new">Nuevo</span>
-            <span t-if="dk_pv['price_reduce'] and 'base_price' in dk_pv and dk_pv['base_price'] &gt; dk_pv['price_reduce']" class="dk-badge dk-badge-sale">Rebaja</span>
+            <span t-if="product.dk_is_new" class="badge dk-badge dk-badge-new">Nuevo</span>
+            <span t-if="dk_pv['price_reduce'] and 'base_price' in dk_pv and dk_pv['base_price'] &gt; dk_pv['price_reduce']" class="badge dk-badge dk-badge-sale">Rebaja</span>
         </xpath>
         <xpath expr="//div[hasclass('o_wsale_product_information')]" position="inside">
             <t t-set="dk_variant" t-value="product._get_first_possible_variant_id()"/>
@@ -19,7 +19,7 @@
                 <t t-set="dk_line" t-value="dk_order.website_order_line.filtered_domain([('product_id', '=', dk_variant)])[:1]"/>
                 <t t-set="dk_qty" t-value="int(dk_line.product_uom_qty) if dk_line else 0"/>
                 <div class="dk-buy" t-att-data-product-id="dk_variant" t-att-data-qty="dk_qty" t-att-data-state="'in' if dk_qty else 'out'">
-                    <button type="button" class="dk-add">Agregar</button>
+                    <button type="button" class="dk-add btn btn-primary">Agregar</button>
                     <div class="dk-live">
                         <div class="dk-stp">
                             <button type="button" class="dk-minus" aria-label="Menos">&#8722;</button>
@@ -33,7 +33,7 @@
                 </div>
             </t>
             <t t-else="">
-                <a t-att-href="product_href" class="dk-options">Ver opciones</a>
+                <a t-att-href="product_href" class="dk-options btn btn-outline-primary">Ver opciones</a>
             </t>
         </xpath>
     </template>
@@ -45,8 +45,8 @@
                 <t t-set="dk_o" t-value="website.sale_get_order()"/>
                 <a href="/shop/cart" id="dk-pill" t-attf-class="dk-pill #{'' if dk_o.website_order_line else 'd-none'}" aria-label="Ver carrito">
                     <span class="dk-pill-txt">
-                        <b><span class="dk-pill-lines" t-out="len(dk_o.website_order_line)"/> productos · <span class="dk-pill-sub" t-out="dk_o.amount_untaxed" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/></b>
-                        <small><span class="dk-pill-units" t-out="int(dk_o.cart_quantity)"/> unidades en tu carrito</small>
+                        <b><span class="dk-pill-lines" t-out="len(dk_o.website_order_line)"/> <span class="dk-pill-word" t-out="'producto' if len(dk_o.website_order_line) == 1 else 'productos'"/></b>
+                        <small><span class="dk-pill-units" t-out="int(dk_o.cart_quantity)"/> <span class="dk-pill-uword" t-out="'unidad' if int(dk_o.cart_quantity) == 1 else 'unidades'"/> en tu carrito</small>
                     </span>
                     <span class="dk-pill-go">Ver carrito</span>
                 </a>

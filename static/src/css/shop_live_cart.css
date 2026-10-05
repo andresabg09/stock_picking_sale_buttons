@@ -107,11 +107,15 @@
     font-weight: 800;
     line-height: 1.4;
 }
+.dk-badge,
+.dk-badge:hover {
+    color: #fff !important;
+}
 .dk-badge-new {
-    background: #0B1F3A;
+    background: #0B1F3A !important;
 }
 .dk-badge-sale {
-    background: #0A0A0A;
+    background: #0A0A0A !important;
 }
 .dk-badge-new + .dk-badge-sale {
     top: 34px;
