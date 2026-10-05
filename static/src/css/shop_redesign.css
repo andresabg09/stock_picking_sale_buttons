@@ -471,3 +471,50 @@
         justify-content: space-between;
     }
 }
+
+/* ======================= BUSCADOR DEL ENCABEZADO: lista de sugerencias ======================= */
+/* La caja (.dk-hsearch, definida en el tema) recorta con overflow:hidden y 44px de alto: la lista
+ * del autocompletado nativo quedaba atrapada adentro. Aquí cae debajo como un desplegable. */
+header#top .dk-hsearch {
+    position: relative;
+    overflow: visible !important;
+}
+header#top .dk-hsearch .dk-hsearch-input {
+    border-radius: 6px 0 0 6px !important;
+}
+header#top .dk-hsearch .dk-hsearch-btn {
+    border-radius: 0 5px 5px 0;
+}
+header#top .dk-hsearch .dropdown-menu,
+header#top .dk-hsearch .o_dropdown_menu {
+    position: absolute !important;
+    inset: calc(100% + 6px) 0 auto 0 !important;
+    transform: none !important;
+    width: 100%;
+    max-height: min(70vh, 520px);
+    overflow-y: auto;
+    margin: 0;
+    padding: 6px;
+    z-index: 1050;
+    border: 1px solid #E3E6EB;
+    border-radius: 8px;
+    background: #fff;
+    box-shadow: 0 12px 32px rgba(11, 31, 58, .18);
+}
+header#top .dk-hsearch .dropdown-item,
+header#top .dk-hsearch .o_search_result_item {
+    display: block;
+    padding: 8px 10px;
+    border-radius: 6px;
+    white-space: normal;
+    color: #0A0A0A;
+}
+header#top .dk-hsearch .dropdown-item:hover,
+header#top .dk-hsearch .dropdown-item:focus {
+    background: #EAF0F8;
+}
+header#top .dk-hsearch .dropdown-item img {
+    width: 48px;
+    height: 48px;
+    object-fit: contain;
+}
