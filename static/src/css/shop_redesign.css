@@ -644,11 +644,11 @@ header#top .dk-hsearch .dk-hsearch-btn {
     overflow: hidden;
     box-sizing: border-box;
     height: 400px;
-    padding: 0 80px;
+    padding: 0 64px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    gap: 40px;
+    gap: 32px;
     background: #0B1F3A;
     color: #fff;
     text-decoration: none;
@@ -668,6 +668,8 @@ header#top .dk-hsearch .dk-hsearch-btn {
 }
 #dk-home .dk-hero .dk-b-txt {
     display: flex;
+    flex: 1 1 0;
+    min-width: 0;
     flex-direction: column;
     gap: 14px;
     max-width: 470px;
@@ -681,7 +683,7 @@ header#top .dk-hsearch .dk-hsearch-btn {
 }
 #dk-home .dk-hero .dk-b h1 {
     margin: 0;
-    font-size: 60px;
+    font-size: 56px;
     font-weight: 800;
     line-height: 1.04;
     letter-spacing: -.02em;
@@ -749,21 +751,22 @@ header#top .dk-hsearch .dk-hsearch-btn {
 /* Fotos en abanico */
 #dk-home .dk-hero .dk-b-cards {
     display: flex;
+    flex: 0 0 auto;
     align-items: center;
-    gap: 18px;
+    gap: 14px;
 }
 #dk-home .dk-hero .dk-b-card {
     box-sizing: border-box;
-    width: 230px;
-    height: 300px;
-    padding: 12px;
+    width: 200px;
+    height: 264px;
+    padding: 10px;
     border-radius: 12px;
     background: #fff;
     box-shadow: 0 22px 46px rgba(0, 0, 0, .32);
 }
 #dk-home .dk-hero .dk-b-card.dk-b-side {
-    width: 210px;
-    height: 270px;
+    width: 178px;
+    height: 232px;
     box-shadow: 0 18px 40px rgba(0, 0, 0, .28);
 }
 #dk-home .dk-hero .dk-b-left {
@@ -785,7 +788,8 @@ header#top .dk-hsearch .dk-hsearch-btn {
 /* Tarjeta "Tu lista" (Pedido rápido) */
 #dk-home .dk-hero .dk-ui {
     box-sizing: border-box;
-    width: 500px;
+    flex: 0 0 auto;
+    width: 460px;
     padding: 18px 20px 20px;
     border-radius: 14px;
     background: #fff;
@@ -856,8 +860,9 @@ header#top .dk-hsearch .dk-hsearch-btn {
 /* Tarjeta de días de despacho */
 #dk-home .dk-hero .dk-sch {
     box-sizing: border-box;
-    width: 520px;
-    padding: 28px 30px;
+    flex: 0 0 auto;
+    width: 460px;
+    padding: 26px 28px;
     border-radius: 16px;
     background: #0B1F3A;
     color: #fff;
