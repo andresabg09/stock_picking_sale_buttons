@@ -634,3 +634,459 @@ header#top .dk-hsearch .dk-hsearch-btn {
         height: 120px;
     }
 }
+
+/* ======================= BANNER DEL INICIO (carrusel horizontal) ======================= */
+#dk-home .dk-hero .dk-b {
+    flex: 0 0 100%;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
+    position: relative;
+    overflow: hidden;
+    box-sizing: border-box;
+    height: 400px;
+    padding: 0 80px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 40px;
+    background: #0B1F3A;
+    color: #fff;
+    text-decoration: none;
+}
+#dk-home .dk-hero .dk-b::before {
+    content: "";
+    position: absolute;
+    right: -120px;
+    top: -140px;
+    width: 640px;
+    height: 640px;
+    border-radius: 50%;
+    background: #12305A;
+}
+#dk-home .dk-hero .dk-b > * {
+    position: relative;
+}
+#dk-home .dk-hero .dk-b-txt {
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    max-width: 470px;
+}
+#dk-home .dk-hero .dk-b-eyebrow {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    color: #B8C7E0;
+}
+#dk-home .dk-hero .dk-b h1 {
+    margin: 0;
+    font-size: 60px;
+    font-weight: 800;
+    line-height: 1.04;
+    letter-spacing: -.02em;
+    color: #fff;
+}
+#dk-home .dk-hero .dk-b p {
+    margin: 0;
+    max-width: none;
+    font-size: 18px;
+    line-height: 1.5;
+    color: #D5DEEE;
+}
+#dk-home .dk-hero .dk-b-cta {
+    align-self: flex-start;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    height: 52px;
+    margin-top: 8px;
+    padding: 0 28px;
+    border-radius: 6px;
+    background: #fff;
+    color: #0B1F3A;
+    font-size: 15px;
+    font-weight: 800;
+}
+/* Variante clara (Skala) y blanca (Despachos) */
+#dk-home .dk-hero .dk-b-light {
+    background: #E9EEF6;
+    color: #0B1F3A;
+}
+#dk-home .dk-hero .dk-b-light::before {
+    right: auto;
+    top: auto;
+    left: -160px;
+    bottom: -220px;
+    width: 560px;
+    height: 560px;
+    background: #DAE3F1;
+}
+#dk-home .dk-hero .dk-b-white {
+    background: #fff;
+    color: #0B1F3A;
+}
+#dk-home .dk-hero .dk-b-white::before {
+    display: none;
+}
+#dk-home .dk-hero .dk-b-light h1,
+#dk-home .dk-hero .dk-b-white h1 {
+    color: #0B1F3A;
+}
+#dk-home .dk-hero .dk-b-light p,
+#dk-home .dk-hero .dk-b-white p {
+    color: #24365A;
+}
+#dk-home .dk-hero .dk-b-light .dk-b-eyebrow,
+#dk-home .dk-hero .dk-b-white .dk-b-eyebrow {
+    color: #3C5278;
+}
+#dk-home .dk-hero .dk-b-light .dk-b-cta,
+#dk-home .dk-hero .dk-b-white .dk-b-cta {
+    background: #0B1F3A;
+    color: #fff;
+}
+/* Fotos en abanico */
+#dk-home .dk-hero .dk-b-cards {
+    display: flex;
+    align-items: center;
+    gap: 18px;
+}
+#dk-home .dk-hero .dk-b-card {
+    box-sizing: border-box;
+    width: 230px;
+    height: 300px;
+    padding: 12px;
+    border-radius: 12px;
+    background: #fff;
+    box-shadow: 0 22px 46px rgba(0, 0, 0, .32);
+}
+#dk-home .dk-hero .dk-b-card.dk-b-side {
+    width: 210px;
+    height: 270px;
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .28);
+}
+#dk-home .dk-hero .dk-b-left {
+    transform: rotate(-4deg) translateY(14px);
+}
+#dk-home .dk-hero .dk-b-right {
+    transform: rotate(4deg) translateY(14px);
+}
+#dk-home .dk-hero .dk-b-light .dk-b-card {
+    border: 1px solid #D3DBE8;
+    box-shadow: 0 20px 40px rgba(11, 31, 58, .18);
+}
+#dk-home .dk-hero .dk-b-card img {
+    display: block;
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+}
+/* Tarjeta "Tu lista" (Pedido rápido) */
+#dk-home .dk-hero .dk-ui {
+    box-sizing: border-box;
+    width: 500px;
+    padding: 18px 20px 20px;
+    border-radius: 14px;
+    background: #fff;
+    color: #0A0A0A;
+    box-shadow: 0 24px 50px rgba(0, 0, 0, .35);
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+#dk-home .dk-hero .dk-ui-h {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #3C5278;
+}
+#dk-home .dk-hero .dk-ui-box {
+    box-sizing: border-box;
+    padding: 10px 14px;
+    border: 1px solid #D3DBE8;
+    border-radius: 8px;
+    background: #F4F5F7;
+    font-size: 15px;
+    font-weight: 600;
+    line-height: 1.7;
+    color: #0A0A0A;
+}
+#dk-home .dk-hero .dk-ui-ok {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 13px;
+    font-weight: 800;
+    color: #0B1F3A;
+}
+#dk-home .dk-hero .dk-ui-rows {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+#dk-home .dk-hero .dk-ui-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 10px 6px 6px;
+    border: 1px solid #E3E6EB;
+    border-radius: 8px;
+}
+#dk-home .dk-hero .dk-ui-row img {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+}
+#dk-home .dk-hero .dk-ui-row span {
+    flex: 1;
+    font-size: 14px;
+    font-weight: 700;
+    color: #0A0A0A;
+}
+#dk-home .dk-hero .dk-ui-row b {
+    padding: 4px 12px;
+    border-radius: 999px;
+    background: #EAF0F8;
+    color: #0B1F3A;
+    font-size: 13px;
+    font-weight: 800;
+}
+/* Tarjeta de días de despacho */
+#dk-home .dk-hero .dk-sch {
+    box-sizing: border-box;
+    width: 520px;
+    padding: 28px 30px;
+    border-radius: 16px;
+    background: #0B1F3A;
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    gap: 22px;
+}
+#dk-home .dk-hero .dk-sch-h {
+    font-size: 12px;
+    font-weight: 800;
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    color: #B8C7E0;
+}
+#dk-home .dk-hero .dk-sch-days {
+    display: grid;
+    grid-template-columns: repeat(7, minmax(0, 1fr));
+    gap: 8px;
+}
+#dk-home .dk-hero .dk-sch-day {
+    height: 64px;
+    border-radius: 10px;
+    background: #fff;
+    color: #0B1F3A;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+}
+#dk-home .dk-hero .dk-sch-day span {
+    font-size: 20px;
+    font-weight: 800;
+}
+#dk-home .dk-hero .dk-sch-day small {
+    font-size: 12px;
+    font-weight: 700;
+}
+#dk-home .dk-hero .dk-sch-day.off {
+    background: transparent;
+    border: 1px solid #3A5580;
+    color: #9FB1D0;
+}
+#dk-home .dk-hero .dk-sch-hours {
+    display: flex;
+    justify-content: space-between;
+    font-size: 14px;
+    font-weight: 800;
+}
+#dk-home .dk-hero .dk-sch-bar {
+    height: 10px;
+    margin-top: -14px;
+    border-radius: 999px;
+    background: #fff;
+}
+/* Puntos del carrusel: píldora oscura, se ven sobre banners claros u oscuros */
+#dk-home .dk-hero .dk-dots {
+    left: 50%;
+    right: auto;
+    bottom: 12px;
+    transform: translateX(-50%);
+    padding: 0 10px;
+    border-radius: 999px;
+    background: rgba(11, 31, 58, .55);
+}
+
+/* ======================= FRANJA DE 3 SERVICIOS ======================= */
+#dk-home .dk-svc {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+}
+#dk-home .dk-svc-i {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 16px 18px;
+    border: 1px solid #E3E6EB;
+    border-radius: 8px;
+    background: #fff;
+    color: #0A0A0A;
+}
+#dk-home .dk-svc-ico {
+    flex: 0 0 44px;
+    width: 44px;
+    height: 44px;
+    border-radius: 10px;
+    background: #EAF0F8;
+    color: #0B1F3A;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+#dk-home .dk-svc-t {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+#dk-home .dk-svc-t b {
+    font-size: 15px;
+}
+#dk-home .dk-svc-t small {
+    font-size: 13px;
+    color: #5A6577;
+}
+
+/* Tablet y celular: el banner sigue siendo horizontal (texto a la izquierda, imagen a la derecha) */
+@media (max-width: 900px) {
+    #dk-home .dk-hero .dk-b {
+        height: 184px;
+        padding: 0 16px 0 20px;
+        gap: 8px;
+    }
+    #dk-home .dk-hero .dk-b::before {
+        right: -60px;
+        top: -70px;
+        width: 260px;
+        height: 260px;
+    }
+    #dk-home .dk-hero .dk-b-light::before {
+        left: -90px;
+        bottom: -120px;
+    }
+    #dk-home .dk-hero .dk-b-txt {
+        gap: 6px;
+        max-width: 170px;
+    }
+    #dk-home .dk-hero .dk-b-eyebrow {
+        font-size: 10px;
+        letter-spacing: .1em;
+    }
+    #dk-home .dk-hero .dk-b h1 {
+        font-size: 26px;
+    }
+    #dk-home .dk-hero .dk-b p {
+        display: none;
+    }
+    #dk-home .dk-hero .dk-b-cta {
+        height: 44px;
+        margin-top: 6px;
+        padding: 0 16px;
+        font-size: 13px;
+    }
+    #dk-home .dk-hero .dk-b-cta svg {
+        display: none;
+    }
+    #dk-home .dk-hero .dk-b-cards {
+        gap: 0;
+    }
+    #dk-home .dk-hero .dk-b-card {
+        width: 92px;
+        height: 124px;
+        padding: 6px;
+        margin-left: -14px;
+        border-radius: 8px;
+    }
+    #dk-home .dk-hero .dk-b-card.dk-b-side {
+        width: 84px;
+        height: 112px;
+        margin-left: 0;
+    }
+    #dk-home .dk-hero .dk-b-right {
+        display: none;
+    }
+    #dk-home .dk-hero .dk-b-left {
+        transform: rotate(-5deg);
+    }
+    #dk-home .dk-hero .dk-ui {
+        width: 168px;
+        padding: 10px;
+        gap: 6px;
+        border-radius: 10px;
+    }
+    #dk-home .dk-hero .dk-ui-h,
+    #dk-home .dk-hero .dk-ui-ok,
+    #dk-home .dk-hero .dk-ui-more {
+        display: none;
+    }
+    #dk-home .dk-hero .dk-ui-box {
+        padding: 5px 8px;
+        font-size: 11px;
+        line-height: 1.5;
+    }
+    #dk-home .dk-hero .dk-ui-row {
+        gap: 6px;
+        padding: 3px 6px 3px 3px;
+        border-radius: 6px;
+    }
+    #dk-home .dk-hero .dk-ui-row img {
+        width: 24px;
+        height: 24px;
+    }
+    #dk-home .dk-hero .dk-ui-row span {
+        font-size: 10px;
+    }
+    #dk-home .dk-hero .dk-ui-row b {
+        padding: 2px 7px;
+        font-size: 10px;
+    }
+    #dk-home .dk-hero .dk-sch {
+        width: 170px;
+        padding: 12px;
+        gap: 8px;
+        border-radius: 10px;
+    }
+    #dk-home .dk-hero .dk-sch-h,
+    #dk-home .dk-hero .dk-sch-hours {
+        display: none;
+    }
+    #dk-home .dk-hero .dk-sch-bar {
+        margin-top: 0;
+        height: 6px;
+    }
+    #dk-home .dk-hero .dk-sch-days {
+        gap: 3px;
+    }
+    #dk-home .dk-hero .dk-sch-day {
+        height: 38px;
+        border-radius: 6px;
+    }
+    #dk-home .dk-hero .dk-sch-day span {
+        font-size: 14px;
+    }
+    #dk-home .dk-hero .dk-sch-day small {
+        display: none;
+    }
+    #dk-home .dk-svc {
+        grid-template-columns: 1fr;
+        gap: 10px;
+    }
+}
