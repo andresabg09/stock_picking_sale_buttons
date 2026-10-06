@@ -970,59 +970,75 @@ header#top .dk-hsearch .dk-hsearch-btn {
     color: #5A6577;
 }
 
-/* Tablet y celular: el banner sigue siendo horizontal (texto a la izquierda, imagen a la derecha) */
+/* Tablet y celular: el banner sigue siendo horizontal (texto a la izquierda, fotos grandes a la derecha),
+ * a todo el ancho de la pantalla, sin recortes, y los puntos van debajo (no tapan los botones). */
 @media (max-width: 900px) {
+    /* a todo el ancho de la pantalla, sin importar los márgenes de la página */
+    #dk-home .dk-hero {
+        width: 100vw;
+        margin-left: calc(50% - 50vw);
+        margin-right: 0;
+    }
+    #dk-home .dk-hero .dk-slides {
+        border-radius: 0;
+    }
     #dk-home .dk-hero .dk-b {
-        height: 184px;
-        padding: 0 16px 0 20px;
-        gap: 8px;
+        height: 224px;
+        padding: 0 14px 0 20px;
+        gap: 6px;
     }
     #dk-home .dk-hero .dk-b::before {
-        right: -60px;
-        top: -70px;
-        width: 260px;
-        height: 260px;
+        right: -70px;
+        top: -80px;
+        width: 280px;
+        height: 280px;
     }
     #dk-home .dk-hero .dk-b-light::before {
         left: -90px;
         bottom: -120px;
     }
     #dk-home .dk-hero .dk-b-txt {
+        flex: 1 1 0;
+        min-width: 0;
+        max-width: none;
         gap: 6px;
-        max-width: 170px;
     }
     #dk-home .dk-hero .dk-b-eyebrow {
         font-size: 10px;
-        letter-spacing: .1em;
+        letter-spacing: .08em;
     }
     #dk-home .dk-hero .dk-b h1 {
-        font-size: 26px;
+        font-size: 23px;
+        line-height: 1.08;
     }
     #dk-home .dk-hero .dk-b p {
         display: none;
     }
     #dk-home .dk-hero .dk-b-cta {
-        height: 44px;
-        margin-top: 6px;
+        height: 42px;
+        margin-top: 8px;
         padding: 0 16px;
         font-size: 13px;
+        white-space: nowrap;
     }
-    #dk-home .dk-hero .dk-b-cta svg {
+    #dk-home .dk-hero .dk-b-cta svg,
+    #dk-home .dk-hero .dk-b-cta .dk-l {
         display: none;
     }
     #dk-home .dk-hero .dk-b-cards {
+        flex: 0 0 auto;
         gap: 0;
     }
     #dk-home .dk-hero .dk-b-card {
-        width: 92px;
-        height: 124px;
-        padding: 6px;
-        margin-left: -14px;
-        border-radius: 8px;
+        width: 118px;
+        height: 164px;
+        padding: 7px;
+        margin-left: -20px;
+        border-radius: 10px;
     }
     #dk-home .dk-hero .dk-b-card.dk-b-side {
-        width: 84px;
-        height: 112px;
+        width: 104px;
+        height: 144px;
         margin-left: 0;
     }
     #dk-home .dk-hero .dk-b-right {
@@ -1032,7 +1048,7 @@ header#top .dk-hsearch .dk-hsearch-btn {
         transform: rotate(-5deg);
     }
     #dk-home .dk-hero .dk-ui {
-        width: 168px;
+        width: 196px;
         padding: 10px;
         gap: 6px;
         border-radius: 10px;
@@ -1043,52 +1059,74 @@ header#top .dk-hsearch .dk-hsearch-btn {
         display: none;
     }
     #dk-home .dk-hero .dk-ui-box {
-        padding: 5px 8px;
+        padding: 6px 9px;
         font-size: 11px;
         line-height: 1.5;
+        white-space: nowrap;
+        overflow: hidden;
     }
     #dk-home .dk-hero .dk-ui-row {
         gap: 6px;
-        padding: 3px 6px 3px 3px;
+        padding: 4px 8px 4px 4px;
         border-radius: 6px;
     }
     #dk-home .dk-hero .dk-ui-row img {
-        width: 24px;
-        height: 24px;
+        width: 28px;
+        height: 28px;
     }
     #dk-home .dk-hero .dk-ui-row span {
-        font-size: 10px;
+        min-width: 0;
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        font-size: 11px;
     }
     #dk-home .dk-hero .dk-ui-row b {
-        padding: 2px 7px;
-        font-size: 10px;
+        padding: 2px 8px;
+        font-size: 11px;
     }
     #dk-home .dk-hero .dk-sch {
-        width: 170px;
+        width: 196px;
         padding: 12px;
         gap: 8px;
         border-radius: 10px;
     }
-    #dk-home .dk-hero .dk-sch-h,
-    #dk-home .dk-hero .dk-sch-hours {
+    #dk-home .dk-hero .dk-sch-h {
         display: none;
-    }
-    #dk-home .dk-hero .dk-sch-bar {
-        margin-top: 0;
-        height: 6px;
     }
     #dk-home .dk-hero .dk-sch-days {
         gap: 3px;
     }
     #dk-home .dk-hero .dk-sch-day {
-        height: 38px;
+        height: 40px;
         border-radius: 6px;
     }
     #dk-home .dk-hero .dk-sch-day span {
-        font-size: 14px;
+        font-size: 13px;
     }
     #dk-home .dk-hero .dk-sch-day small {
         display: none;
+    }
+    #dk-home .dk-hero .dk-sch-hours {
+        font-size: 11px;
+    }
+    #dk-home .dk-hero .dk-sch-bar {
+        height: 6px;
+        margin-top: -4px;
+    }
+    /* Puntos debajo del banner */
+    #dk-home .dk-hero .dk-dots {
+        position: static;
+        transform: none;
+        margin-top: 8px;
+        padding: 0;
+        background: transparent;
+    }
+    #dk-home .dk-hero .dk-dot::before {
+        background: rgba(11, 31, 58, .22);
+    }
+    #dk-home .dk-hero .dk-dot.on::before {
+        background: #0B1F3A;
     }
     #dk-home .dk-svc {
         grid-template-columns: 1fr;
