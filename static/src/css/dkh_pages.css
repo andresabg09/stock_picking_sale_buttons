@@ -292,3 +292,13 @@
 .dkh #dk-home.qo .qo-sug-add { flex: 1; height: 44px; border: 0; border-radius: 999px; background: var(--dkh-navy); color: #fff; font: 600 15px var(--dkh-font); cursor: pointer; }
 .dkh #dk-home.qo .qo-sug-add:disabled { opacity: .6; cursor: default; }
 @media (max-width: 640px) { .dkh #dk-home.qo .qo-sugs { grid-template-columns: 1fr; } }
+
+/* Sugerencias/opciones del Pedido rápido: se ve claro que NO están en el pedido */
+.dkh #dk-home.qo .qo-sbox { border: 2px dashed var(--dkh-pink-d); border-radius: 26px; background: #FFF6F9; padding: 14px; width: 100%; }
+.dkh #dk-home.qo .qo-shead { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
+.dkh #dk-home.qo .qo-stag { flex: 0 0 auto; background: var(--dkh-pink-d); color: #fff; border-radius: 999px; padding: 4px 12px; font: 800 11px var(--dkh-font); letter-spacing: .12em; }
+.dkh #dk-home.qo .qo-stxt { font-size: 13px; line-height: 1.4; color: var(--dkh-ink-2); }
+.dkh #dk-home.qo .qo-sug { position: relative; padding-top: 38px; }
+.dkh #dk-home.qo .qo-state { position: absolute; top: 10px; left: 12px; border-radius: 999px; padding: 3px 10px; font: 700 11px var(--dkh-font); }
+.dkh #dk-home.qo .qo-state.no { background: #EEF0F5; color: var(--dkh-mute); }
+.dkh #dk-home.qo .qo-state.yes { background: #DDF3E6; color: #1F6B45; }

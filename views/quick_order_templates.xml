@@ -117,13 +117,22 @@
   }
   /* Opciones como catálogo: foto, nombre, precio, cantidad y botón Agregar en cada tarjeta. */
   function catalog(l){
+    var box=el('div','qo-sbox');
+    var head=el('div','qo-shead');
+    head.appendChild(el('span','qo-stag',l.status==='suggest'?'SUGERENCIAS':'OPCIONES'));
+    head.appendChild(el('span','qo-stxt',(l.status==='suggest'
+      ?'No encontramos exactamente lo que escribiste. Estos productos se parecen, pero NO están en tu pedido todavía.'
+      :'Hay varios productos que coinciden. Ninguno está en tu pedido todavía: toca Agregar en el que quieras.')));
+    box.appendChild(head);
     var grid=el('div','qo-sugs');
+    box.appendChild(grid);
     l.options.forEach(function(o){
       if(!o.q){o.q=norm(o,l.qty);}
       var card=el('div','qo-sug'+(o.added?' on':''));
+      card.appendChild(el('span',o.added?'qo-state yes':'qo-state no',o.added?'✓ En tu pedido':'No agregado'));
       var im=el('img'); im.src=o.image; im.alt=''; im.loading='lazy'; card.appendChild(im);
       var tx=el('div','qo-sug-t'); tx.appendChild(el('b',null,o.name)); tx.appendChild(el('small',null,money(o.price)+' c/u'));
-      if(o.added){tx.appendChild(el('span','qo-adj','✓ '+o.added+' en tu pedido'));}
+      if(o.added){tx.appendChild(el('span','qo-adj',o.added+' agregadas'));}
       card.appendChild(tx);
       if(o.variants){
         var a=el('a','qo-link','Tiene variantes: ábrelo'); a.href=o.url; card.appendChild(a);
@@ -144,7 +153,7 @@
       }
       grid.appendChild(card);
     });
-    return grid;
+    return box;
   }
   function render(){
     out.textContent='';
