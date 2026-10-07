@@ -182,7 +182,7 @@
 /* ==========================================================================
    Lote C — carrito, confirmación, gracias, Pedido rápido y escáner (todo bajo .dkh)
    ========================================================================== */
-.dkh a[href^="/shop/checkout"], .dkh [name="website_sale_main_button"] { display: none !important; }
+.dkh a[href^="/shop/checkout"]:not(.dkh-btn), .dkh [name="website_sale_main_button"] { display: none !important; }
 .dkh .dk-cart-head h1 { font-weight: 800; letter-spacing: -.045em; text-transform: lowercase; color: var(--dkh-navy); }
 .dkh .dk-cline { border: 0; border-radius: 26px; background: #F6F8FD; }
 .dkh .dk-cline-name { color: var(--dkh-navy) !important; font-weight: 600; }
@@ -232,3 +232,6 @@
     .dkh-confirm-grid { grid-template-columns: 1fr; }
     .dkh-thanks { padding-top: 56px; }
 }
+
+.dkh .dkh-btn-off { opacity: .45; cursor: default; pointer-events: none; }
+.dkh .dk-cline.dk-busy { opacity: .6; transition: opacity .15s; }

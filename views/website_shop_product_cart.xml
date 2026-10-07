@@ -33,7 +33,7 @@
         <xpath expr="//div[@id='cart_products']" position="replace">
             <div id="cart_products" t-if="website_sale_order and website_sale_order.website_order_line" class="js_cart_lines dk-cart-lines">
                 <t t-set="show_qty" t-value="is_view_active('website_sale.product_quantity')"/>
-                <article t-foreach="website_sale_order.website_order_line" t-as="line" t-attf-class="o_cart_product dk-cline #{line.linked_line_id and 'optional_product info'}" t-attf-data-product-id="#{line.product_id and line.product_id.id}">
+                <article t-foreach="website_sale_order.website_order_line" t-as="line" t-attf-class="o_cart_product dk-cline #{line.linked_line_id and 'optional_product info'}" t-attf-data-product-id="#{line.product_id and line.product_id.id}" t-att-data-min="line.product_id and line.product_id._dkh_qty_rule()[0]" t-att-data-step="line.product_id and line.product_id._dkh_qty_rule()[1]">
                     <t t-if="line.product_id">
                         <div class="dk-cline-img">
                             <img t-if="line._is_not_sellable_line() and line.product_id.image_256" t-att-src="image_data_uri(line.product_id.image_256)" t-att-alt="line.name_short"/>

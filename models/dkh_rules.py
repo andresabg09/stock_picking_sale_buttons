@@ -9,6 +9,7 @@ Solo se aplican a pedidos con sitio web (`website_id`): las ventas internas y la
 no pasan por aquí.
 """
 from odoo import models
+from odoo.exceptions import ValidationError
 
 MIN_UNITS = 6
 TINTE_MIN = 5
@@ -118,3 +119,12 @@ class SaleOrder(models.Model):
                         set_qty, add_qty = fixed, 0
         return super()._cart_update(
             product_id=product_id, line_id=line_id, add_qty=add_qty, set_qty=set_qty, **kwargs)
+
+    def _check_cart_is_ready_to_be_paid(self):
+        """Con la Versión H encendida, el pedido mínimo también se exige en el servidor (aunque
+        alguien abra /shop/payment directo por URL). Si Odoo no trae este chequeo, no se usa."""
+        for order in self:
+            if order.website_id and order.website_id.dkh_active() and order._dkh_min_missing() > 0:
+                raise ValidationError(
+                    'Todavía no llegas al pedido mínimo: te faltan B/. %.2f.' % order._dkh_min_missing())
+        return super()._check_cart_is_ready_to_be_paid()

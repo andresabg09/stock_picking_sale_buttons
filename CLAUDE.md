@@ -512,4 +512,14 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   ruta nativa /shop/checkout NO se bloquea todavía), Pedido rápido v2 (`dkh.quick.alias` = memoria
   por cliente, sugerencias hasta 3 ordenadas por historial de compra, "No es este", etiqueta
   "cantidad ajustada"). Pendiente: etapa 9 (pedido por foto con IA), 10 (pruebas y cambio) y 11.
+- 2026-10-08: Ajustes tras probar el Lote C (v18.0.3.3.0). (1) Carrito en vivo: `dkh_cart.js` toma el
+  control de +/−/escribir/quitar en `.dk-cline` (fase de captura), llama `/shop/dk/set_qty` y
+  reemplaza las piezas del carrito (líneas, resumen, barra) sin refrescar. (2) Se QUITÓ el panel de
+  Forma de Pago/Fecha especial/ITBMS del carrito y la ruta `/shop/dk/confirmar`: eso es de la venta
+  en ruta; los clientes de la web SIEMPRE pagan ITBMS 7% y con tarjeta o transferencia, así que
+  "Finalizar compra" sigue el flujo NATIVO de Odoo (solo se habilita con el pedido mínimo).
+  (3) `action_confirm`: en pedidos de la web con pago en línea se llena solo la forma de pago
+  (transferencia si el proveedor es `custom`, si no tarjeta) e ITBMS sí, sin abrir el pop-up de ruta.
+  (4) `_check_cart_is_ready_to_be_paid` exige el pedido mínimo en el servidor con la H encendida
+  (si este Odoo no trae ese método, no tiene efecto). Hoy NO hay `payment.provider` activo.
 

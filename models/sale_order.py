@@ -95,6 +95,15 @@ class SaleOrder(models.Model):
         wizard (`sale.confirm.payment.wizard`) para volver a llamar a este
         método una vez ya guardó la forma de pago, sin caer otra vez en el
         pop-up."""
+        # Pedidos de la tienda con pago en línea: la forma de pago sale de la transacción
+        # (transferencia o tarjeta) y el ITBMS va incluido; no se pregunta nada.
+        for order in self.filtered(lambda o: o.website_id and not o.custom_payment_method):
+            txs = order.transaction_ids.filtered(lambda t: t.state in ('pending', 'authorized', 'done'))
+            if txs:
+                order.write({
+                    'custom_payment_method': 'transferencia' if txs[-1].provider_code == 'custom' else 'tarjeta',
+                    'custom_itbms_required': True,
+                })
         if not self.env.context.get('skip_payment_method_check'):
             missing = self.filtered(lambda o: not o.custom_payment_method)
             if missing:
