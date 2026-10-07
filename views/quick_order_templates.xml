@@ -46,24 +46,18 @@
                     </style>
                     <div class="qo-wrap">
                         <h1>Pedido rápido</h1>
-                        <p>Escribe o pega tu lista, un producto por línea. Revisamos qué producto es cada línea y, si todo está bien, lo agregamos al carrito de una vez.</p>
-                        <div class="qo-help">
-                            Puedes usar el <strong>código de barras</strong> o el <strong>nombre</strong> (con abreviaturas como SHP o TRAT), y la cantidad al final o al inicio:<br/>
-                            <code>847610010414 x 6</code> &#160; <code>trat skala acai 3</code> &#160; <code>12 x shp xcare coconut</code>
-                        </div>
                         <input type="hidden" id="qo-csrf" t-att-value="request.csrf_token()"/>
                         <div t-if="website.dkh_active()" class="qo-tabs" role="tablist">
                             <button type="button" class="qo-tab on" id="qo-tab-t" role="tab" aria-selected="true">Escribir</button>
                             <button type="button" class="qo-tab" id="qo-tab-p" role="tab" aria-selected="false">Foto</button>
                         </div>
                         <div t-if="website.dkh_active()" id="qo-photo" class="qo-photo" hidden="hidden">
-                            <p>Toma o elige una o varias fotos de tu lista. La leemos y la revisas antes de agregar. Las fotos no se guardan.</p>
                             <input type="file" id="qo-files" accept="image/*" multiple="multiple" class="qo-file"/>
                             <div id="qo-thumbs" class="qo-thumbs"></div>
                             <button type="button" class="qo-btn" id="qo-read" disabled="disabled">Leer lista</button>
                             <div id="qo-photo-msg" class="qo-note" aria-live="polite"></div>
                         </div>
-                        <textarea id="qo-text" aria-label="Lista de productos" placeholder="847610010414 x 6&#10;trat skala acai 3&#10;shp xcare coconut 12"></textarea>
+                        <textarea id="qo-text" aria-label="Lista de productos" placeholder="12 x shp xcare coco&#10;847610010414 x 6&#10;trat skala acai 3"></textarea>
                         <button type="button" class="qo-btn" id="qo-review">Revisar pedido</button>
                         <div id="qo-out" aria-live="polite"></div>
                     </div>
@@ -120,9 +114,7 @@
     var box=el('div','qo-sbox');
     var head=el('div','qo-shead');
     head.appendChild(el('span','qo-stag',l.status==='suggest'?'SUGERENCIAS':'OPCIONES'));
-    head.appendChild(el('span','qo-stxt',(l.status==='suggest'
-      ?'No encontramos exactamente lo que escribiste. Estos productos se parecen, pero NO están en tu pedido todavía.'
-      :'Hay varios productos que coinciden. Ninguno está en tu pedido todavía: toca Agregar en el que quieras.')));
+    head.appendChild(el('span','qo-stxt','Aún no están en tu pedido'));
     box.appendChild(head);
     var grid=el('div','qo-sugs');
     box.appendChild(grid);
@@ -163,9 +155,7 @@
       var row=el('div','qo-row'+(l.skip?' skip':'')+((l.status==='suggest'||l.status==='choose')?' sug':''));
       var left=el('div','qo-left');
       left.appendChild(el('div','qo-raw',l.raw));
-      if(l.fuzzy){left.appendChild(el('div','qo-note','Buscado como «'+l.fuzzy+'»'));}
-      if(l.status==='suggest'){left.appendChild(el('div','qo-note','No lo encontramos igual. ¿Quisiste decir…?'));}
-      if(l.status==='choose'&amp;&amp;l.total&gt;l.options.length){left.appendChild(el('div','qo-note','Hay '+l.total+' productos parecidos: mostramos '+l.options.length+'. Escribe un poco más para afinar.'));}
+      if(l.status==='choose'&amp;&amp;l.total&gt;l.options.length){left.appendChild(el('div','qo-note',l.options.length+' de '+l.total));}
       row.appendChild(left);
       var mid=el('div','qo-mid');
       if(l.status==='missing'){
@@ -188,7 +178,7 @@
           if(l.remembered){
             var nr=el('button','qo-link','No es este'); nr.type='button';
             nr.addEventListener('click',function(){forget(l);});
-            info.appendChild(el('div','qo-note','Lo recordamos de tu pedido anterior')); info.appendChild(nr);
+            info.appendChild(nr);
           }
           if(l.adj){info.appendChild(el('span','qo-adj','cantidad ajustada'));}
           prod.appendChild(info); mid.appendChild(prod);
@@ -214,7 +204,7 @@
     });
     out.appendChild(list);
     var sum=el('div','qo-sum'), st=el('div','qo-sumtxt');
-    st.appendChild(el('div',null,ready+' listas'+(added?' · '+added+' ya en tu pedido':'')+(pending?' · '+pending+' por elegir':'')+(missing?' · '+missing+' no encontradas':'')));
+    st.appendChild(el('div',null,(ready+added)+' listos'+(pending?' · '+pending+' por elegir':'')+(missing?' · '+missing+' sin resultado':'')));
     st.appendChild(el('div','qo-total',money(total)));
     sum.appendChild(st);
     var add=el('button','qo-btn',(ready===0&amp;&amp;added)?'Ir al carrito':'Agregar al carrito'); add.type='button'; add.disabled=(ready===0&amp;&amp;!added);
@@ -236,6 +226,8 @@
       })
       .catch(function(){btn.disabled=false; btn.textContent='Agregar al carrito'; alert('No se pudo agregar al carrito. Intenta de nuevo.');});
   }
+  // Al pegar una lista se revisa sola (un toque menos).
+  txt.addEventListener('paste',function(){setTimeout(function(){ if(txt.value.trim()){go.click();} },60);});
   /* --- modo foto --- */
   var tabT=document.getElementById('qo-tab-t'), tabP=document.getElementById('qo-tab-p'),
       photo=document.getElementById('qo-photo'), files=document.getElementById('qo-files'),
