@@ -35,6 +35,17 @@ class QuickOrder(http.Controller):
             'truncated': len(parsed) > MAX_LINES,
         })
 
+    @http.route('/pedido-rapido/olvidar', type='http', auth='user', website=True,
+                methods=['POST'], sitemap=False)
+    def quick_order_forget(self, alias='', **kw):
+        """"No es este": borra lo que se había recordado para esta frase de ESTE cliente."""
+        partner = request.env.user.partner_id.commercial_partner_id
+        key = normalize_text(alias)
+        if key:
+            request.env['dkh.quick.alias'].sudo().search(
+                [('partner_id', '=', partner.id), ('alias_text', '=', key)]).unlink()
+        return request.make_json_response({'ok': True})
+
     @http.route('/pedido-rapido/agregar', type='http', auth='user', website=True,
                 methods=['POST'], sitemap=False)
     def quick_order_add(self, items='[]', **kw):
@@ -62,11 +73,64 @@ class QuickOrder(http.Controller):
                 continue
             order._cart_update(product_id=tmpl.product_variant_id.id, add_qty=qty)
             added += 1
+            if item.get('learn') and item.get('alias'):
+                self._remember(item['alias'], tmpl)
         # El numerito del carrito en el encabezado sale de aquí (igual que /shop/cart/update).
         request.session['website_sale_cart_quantity'] = order.cart_quantity
         return request.make_json_response({'added': added, 'skipped': skipped})
 
     # ------------------------------------------------------------------ helpers
+
+    @staticmethod
+    def _partner():
+        return request.env.user.partner_id.commercial_partner_id
+
+    def _remember(self, alias, tmpl):
+        """Guarda (o actualiza) que este cliente, al escribir `alias`, se refiere a `tmpl`."""
+        key = normalize_text(alias)
+        if not key or len(key) > 120:
+            return
+        Alias = request.env['dkh.quick.alias'].sudo()
+        found = Alias.search([('partner_id', '=', self._partner().id), ('alias_text', '=', key)], limit=1)
+        if found:
+            found.write({'template_id': tmpl.id, 'uses': found.uses + 1})
+        else:
+            Alias.create({'partner_id': self._partner().id, 'alias_text': key, 'template_id': tmpl.id})
+
+    def _history(self, templates):
+        """{template_id: unidades que este cliente ya compró} para ordenar sugerencias."""
+        if not templates:
+            return {}
+        Line = request.env['sale.order.line'].sudo()
+        groups = Line._read_group(
+            [('order_id.partner_id.commercial_partner_id', '=', self._partner().id),
+             ('state', 'in', ('sale', 'done')),
+             ('product_id.product_tmpl_id', 'in', templates.ids)],
+            ['product_id'], ['product_uom_qty:sum'])
+        hist = {}
+        for product, qty in groups:
+            hist[product.product_tmpl_id.id] = hist.get(product.product_tmpl_id.id, 0) + qty
+        return hist
+
+    def _suggest(self, text):
+        """Hasta 3 productos parecidos a una línea no encontrada, primero los que ya compra."""
+        Template = request.env['product.template']
+        tokens = [t for t in normalize_text(text).split() if len(t) >= 3]
+        if not tokens:
+            return Template
+        domain = expression.OR([[('search_index', 'ilike', t)] for t in tokens])
+        found = Template.search(
+            expression.AND([request.website.sale_product_domain(), domain]), limit=60)
+        if not found:
+            return Template
+        hist = self._history(found)
+
+        def hits(t):
+            idx = normalize_text(t.search_index or t.name)
+            return sum(1 for tk in tokens if tk in idx)
+
+        ranked = sorted(found, key=lambda t: (-hits(t), -hist.get(t.id, 0), t.name))
+        return Template.browse([t.id for t in ranked[:3]])
 
     @staticmethod
     def _parse_lines(texto):
@@ -96,6 +160,7 @@ class QuickOrder(http.Controller):
             'image': '/web/image/product.template/%s/image_128' % tmpl.id,
             'url': tmpl.website_url,
             'variants': tmpl.product_variant_count != 1,
+            'rule': list(tmpl._dkh_qty_rule()),
         }
 
     def _resolve_line(self, raw, text, qty):
@@ -103,6 +168,17 @@ class QuickOrder(http.Controller):
         base_domain = request.website.sale_product_domain()
         result = {'raw': raw, 'text': text, 'qty': qty, 'status': 'missing', 'options': [],
                   'fuzzy': False}
+
+        # 0) ¿Ya eligió esto antes? Se propone lo mismo (con "No es este" para corregir).
+        alias = request.env['dkh.quick.alias'].sudo().search(
+            [('partner_id', '=', self._partner().id), ('alias_text', '=', normalize_text(text))], limit=1)
+        if alias:
+            remembered = Template.search(expression.AND([base_domain, [('id', '=', alias.template_id.id)]]), limit=1)
+            if remembered:
+                result['options'] = [self._option(remembered)]
+                result['status'] = 'ok'
+                result['remembered'] = True
+                return result
 
         # 1) ¿Es un código? Se busca exacto en código de barras, códigos extra y referencia.
         if re.fullmatch(r'[0-9A-Za-z\-]{5,}', text) and re.search(r'\d', text):
@@ -127,9 +203,13 @@ class QuickOrder(http.Controller):
             'products_only', text, limit=MAX_OPTIONS * 4, order='name asc', options=options)
         found = details[0].get('results', Template) if details else Template
         if not found:
+            suggestions = self._suggest(text)
+            if suggestions:
+                result['options'] = [self._option(t) for t in suggestions]
+                result['status'] = 'suggest'
             return result
 
-        ranked = self._rank(found, fuzzy or text)[:MAX_OPTIONS]
+        ranked = self._rank(found, fuzzy or text, self._history(found))[:MAX_OPTIONS]
         result['options'] = [self._option(t) for t in ranked]
         result['fuzzy'] = fuzzy or False
         result['total'] = count
@@ -141,13 +221,13 @@ class QuickOrder(http.Controller):
         return result
 
     @staticmethod
-    def _rank(templates, text):
+    def _rank(templates, text, hist=None):
         """Primero los que contienen TODAS las palabras escritas como palabras completas."""
         words = normalize_text(text).split()
 
         def score(tmpl):
             tokens = normalize_text(tmpl.name).split()
             whole = all(w in tokens for w in words)
-            return (0 if whole else 1, len(tokens), tmpl.name)
+            return (0 if whole else 1, -(hist or {}).get(tmpl.id, 0), len(tokens), tmpl.name)
 
         return sorted(templates, key=score)

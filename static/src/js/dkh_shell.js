@@ -19,25 +19,50 @@
         }
     }
 
-    // Qué hacer con lo leído: un enlace de esta misma tienda se abre; lo demás se busca como código.
+    // Qué hacer con lo leído: un enlace de esta misma tienda se abre; un código de barras se
+    // agrega al pedido (cantidad mínima) y la cámara sigue lista para el siguiente.
     function onCode(raw) {
         var code = (raw || '').trim();
         if (!code || busy) {
             return;
         }
         busy = true;
-        stopCamera();
-        setMsg('Código leído: ' + code);
-        var url = '/shop?search=' + encodeURIComponent(code);
         if (/^https?:\/\//i.test(code)) {
             try {
                 var u = new URL(code);
                 if (u.origin === window.location.origin) {
-                    url = u.pathname + u.search;
+                    stopCamera();
+                    window.location.href = u.pathname + u.search;
+                    return;
                 }
-            } catch (e) { /* se busca como texto */ }
+            } catch (e) { /* se trata como código */ }
         }
-        window.location.href = url;
+        setMsg('Buscando ' + code + '…');
+        fetch('/shop/dk/scan', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            credentials: 'same-origin',
+            body: JSON.stringify({ jsonrpc: '2.0', method: 'call', params: { code: code } })
+        }).then(function (r) { return r.json(); }).then(function (d) {
+            var res = d && d.result;
+            if (res && res.found) {
+                setMsg('✓ ' + res.name + ' · ' + res.qty + ' en tu pedido');
+                var tot = document.querySelector('.dkh-cart-total');
+                if (tot && res.cart_amount !== undefined) {
+                    tot.textContent = 'B/. ' + Number(res.cart_amount).toFixed(2);
+                }
+            } else if (res && res.many) {
+                stopCamera();
+                window.location.href = res.url;
+                return;
+            } else {
+                setMsg('No encontramos el código ' + code);
+            }
+            setTimeout(function () { busy = false; setMsg('Apunta al siguiente código'); }, 1800);
+        }).catch(function () {
+            setMsg('No se pudo agregar. Intenta de nuevo.');
+            setTimeout(function () { busy = false; }, 1800);
+        });
     }
 
     function stopCamera() {

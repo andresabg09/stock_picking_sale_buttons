@@ -9,3 +9,5 @@ access_shop_search_synonym_user,shop.search.synonym.user,model_shop_search_synon
 access_dkh_banner_manager,dkh.banner.manager,model_dkh_banner,sales_team.group_sale_manager,1,1,1,1
 access_dkh_banner_public,dkh.banner.public,model_dkh_banner,base.group_public,1,0,0,0
 access_dkh_banner_user,dkh.banner.user,model_dkh_banner,base.group_user,1,0,0,0
+access_dkh_quick_alias_manager,dkh.quick.alias.manager,model_dkh_quick_alias,sales_team.group_sale_manager,1,1,1,1
+access_dkh_quick_alias_user,dkh.quick.alias.user,model_dkh_quick_alias,base.group_user,1,0,0,0

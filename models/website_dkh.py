@@ -30,3 +30,7 @@ class Website(models.Model):
 
     def dkh_is_designer(self):
         return self.env.user.has_group('website.group_website_designer')
+
+    def dkh_today(self):
+        from odoo import fields
+        return fields.Date.context_today(self).isoformat()

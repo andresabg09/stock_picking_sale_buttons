@@ -127,7 +127,7 @@
                     <video id="dkh-video" playsinline="playsinline" muted="muted" autoplay="autoplay"/>
                     <i/><i/><i/><i/><u/><span id="dkh-scan-msg">Apunta al código de barras o QR</span>
                 </div>
-                <p>Escanea el código del producto y lo buscamos en la tienda.</p>
+                <p>Escanea el código del producto y lo agregamos a tu pedido. Después ajustas la cantidad.</p>
             </div>
         </div>
     </template>

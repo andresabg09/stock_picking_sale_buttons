@@ -63,6 +63,32 @@
   var lines=[];
   function el(tag,cls,text){var e=document.createElement(tag); if(cls){e.className=cls;} if(text!==undefined){e.textContent=text;} return e;}
   function money(n){return '$'+Number(n).toFixed(2);}
+  function norm(o,n){
+    n=parseInt(n,10); if(!(n>0)){n=1;}
+    var r=o&amp;&amp;o.rule?o.rule:null; if(!r){return n;}
+    if(r[2]){return Math.max(5,Math.floor((n+2)/5)*5);}
+    return Math.max(r[0],n);
+  }
+  function fixQty(l){
+    var o=current(l); if(!o){return;}
+    var n=norm(o,l.qty);
+    if(n!==l.qty){l.qty=n; l.adj=true;}
+  }
+  function post(url,data){
+    var fd=new FormData(); fd.append('csrf_token',csrf);
+    Object.keys(data).forEach(function(k){fd.append(k,data[k]);});
+    return fetch(url,{method:'POST',body:fd,credentials:'same-origin'}).then(function(r){return r.json();});
+  }
+  function forget(l){
+    post('/pedido-rapido/olvidar',{alias:l.text}).then(function(){
+      return post('/pedido-rapido/revisar',{texto:l.raw});
+    }).then(function(d){
+      var n=d.lines&amp;&amp;d.lines[0]; if(!n){return;}
+      n.remembered=false; n.skip=false; n.qty=l.qty; n.adj=false;
+      n.pick=(n.status==='ok')?0:null;
+      lines[lines.indexOf(l)]=n; render();
+    });
+  }
   function current(l){
     if(l.skip||l.pick===null){return null;}
     var o=l.options[l.pick];
@@ -77,13 +103,22 @@
       var left=el('div','qo-left');
       left.appendChild(el('div','qo-raw',l.raw));
       if(l.fuzzy){left.appendChild(el('div','qo-note','Buscado como «'+l.fuzzy+'»'));}
+      if(l.status==='suggest'&amp;&amp;l.pick===null){left.appendChild(el('div','qo-note','No lo encontramos igual. ¿Quisiste decir…?'));}
       row.appendChild(left);
       var mid=el('div','qo-mid');
       if(l.status==='missing'){
         mid.appendChild(el('span','qo-chip bad','No encontrado'));
         if(!l.skip){missing++;}
       } else {
-        if(l.options.length&gt;1){
+        if(l.status==='suggest'){
+          var chips=el('div','qo-sugs');
+          l.options.forEach(function(o,k){
+            var b=el('button','qo-sug'+(l.pick===k?' on':''),o.name); b.type='button';
+            b.addEventListener('click',function(){l.pick=(l.pick===k?null:k); render();});
+            chips.appendChild(b);
+          });
+          mid.appendChild(chips);
+        } else if(l.options.length&gt;1){
           var sel=el('select','qo-sel');
           var ph=el('option',null,'Elige el producto…'); ph.value=''; sel.appendChild(ph);
           l.options.forEach(function(o,k){
@@ -95,6 +130,7 @@
           mid.appendChild(sel);
         }
         var o=(l.pick===null)?null:l.options[l.pick];
+        if(o&amp;&amp;!l.skip){fixQty(l);}
         if(o){
           var prod=el('div','qo-prod'), img=el('img'); img.src=o.image; img.alt=''; prod.appendChild(img);
           var info=el('div'); info.appendChild(el('div','qo-pname',o.name));
@@ -102,7 +138,14 @@
           if(o.variants){
             var a=el('a',null,'Tiene variantes: ábrelo en la tienda'); a.href=o.url; pr.appendChild(a);
           } else { pr.textContent=money(o.price)+' c/u'; }
-          info.appendChild(pr); prod.appendChild(info); mid.appendChild(prod);
+          info.appendChild(pr);
+          if(l.remembered){
+            var nr=el('button','qo-link','No es este'); nr.type='button';
+            nr.addEventListener('click',function(){forget(l);});
+            info.appendChild(el('div','qo-note','Lo recordamos de tu pedido anterior')); info.appendChild(nr);
+          }
+          if(l.adj){info.appendChild(el('span','qo-adj','cantidad ajustada'));}
+          prod.appendChild(info); mid.appendChild(prod);
         }
         if(!l.skip){
           var cur=current(l);
@@ -110,9 +153,10 @@
         }
       }
       row.appendChild(mid);
-      var qty=el('input','qo-qty'); qty.type='number'; qty.min='1'; qty.max='9999'; qty.value=l.qty;
+      var qty=el('input','qo-qty'); qty.type='text'; qty.setAttribute('inputmode','numeric'); qty.value=l.qty;
       qty.setAttribute('aria-label','Cantidad');
-      qty.addEventListener('change',function(){var v=parseInt(qty.value,10); l.qty=(v&gt;0?v:1); render();});
+      qty.addEventListener('focus',function(){qty.select();});
+      qty.addEventListener('change',function(){var v=parseInt(qty.value,10); l.qty=(v&gt;0?v:1); l.adj=false; render();});
       row.appendChild(qty);
       var x=el('button','qo-x',l.skip?'↺':'×'); x.type='button';
       x.setAttribute('aria-label',l.skip?'Volver a incluir':'Quitar línea');
@@ -132,7 +176,7 @@
   }
   function addAll(btn){
     var items=[];
-    lines.forEach(function(l){var o=current(l); if(o){items.push({template_id:o.template_id,qty:l.qty,name:o.name});}});
+    lines.forEach(function(l){var o=current(l); if(o){items.push({template_id:o.template_id,qty:l.qty,name:o.name,alias:l.text,learn:(l.status==='choose'||l.status==='suggest')});}});
     if(!items.length){return;}
     btn.disabled=true; btn.textContent='Agregando…';
     var fd=new FormData(); fd.append('csrf_token',csrf); fd.append('items',JSON.stringify(items));
@@ -152,7 +196,7 @@
     fetch('/pedido-rapido/revisar',{method:'POST',body:fd,credentials:'same-origin'})
       .then(function(r){return r.json();})
       .then(function(d){
-        lines=d.lines.map(function(l){l.skip=false; l.pick=(l.status==='ok')?0:null; return l;});
+        lines=d.lines.map(function(l){l.skip=false; l.adj=false; l.pick=(l.status==='ok')?0:null; return l;});
         go.disabled=false; go.textContent='Revisar de nuevo';
         render();
         if(d.truncated){alert('Solo se revisaron las primeras 200 líneas.');}

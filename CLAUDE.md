@@ -504,4 +504,12 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   Inicio viejo se oculta por CSS `body.dkh-home #wrap`; la vista website.inicio NO se toca),
   cintillo de marcas (parámetro `dkh.brands`, coma), `static/src/css/dkh_pages.css` (Inicio,
   Tienda y Producto en estilo H, todo bajo `.dkh`), carrusel del banner principal en `dkh_shell.js`.
+- 2026-10-07 (noche): Lote B probado por Andrés ("todo perfecto"). LOTE C = etapas 6-8, v18.0.3.2.0:
+  `controllers/dkh_checkout.py` (`/shop/dk/confirmar` = guarda Forma de Pago/Fecha especial/ITBMS
+  en la COTIZACIÓN y exige pedido mínimo `dkh.min_order`; `/shop/dk/gracias`; `/shop/dk/scan` = el
+  escáner agrega el producto al pedido), `views/dkh_cart.xml` (panel "confirma tu pedido" bajo el
+  carrito, solo vista previa; el botón nativo "Finalizar compra" se oculta por CSS bajo `.dkh`, la
+  ruta nativa /shop/checkout NO se bloquea todavía), Pedido rápido v2 (`dkh.quick.alias` = memoria
+  por cliente, sugerencias hasta 3 ordenadas por historial de compra, "No es este", etiqueta
+  "cantidad ajustada"). Pendiente: etapa 9 (pedido por foto con IA), 10 (pruebas y cambio) y 11.
 

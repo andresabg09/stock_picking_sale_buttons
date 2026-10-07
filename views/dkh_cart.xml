@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Versión H, Etapa 6: carrito y confirmación del pedido. Solo vista previa / encendido.
+         Se agrega debajo de las líneas del carrito (dk_cart_page). El botón nativo "Finalizar
+         compra" se oculta por CSS bajo `.dkh`; "Confirmar pedido" deja la cotización guardada con
+         Forma de Pago / Fecha especial / ITBMS para que el equipo la confirme. -->
+    <template id="dkh_cart_confirm" inherit_id="stock_picking_sale_buttons.dk_cart_page" name="DKH: confirmar pedido" priority="100">
+        <xpath expr="//div[hasclass('clearfix')]" position="after">
+            <t t-if="website.dkh_active() and website_sale_order and website_sale_order.website_order_line">
+                <t t-set="dkh_min" t-value="website_sale_order._dkh_min_order_amount()"/>
+                <t t-set="dkh_tot" t-value="website_sale_order.amount_untaxed"/>
+                <t t-set="dkh_miss" t-value="website_sale_order._dkh_min_missing()"/>
+                <t t-set="dkh_pay" t-value="website_sale_order._last_payment_method_for_partner()"/>
+                <t t-set="dkh_itb" t-value="website_sale_order._last_itbms_choice_for_partner()"/>
+                <t t-set="dkh_err" t-value="request.params.get('dkh_err')"/>
+                <form class="dkh-confirm" action="/shop/dk/confirmar" method="post">
+                    <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                    <h2>confirma tu pedido<span>.</span></h2>
+                    <div t-if="dkh_err == 'min'" class="dkh-alert">Todavía no llegas al pedido mínimo.</div>
+                    <div t-if="dkh_err == 'pay'" class="dkh-alert">Elige la forma de pago para continuar.</div>
+                    <div class="dkh-confirm-grid">
+                        <label class="dkh-f">
+                            <span>Forma de pago</span>
+                            <select name="payment_method" required="required">
+                                <option value="">Elige…</option>
+                                <t t-foreach="website_sale_order._fields['custom_payment_method']._description_selection(request.env)" t-as="dkh_o">
+                                    <option t-att-value="dkh_o[0]" t-att-selected="'selected' if dkh_o[0] == dkh_pay else None" t-out="dkh_o[1]"/>
+                                </t>
+                            </select>
+                        </label>
+                        <label class="dkh-f">
+                            <span>Fecha especial de entrega (opcional)</span>
+                            <input type="date" name="special_date" t-att-min="website.dkh_today()"/>
+                        </label>
+                        <label class="dkh-f dkh-check">
+                            <input type="checkbox" name="itbms" value="1" t-att-checked="'checked' if dkh_itb else None"/>
+                            <span>Incluye ITBMS</span>
+                        </label>
+                    </div>
+                    <div class="dkh-pbar">
+                        <div class="dkh-pbar-m">
+                            <b t-if="dkh_miss &gt; 0">Te faltan B/. <t t-out="'%.2f' % dkh_miss"/> para tu pedido mínimo</b>
+                            <b t-else="">Tu pedido está listo para enviar</b>
+                            <div class="dkh-bar"><i t-attf-style="width: #{min(100, int(dkh_tot * 100 / dkh_min)) if dkh_min else 100}%"/></div>
+                        </div>
+                        <b class="dkh-pbar-t">B/. <t t-out="'%.2f' % dkh_tot"/></b>
+                        <button type="submit" class="dkh-btn dkh-btn-w" t-att-disabled="'disabled' if dkh_miss &gt; 0 else None">Confirmar pedido</button>
+                    </div>
+                </form>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="dkh_thanks" name="DKH: pedido enviado">
+        <t t-call="website.layout">
+            <t t-set="additional_title">Pedido enviado</t>
+            <div id="wrap" class="oe_structure">
+                <div class="dkh-wrap dkh-thanks">
+                    <h1>¡pedido enviado<span>.</span></h1>
+                    <p t-if="order">Tu pedido <b t-out="order.name"/> por <b>B/. <t t-out="'%.2f' % order.amount_untaxed"/></b> quedó guardado. Nuestro equipo lo confirmará y te avisará.</p>
+                    <p t-else="">Tu pedido quedó guardado. Nuestro equipo lo confirmará y te avisará.</p>
+                    <div class="dkh-thanks-a">
+                        <a href="/shop" class="dkh-btn">Seguir comprando</a>
+                        <a href="/my/orders" class="dkh-btn dkh-btn-soft">Mis pedidos</a>
+                    </div>
+                </div>
+            </div>
+        </t>
+    </template>
+</odoo>
