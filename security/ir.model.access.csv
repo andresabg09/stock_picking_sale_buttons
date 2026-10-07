@@ -6,3 +6,6 @@ access_res_partner_pricing_wizard_user,res.partner.pricing.wizard.user,model_res
 access_res_partner_pricing_wizard_line_user,res.partner.pricing.wizard.line.user,model_res_partner_pricing_wizard_line,base.group_user,1,1,1,1
 access_shop_search_synonym_manager,shop.search.synonym.manager,model_shop_search_synonym,sales_team.group_sale_manager,1,1,1,1
 access_shop_search_synonym_user,shop.search.synonym.user,model_shop_search_synonym,base.group_user,1,0,0,0
+access_dkh_banner_manager,dkh.banner.manager,model_dkh_banner,sales_team.group_sale_manager,1,1,1,1
+access_dkh_banner_public,dkh.banner.public,model_dkh_banner,base.group_public,1,0,0,0
+access_dkh_banner_user,dkh.banner.user,model_dkh_banner,base.group_user,1,0,0,0

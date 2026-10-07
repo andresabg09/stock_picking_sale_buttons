@@ -1,0 +1,184 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Versión H, Etapa 3: INICIO. Solo en vista previa (/dkh) o con dkh.enabled = 1.
+         La página /inicio (vista website.inicio) no se toca: el Inicio H se agrega al final de
+         <main> y el CSS (clase dkh-home en el body) oculta el contenido viejo. -->
+
+    <template id="dkh_body_class_home" inherit_id="website.layout" name="DKH: clase del inicio" priority="31">
+        <xpath expr="//html" position="before">
+            <t t-if="website and website.dkh_active() and request.httprequest.path in ('/', '/inicio')">
+                <t t-set="body_classname" t-value="((body_classname or '') + ' dkh-home').strip()"/>
+            </t>
+        </xpath>
+    </template>
+
+    <template id="dkh_home_inject" inherit_id="website.layout" name="DKH: inicio H" priority="31">
+        <xpath expr="//main" position="inside">
+            <t t-if="website and website.dkh_active() and request.httprequest.path in ('/', '/inicio')">
+                <t t-call="stock_picking_sale_buttons.dkh_home"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Espacio de banner. Parámetros: slot, tone ('pink'|'blue'), size (texto), ftitle, fsub, cls. -->
+    <template id="dkh_slot" name="DKH: espacio de banner">
+        <t t-set="dkh_bs" t-value="request.env['dkh.banner']._dkh_for(slot)"/>
+        <t t-set="dkh_adm" t-value="website.dkh_is_designer()"/>
+        <div t-attf-class="dkh-slot dkh-slot-#{slot} #{cls or ''}">
+            <t t-if="dkh_bs">
+                <div t-attf-class="dkh-track #{'dkh-hero-track' if slot == 'hero' and len(dkh_bs) &gt; 1 else ''}">
+                    <t t-foreach="dkh_bs" t-as="dkh_b">
+                        <t t-if="dkh_b.image">
+                            <a t-att-href="dkh_b.link or '#'" class="dkh-banner dkh-banner-img">
+                                <img t-att-src="website.image_url(dkh_b, 'image')" t-att-alt="dkh_b.title or dkh_b.name" loading="lazy"/>
+                            </a>
+                        </t>
+                        <t t-else="">
+                            <div t-attf-class="dkh-banner dkh-banner-txt dkh-tone-#{tone or 'pink'}">
+                                <span class="dkh-banner-t" t-out="dkh_b.title or dkh_b.name"/>
+                                <span class="dkh-banner-s" t-if="dkh_b.subtitle" t-out="dkh_b.subtitle"/>
+                                <a t-if="dkh_b.link and dkh_b.cta_label" t-att-href="dkh_b.link" class="dkh-btn" t-out="dkh_b.cta_label"/>
+                            </div>
+                        </t>
+                    </t>
+                </div>
+            </t>
+            <t t-else="">
+                <div t-attf-class="dkh-banner dkh-banner-txt dkh-tone-#{tone or 'pink'}">
+                    <span class="dkh-banner-t" t-out="ftitle"/>
+                    <span class="dkh-banner-s" t-if="fsub" t-out="fsub"/>
+                </div>
+            </t>
+            <span t-if="dkh_adm" class="dkh-size" t-out="size"/>
+        </div>
+    </template>
+
+    <!-- Tarjeta del cuadrado "Nuevos": usa dk_card (cantidad viva). -->
+    <template id="dkh_row" name="DKH: fila de producto (lo más pedido)">
+        <t t-set="dk_info" t-value="p._get_combination_info(only_template=True)"/>
+        <t t-set="dk_variant" t-value="p._get_first_possible_variant_id()"/>
+        <t t-set="dk_can_add" t-value="dk_variant and p.product_variant_count == 1 and p._website_show_quick_add() and (dk_info['price'] or not website.prevent_zero_price_sale)"/>
+        <t t-set="dk_order" t-value="website.sale_get_order()"/>
+        <t t-set="dk_line" t-value="dk_order.website_order_line.filtered_domain([('product_id', '=', dk_variant)])[:1] if dk_variant else False"/>
+        <t t-set="dk_qty" t-value="int(dk_line.product_uom_qty) if dk_line else 0"/>
+        <div class="dkh-row">
+            <a class="dkh-row-img" t-att-href="p.website_url"><img t-att-src="website.image_url(p, 'image_256')" t-att-alt="p.name" loading="lazy"/></a>
+            <div class="dkh-row-name">
+                <a t-att-href="p.website_url" t-out="p.name.capitalize()"/>
+                <small><span t-out="dk_info['price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/> c/u</small>
+            </div>
+            <t t-if="dk_can_add">
+                <t t-set="dk_rule" t-value="p._dkh_qty_rule()"/>
+                <div class="dk-buy" t-att-data-product-id="dk_variant" t-att-data-min="dk_rule[0]" t-att-data-step="dk_rule[1]" t-att-data-qty="dk_qty" t-att-data-state="'in' if dk_qty else 'out'">
+                    <button type="button" class="dk-add btn btn-primary">Agregar</button>
+                    <div class="dk-live">
+                        <div class="dk-stp">
+                            <button type="button" class="dk-minus" aria-label="Menos">&#8722;</button>
+                            <input type="text" inputmode="numeric" class="dk-q" t-att-value="dk_qty or dk_rule[0]" aria-label="Cantidad"/>
+                            <button type="button" class="dk-plus" aria-label="Más">+</button>
+                        </div>
+                        <div class="dk-in"><i class="fa fa-check" aria-hidden="true"/> En tu pedido</div>
+                    </div>
+                </div>
+            </t>
+            <a t-else="" t-att-href="p.website_url" class="dkh-btn">Ver opciones</a>
+        </div>
+    </template>
+
+    <template id="dkh_home" name="DKH: inicio H">
+        <t t-set="dkh_new" t-value="request.env['product.template']._dk_new_products(3)"/>
+        <t t-set="dkh_new" t-value="dkh_new or request.env['product.template']._dk_bestsellers(3)"/>
+        <t t-set="dkh_best" t-value="request.env['product.template']._dk_bestsellers(8)"/>
+        <t t-set="dkh_roots" t-value="request.env['product.public.category'].search([('parent_id', '=', False)] + website.website_domain(), order='sequence, name')"/>
+        <t t-set="dkh_cats" t-value="request.env['product.public.category']._dk_top_categories(8) &amp; dkh_roots"/>
+        <t t-set="dkh_cats" t-value="dkh_cats or dkh_roots[:8]"/>
+        <t t-set="dkh_order" t-value="website.sale_get_order()"/>
+        <t t-set="dkh_min" t-value="request.env['sale.order']._dkh_min_order_amount()"/>
+        <t t-set="dkh_tot" t-value="dkh_order.amount_untaxed if dkh_order else 0.0"/>
+
+        <div class="dkh-home dkh-wrap">
+            <!-- BLOQUE 1 · marketing -->
+            <section class="dkh-b1">
+                <t t-call="stock_picking_sale_buttons.dkh_slot">
+                    <t t-set="slot" t-value="'hero'"/><t t-set="tone" t-value="'pink'"/><t t-set="size" t-value="'Espacio principal · 1600 × 700 px · carrusel'"/>
+                    <t t-set="ftitle" t-value="'Lo más pedido por tus clientes'"/><t t-set="fsub" t-value="'Pide rápido, directo desde tu celular.'"/>
+                </t>
+                <div class="dkh-g21">
+                    <t t-call="stock_picking_sale_buttons.dkh_slot">
+                        <t t-set="slot" t-value="'mid'"/><t t-set="tone" t-value="'pink'"/><t t-set="size" t-value="'Banner mediano · 1000 × 400 px'"/>
+                        <t t-set="ftitle" t-value="'Pedido rápido'"/><t t-set="fsub" t-value="'Escribe o pega tu lista y la agregamos.'"/>
+                    </t>
+                    <t t-call="stock_picking_sale_buttons.dkh_slot">
+                        <t t-set="slot" t-value="'small'"/><t t-set="tone" t-value="'blue'"/><t t-set="size" t-value="'Banner pequeño · 500 × 400 px'"/>
+                        <t t-set="ftitle" t-value="'Novedades'"/><t t-set="fsub" t-value="'Mira lo último en la tienda.'"/>
+                    </t>
+                </div>
+            </section>
+        </div>
+
+        <!-- cintillo permanente de marcas -->
+        <div class="dkh-ribbon" aria-hidden="true">
+            <div class="dkh-marq">
+                <t t-foreach="range(4)" t-as="dkh_r"><t t-foreach="website.dkh_brands()" t-as="dkh_br"><span t-out="dkh_br"/></t></t>
+            </div>
+        </div>
+
+        <div class="dkh-home dkh-wrap">
+            <!-- BLOQUE 2 · nuevos -->
+            <section class="dkh-sec">
+                <div class="dkh-sec-h"><h2>nuevos<span>.</span></h2><a href="/shop?order=create_date+desc">Ver todos →</a></div>
+                <div class="dkh-g4">
+                    <t t-foreach="dkh_new" t-as="np"><t t-call="stock_picking_sale_buttons.dk_card"><t t-set="p" t-value="np"/></t></t>
+                    <t t-call="stock_picking_sale_buttons.dkh_slot">
+                        <t t-set="slot" t-value="'square'"/><t t-set="tone" t-value="'blue'"/><t t-set="cls" t-value="'dkh-sq'"/><t t-set="size" t-value="'Banner cuadrado · 600 × 600 px'"/>
+                        <t t-set="ftitle" t-value="'Destacado'"/><t t-set="fsub" t-value="'Un producto nuevo o una promo.'"/>
+                    </t>
+                </div>
+            </section>
+
+            <!-- BLOQUE 3 · lo más pedido -->
+            <section class="dkh-sec">
+                <div class="dkh-sec-h"><h2>lo más pedido<span>.</span></h2></div>
+                <div class="dkh-g420">
+                    <t t-call="stock_picking_sale_buttons.dkh_slot">
+                        <t t-set="slot" t-value="'tall'"/><t t-set="tone" t-value="'pink'"/><t t-set="cls" t-value="'dkh-tall'"/><t t-set="size" t-value="'Banner vertical · 600 × 900 px'"/>
+                        <t t-set="ftitle" t-value="'Tu promo del mes'"/><t t-set="fsub" t-value="'Aquí va tu banner.'"/>
+                    </t>
+                    <div class="dkh-rows">
+                        <t t-foreach="dkh_best" t-as="bp"><t t-call="stock_picking_sale_buttons.dkh_row"><t t-set="p" t-value="bp"/></t></t>
+                    </div>
+                </div>
+                <div class="dkh-pbar" t-if="dkh_order and dkh_order.website_order_line">
+                    <div class="dkh-pbar-m">
+                        <b t-if="dkh_tot &lt; dkh_min">Te faltan B/. <t t-out="'%.2f' % (dkh_min - dkh_tot)"/> para tu pedido mínimo</b>
+                        <b t-else="">Tu pedido está listo para enviar</b>
+                        <div class="dkh-bar"><i t-attf-style="width: #{min(100, int(dkh_tot * 100 / dkh_min)) if dkh_min else 100}%"/></div>
+                    </div>
+                    <b class="dkh-pbar-t">B/. <t t-out="'%.2f' % dkh_tot"/></b>
+                    <a href="/shop/cart" class="dkh-btn dkh-btn-w">Ir al carrito</a>
+                </div>
+            </section>
+
+            <!-- BLOQUE 4 · categorías -->
+            <section class="dkh-sec dkh-sec-last">
+                <div class="dkh-sec-h"><h2>categorías<span>.</span></h2></div>
+                <div class="dkh-cats">
+                    <t t-foreach="dkh_cats" t-as="c">
+                        <a t-attf-href="/shop/category/#{c.id}" t-attf-class="dkh-cat dkh-cat-#{c_index % 2}"><span t-out="(c.name or '').strip()"/><span aria-hidden="true">→</span></a>
+                    </t>
+                </div>
+            </section>
+        </div>
+    </template>
+
+    <!-- Etapa 4: franja de banner arriba de la Tienda (solo vista previa / encendido). -->
+    <template id="dkh_shop_top" inherit_id="stock_picking_sale_buttons.dk_shop_page" name="DKH: franja de la tienda" priority="100">
+        <xpath expr="//div[hasclass('dk-head')]" position="before">
+            <t t-if="website.dkh_active() and request.env['dkh.banner']._dkh_for('shop_top')">
+                <t t-call="stock_picking_sale_buttons.dkh_slot">
+                    <t t-set="slot" t-value="'shop_top'"/><t t-set="tone" t-value="'blue'"/><t t-set="cls" t-value="'dkh-shoptop'"/><t t-set="size" t-value="'Tienda · franja superior · 1600 × 300 px'"/>
+                </t>
+            </t>
+        </xpath>
+    </template>
+</odoo>

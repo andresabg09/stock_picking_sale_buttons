@@ -496,3 +496,12 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   selecciona al tocar y respeta `data-min`/`data-step`. Pedido mínimo B/. 150 (`dkh.min_order`):
   existe `_dkh_min_missing()`; el bloqueo al confirmar entra en la etapa 6. Pendiente de Andrés:
   HTTPS para la cámara (web.base.url hoy es http://).
+- 2026-10-07 (noche): Lote A desplegado y probado por Andrés (QR con cámara OK: `BarcodeDetector` +
+  respaldo `@zxing/library`; `clean_url()` no existe en este Odoo → usar `menu.url`). LOTE B =
+  etapas 3-5, v18.0.3.1.0: modelo `dkh.banner` (Ventas → Configuración → "Banners de la tienda";
+  espacios hero/mid/small/square/tall/shop_top; sin imagen se ve el diseño pastel con título y
+  subtítulo), `views/dkh_home.xml` (Inicio H inyectado al final de `<main>` solo en `/dkh`, el
+  Inicio viejo se oculta por CSS `body.dkh-home #wrap`; la vista website.inicio NO se toca),
+  cintillo de marcas (parámetro `dkh.brands`, coma), `static/src/css/dkh_pages.css` (Inicio,
+  Tienda y Producto en estilo H, todo bajo `.dkh`), carrusel del banner principal en `dkh_shell.js`.
+

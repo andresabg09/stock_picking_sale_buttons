@@ -198,4 +198,33 @@
             closeScan();
         }
     });
+
+    // Carrusel del banner principal: avanza solo cada 6 s; se detiene al tocar/pasar el mouse.
+    function initHero() {
+        var tr = document.querySelector('.dkh-hero-track');
+        if (!tr || !tr.children.length || (window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches)) {
+            return;
+        }
+        var idx = 0;
+        var hold = false;
+        tr.addEventListener('mouseenter', function () { hold = true; });
+        tr.addEventListener('mouseleave', function () { hold = false; });
+        tr.addEventListener('touchstart', function () { hold = true; }, { passive: true });
+        tr.addEventListener('touchend', function () { setTimeout(function () { hold = false; }, 6000); }, { passive: true });
+        tr.addEventListener('scroll', function () {
+            idx = Math.round(tr.scrollLeft / (tr.clientWidth || 1));
+        }, { passive: true });
+        setInterval(function () {
+            if (hold || document.hidden) {
+                return;
+            }
+            idx = (idx + 1) % tr.children.length;
+            tr.scrollTo({ left: idx * tr.clientWidth, behavior: 'smooth' });
+        }, 6000);
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', initHero);
+    } else {
+        initHero();
+    }
 })();

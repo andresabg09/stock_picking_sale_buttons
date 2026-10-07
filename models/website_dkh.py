@@ -21,3 +21,12 @@ class Website(models.Model):
             return bool(request and request.httprequest.cookies.get(COOKIE) == '1')
         except RuntimeError:  # fuera de una petición web (cron, shell)
             return False
+
+    def dkh_brands(self):
+        """Marcas del cintillo: parámetro `dkh.brands` (separadas por coma), editable sin código."""
+        raw = self.env['ir.config_parameter'].sudo().get_param('dkh.brands') or ''
+        brands = [b.strip() for b in raw.split(',') if b.strip()]
+        return brands or ['Nevada', 'Skala', 'Salon Line', 'NNP', 'X.Care', 'Eleve']
+
+    def dkh_is_designer(self):
+        return self.env.user.has_group('website.group_website_designer')
