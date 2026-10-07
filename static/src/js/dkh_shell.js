@@ -260,4 +260,22 @@
     } else {
         initHero();
     }
+
+    // Categorías deslizables (celular/tablet): al elegir una, la fila queda con esa categoría al
+    // principio, sin tener que volver a deslizar desde el inicio.
+    function revealActiveChip() {
+        var rows = document.querySelectorAll('.dk-chips');
+        Array.prototype.forEach.call(rows, function (row) {
+            var act = row.querySelector('.act');
+            if (act && row.scrollWidth > row.clientWidth) {
+                row.scrollLeft = Math.max(0, act.getBoundingClientRect().left - row.getBoundingClientRect().left + row.scrollLeft - 12);
+            }
+        });
+    }
+    if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', revealActiveChip);
+    } else {
+        revealActiveChip();
+    }
+    window.addEventListener('load', revealActiveChip);
 })();

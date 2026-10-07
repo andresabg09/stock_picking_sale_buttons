@@ -120,13 +120,57 @@ class ProductTemplate(models.Model):
 
     @api.model
     def _dk_new_products(self, limit=4):
-        """Lo más reciente de la tienda (creado dentro de los días de "Nuevo")."""
+        """Lo más reciente de la tienda (creado dentro de los días de "Nuevo"). No exige categoría
+        web: los productos recién creados casi nunca la tienen todavía."""
         since = fields.Datetime.now() - timedelta(days=self._dk_new_days())
         domain = expression.AND([
             self._dk_shop_domain(),
-            [('create_date', '>=', since), ('public_categ_ids', '!=', False)],
+            [('create_date', '>=', since)],
         ])
         return self.search(domain, limit=limit, order='create_date desc')
+
+    @api.model
+    def _dk_bestsellers_by_category(self, limit=8, days=90):
+        """Lo más pedido con variedad: el producto que más rota de CADA categoría (por unidades
+        vendidas en `days` días), en orden de ventas. Si hay menos categorías que `limit`, se
+        completa con los siguientes más vendidos."""
+        Line = self.env['sale.order.line'].sudo()
+        since = fields.Datetime.now() - timedelta(days=days)
+        groups = Line._read_group(
+            [('state', 'in', ('sale', 'done')), ('create_date', '>=', since), ('price_unit', '>', 0)],
+            ['product_id'], ['product_uom_qty:sum'],
+            order='product_uom_qty:sum desc', limit=400)
+        ranked = []
+        for product, _qty in groups:
+            tmpl_id = product.product_tmpl_id.id if product else False
+            if tmpl_id and tmpl_id not in ranked:
+                ranked.append(tmpl_id)
+        if not ranked:
+            return self.browse()
+        found = self.search(expression.AND([self._dk_shop_domain(), [('id', 'in', ranked)]]))
+        ordered = found.sorted(key=lambda t: ranked.index(t.id))
+
+        def root_of(tmpl):
+            cat = tmpl.public_categ_ids[:1]
+            while cat and cat.parent_id:
+                cat = cat.parent_id
+            return cat.id or ('sin', tmpl.categ_id.id)
+
+        picked, seen = [], set()
+        for tmpl in ordered:
+            key = root_of(tmpl)
+            if key in seen:
+                continue
+            seen.add(key)
+            picked.append(tmpl.id)
+            if len(picked) >= limit:
+                break
+        for tmpl in ordered:
+            if len(picked) >= limit:
+                break
+            if tmpl.id not in picked:
+                picked.append(tmpl.id)
+        return self.browse(picked)
 
     @api.model
     def _dk_bestsellers(self, limit=4, days=90):

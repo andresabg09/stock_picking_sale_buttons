@@ -86,9 +86,8 @@
     </template>
 
     <template id="dkh_home" name="DKH: inicio H">
-        <t t-set="dkh_new" t-value="request.env['product.template']._dk_new_products(3)"/>
-        <t t-set="dkh_new" t-value="dkh_new or request.env['product.template']._dk_bestsellers(3)"/>
-        <t t-set="dkh_best" t-value="request.env['product.template']._dk_bestsellers(8)"/>
+        <t t-set="dkh_new" t-value="request.env['product.template']._dk_new_products(12)"/>
+        <t t-set="dkh_best" t-value="request.env['product.template']._dk_bestsellers_by_category(8)"/>
         <t t-set="dkh_roots" t-value="request.env['product.public.category'].search([('parent_id', '=', False)] + website.website_domain(), order='sequence, name')"/>
         <t t-set="dkh_cats" t-value="request.env['product.public.category']._dk_top_categories(8) &amp; dkh_roots"/>
         <t t-set="dkh_cats" t-value="dkh_cats or dkh_roots[:8]"/>
@@ -127,13 +126,14 @@
             <!-- BLOQUE 2 · nuevos -->
             <section class="dkh-sec">
                 <div class="dkh-sec-h"><h2>nuevos<span>.</span></h2><a href="/shop?order=create_date+desc">Ver todos →</a></div>
-                <div class="dkh-g4">
-                    <t t-foreach="dkh_new" t-as="np"><t t-call="stock_picking_sale_buttons.dk_card"><t t-set="p" t-value="np"/></t></t>
+                <div class="dkh-snap">
                     <t t-call="stock_picking_sale_buttons.dkh_slot">
                         <t t-set="slot" t-value="'square'"/><t t-set="tone" t-value="'blue'"/><t t-set="cls" t-value="'dkh-sq'"/><t t-set="size" t-value="'Banner cuadrado · 600 × 600 px'"/>
                         <t t-set="ftitle" t-value="'Destacado'"/><t t-set="fsub" t-value="'Un producto nuevo o una promo.'"/>
                     </t>
+                    <t t-foreach="dkh_new" t-as="np"><t t-call="stock_picking_sale_buttons.dk_card"><t t-set="p" t-value="np"/></t></t>
                 </div>
+                <p t-if="not dkh_new" class="dkh-empty">Pronto verás aquí los productos nuevos.</p>
             </section>
 
             <!-- BLOQUE 3 · lo más pedido -->

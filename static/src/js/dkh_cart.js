@@ -6,6 +6,8 @@
     'use strict';
 
     var busy = false;
+    var WAIT_MS = 900; // espera a que termine de sumar/restar antes de actualizar el carrito
+    var timers = {};
     var SWAP = ['.dk-cart-head', '#cart_products', '.dkh-confirm', '#o_cart_summary', '#o_wsale_total_accordion'];
 
     function inDkh() {
@@ -52,7 +54,11 @@
 
     function setQty(line, qty) {
         var pid = parseInt(line.getAttribute('data-product-id'), 10);
-        if (!pid || busy) {
+        if (!pid) {
+            return;
+        }
+        if (busy) {
+            setTimeout(function () { setQty(line, qty); }, 250);
             return;
         }
         busy = true;
@@ -69,6 +75,21 @@
             busy = false;
             line.classList.remove('dk-busy');
         });
+    }
+
+    // Muestra la cantidad al instante y manda UNA sola actualización cuando deja de tocar.
+    function schedule(line, qty) {
+        var pid = line.getAttribute('data-product-id');
+        var input = line.querySelector('input.js_quantity');
+        if (input) {
+            input.value = String(qty);
+        }
+        line.classList.add('dk-pending');
+        clearTimeout(timers[pid]);
+        timers[pid] = setTimeout(function () {
+            var fresh = document.querySelector('.dk-cline[data-product-id="' + pid + '"]') || line;
+            setQty(fresh, qty);
+        }, WAIT_MS);
     }
 
     function current(line) {
@@ -95,9 +116,9 @@
             setQty(line, 0);
         } else if (t.querySelector('.fa-minus')) {
             var down = cur - step;
-            setQty(line, down < min ? 0 : down);
+            schedule(line, down < min ? 0 : down);
         } else {
-            setQty(line, cur ? cur + step : min);
+            schedule(line, cur ? cur + step : min);
         }
     }, true);
 
@@ -112,7 +133,7 @@
         }
         ev.stopImmediatePropagation();
         var n = parseInt(input.value, 10);
-        setQty(line, n > 0 ? n : 0);
+        schedule(line, n > 0 ? n : 0);
     }, true);
 
     document.addEventListener('focusin', function (ev) {

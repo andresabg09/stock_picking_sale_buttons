@@ -528,4 +528,10 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   con padding-left). Celular (≤640): barra inferior con botón central "Escanear" y hoja "Más"
   (Contáctanos / Mis pedidos / Mi cuenta / WhatsApp, `#dkh-more`). Se quitó el menú hamburguesa y el
   cajón. Los enlaces del dock son fijos (/, /shop, /pedido-rapido, /contactus), no salen de website.menu.
+- 2026-10-08: Ajustes v18.0.3.5.0. (1) Cantidades: el carrito (`dkh_cart.js`) y las tarjetas
+  (`shop_live_cart.js`) esperan 900 ms tras el último toque de +/− y mandan UNA sola actualización.
+  (2) "Nuevos" (`_dk_new_products`) ya NO exige categoría web (los productos recién creados, de julio,
+  no la tienen): el Inicio H los muestra en un carrusel deslizable de hasta 12. (3) "Lo más pedido" del
+  Inicio H = `_dk_bestsellers_by_category`: el más vendido (90 días) de cada categoría raíz, en orden de
+  ventas. (4) En las filas de categorías deslizables (`.dk-chips`) la elegida se acerca al principio.
 

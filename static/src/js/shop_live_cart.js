@@ -5,7 +5,7 @@
 (function () {
     'use strict';
 
-    var DEBOUNCE_MS = 350;
+    var DEBOUNCE_MS = 900; // espera a que termine de sumar/restar antes de actualizar el carrito
     var timers = {};
     var seq = {};
     var toastTimer = null;

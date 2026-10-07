@@ -235,3 +235,13 @@
 
 .dkh .dkh-btn-off { opacity: .45; cursor: default; pointer-events: none; }
 .dkh .dk-cline.dk-busy { opacity: .6; transition: opacity .15s; }
+
+/* Nuevos: se desliza de lado (los productos nuevos caben todos, sin acomodar una rejilla) */
+.dkh-snap { display: flex; gap: 20px; overflow-x: auto; scroll-snap-type: x proximity; padding: 4px 2px 18px; -webkit-overflow-scrolling: touch; }
+.dkh-snap > * { flex: 0 0 clamp(230px, 24vw, 300px); scroll-snap-align: start; }
+.dkh-snap > .dkh-slot { min-height: 340px; }
+.dkh-snap > .dk-card:nth-child(odd) { background: var(--dkh-pink); }
+.dkh-snap > .dk-card:nth-child(even) { background: var(--dkh-blue); }
+.dkh-empty { color: var(--dkh-mute); }
+@media (max-width: 640px) { .dkh-snap > * { flex-basis: 70vw; } }
+.dkh .dk-cline.dk-pending { opacity: .85; }
