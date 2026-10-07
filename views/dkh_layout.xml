@@ -88,7 +88,7 @@
             <a href="/" class="dkh-logo" aria-label="Shalom, inicio">shalom<span>.</span></a>
             <nav class="dkh-nav" aria-label="Principal">
                 <t t-foreach="website.menu_id.child_id" t-as="dkh_m">
-                    <a t-if="dkh_m.is_visible" t-att-href="dkh_m.clean_url()"
+                    <a t-if="dkh_m.is_visible" t-att-href="dkh_m.url"
                        t-attf-class="#{'on' if ((dkh_m.url == '/' and dkh_path in ('/', '/inicio')) or (dkh_m.url != '/' and dkh_path.startswith(dkh_m.url))) else ''}"
                        t-out="dkh_m.name"/>
                 </t>
@@ -110,7 +110,7 @@
         </header>
         <div id="dkh-drawer" class="dkh-drawer" hidden="hidden">
             <t t-foreach="website.menu_id.child_id" t-as="dkh_m">
-                <a t-if="dkh_m.is_visible" t-att-href="dkh_m.clean_url()" t-out="dkh_m.name"/>
+                <a t-if="dkh_m.is_visible" t-att-href="dkh_m.url" t-out="dkh_m.name"/>
             </t>
         </div>
 
