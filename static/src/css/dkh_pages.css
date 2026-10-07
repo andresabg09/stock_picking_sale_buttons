@@ -302,10 +302,3 @@
 .dkh #dk-home.qo .qo-state { position: absolute; top: 10px; left: 12px; border-radius: 999px; padding: 3px 10px; font: 700 11px var(--dkh-font); }
 .dkh #dk-home.qo .qo-state.no { background: #EEF0F5; color: var(--dkh-mute); }
 .dkh #dk-home.qo .qo-state.yes { background: #DDF3E6; color: #1F6B45; }
-
-/* Pantallas táctiles: sin saltitos al tocar (el :hover queda pegado y mueve la tarjeta mientras se escribe) */
-@media (hover: none) {
-    .dkh .dk-card:hover, .dkh-row:hover { transform: none; box-shadow: none; }
-    .dkh .dk-card:hover .dk-card-img img { transform: none; }
-}
-.dkh .dk-card:focus-within, .dkh-row:focus-within { transform: none; transition: none; }
