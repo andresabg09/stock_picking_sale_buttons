@@ -2,7 +2,7 @@
 
 - Cantidad mínima por producto: 6.
 - Tintes NNP: múltiplos de 5, al múltiplo más cercano (22 -> 20, 23 -> 25), nunca menos de 5.
-- Aliset 69 gr: de 12 en 12 (docenas). Decolorantes: de 2 en 2. Ambientadores GODREJ POCKET: de 6 en 6.
+- Aliset 69 gr: de 12 en 12 (docenas). Decolorantes: de 12 en 12. Ambientadores GODREJ POCKET: de 6 en 6.
 - Pedido mínimo (solo pedidos de la web): B/. 150 sobre el subtotal sin impuestos
   (parámetro del sistema `dkh.min_order`).
 
@@ -16,7 +16,7 @@ MIN_UNITS = 6
 TINTE_MIN = 5
 TINTE_STEP = 5
 ALISET_STEP = 12      # Aliset 69 gr: por docenas
-DECOLORANTE_STEP = 2  # decolorantes: de 2 en 2
+DECOLORANTE_STEP = 12  # decolorantes: de 12 en 12 (docenas)
 POCKET_STEP = 6       # ambientadores Pocket: por display de 6
 MIN_ORDER_PARAM = 'dkh.min_order'
 MIN_ORDER_DEFAULT = 150.0
