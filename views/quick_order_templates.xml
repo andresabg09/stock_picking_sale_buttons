@@ -52,6 +52,17 @@
                             <code>847610010414 x 6</code> &#160; <code>trat skala acai 3</code> &#160; <code>12 x shp xcare coconut</code>
                         </div>
                         <input type="hidden" id="qo-csrf" t-att-value="request.csrf_token()"/>
+                        <div t-if="website.dkh_active()" class="qo-tabs" role="tablist">
+                            <button type="button" class="qo-tab on" id="qo-tab-t" role="tab" aria-selected="true">Escribir</button>
+                            <button type="button" class="qo-tab" id="qo-tab-p" role="tab" aria-selected="false">Foto</button>
+                        </div>
+                        <div t-if="website.dkh_active()" id="qo-photo" class="qo-photo" hidden="hidden">
+                            <p>Toma o elige una o varias fotos de tu lista. La leemos y la revisas antes de agregar. Las fotos no se guardan.</p>
+                            <input type="file" id="qo-files" accept="image/*" multiple="multiple" class="qo-file"/>
+                            <div id="qo-thumbs" class="qo-thumbs"></div>
+                            <button type="button" class="qo-btn" id="qo-read" disabled="disabled">Leer lista</button>
+                            <div id="qo-photo-msg" class="qo-note" aria-live="polite"></div>
+                        </div>
                         <textarea id="qo-text" aria-label="Lista de productos" placeholder="847610010414 x 6&#10;trat skala acai 3&#10;shp xcare coconut 12"></textarea>
                         <button type="button" class="qo-btn" id="qo-review">Revisar pedido</button>
                         <div id="qo-out" aria-live="polite"></div>
@@ -66,8 +77,7 @@
   function norm(o,n){
     n=parseInt(n,10); if(!(n>0)){n=1;}
     var r=o&amp;&amp;o.rule?o.rule:null; if(!r){return n;}
-    if(r[2]){return Math.max(5,Math.floor((n+2)/5)*5);}
-    return Math.max(r[0],n);
+    return Math.max(r[0],Math.floor((n+Math.floor(r[1]/2))/r[1])*r[1]);
   }
   function fixQty(l){
     var o=current(l); if(!o){return;}
@@ -187,6 +197,43 @@
         window.location.href='/shop/cart';
       })
       .catch(function(){btn.disabled=false; btn.textContent='Agregar al carrito'; alert('No se pudo agregar al carrito. Intenta de nuevo.');});
+  }
+  /* --- modo foto --- */
+  var tabT=document.getElementById('qo-tab-t'), tabP=document.getElementById('qo-tab-p'),
+      photo=document.getElementById('qo-photo'), files=document.getElementById('qo-files'),
+      readBtn=document.getElementById('qo-read'), thumbs=document.getElementById('qo-thumbs'),
+      pmsg=document.getElementById('qo-photo-msg');
+  function showTab(isPhoto){
+    if(!tabT){return;}
+    tabT.classList.toggle('on',!isPhoto); tabP.classList.toggle('on',isPhoto);
+    tabT.setAttribute('aria-selected',String(!isPhoto)); tabP.setAttribute('aria-selected',String(isPhoto));
+    photo.hidden=!isPhoto; txt.hidden=isPhoto; go.hidden=isPhoto;
+  }
+  if(tabT){
+    tabT.addEventListener('click',function(){showTab(false);});
+    tabP.addEventListener('click',function(){showTab(true);});
+    files.addEventListener('change',function(){
+      thumbs.textContent='';
+      var n=Math.min(files.files.length,5);
+      for(var i=0;i&lt;n;i++){
+        var im=el('img'); im.alt='Foto '+(i+1); im.src=URL.createObjectURL(files.files[i]); thumbs.appendChild(im);
+      }
+      pmsg.textContent=files.files.length&gt;5?'Se leerán las primeras 5 fotos.':'';
+      readBtn.disabled=(n===0);
+    });
+    readBtn.addEventListener('click',function(){
+      var fd=new FormData(); fd.append('csrf_token',csrf);
+      for(var i=0;i&lt;Math.min(files.files.length,5);i++){fd.append('fotos',files.files[i]);}
+      readBtn.disabled=true; readBtn.textContent='Leyendo…'; pmsg.textContent='';
+      fetch('/pedido-rapido/foto',{method:'POST',body:fd,credentials:'same-origin'})
+        .then(function(r){return r.json().then(function(d){return {ok:r.ok,d:d};});})
+        .then(function(x){
+          readBtn.disabled=false; readBtn.textContent='Leer lista';
+          if(!x.ok||!x.d.texto){pmsg.textContent=(x.d&amp;&amp;x.d.error)||'No pudimos leer la lista. Intenta con otra foto.'; return;}
+          txt.value=x.d.texto; showTab(false); go.click();
+        })
+        .catch(function(){readBtn.disabled=false; readBtn.textContent='Leer lista'; pmsg.textContent='No se pudo enviar la foto. Intenta de nuevo.';});
+    });
   }
   go.addEventListener('click',function(){
     var t=txt.value.trim();

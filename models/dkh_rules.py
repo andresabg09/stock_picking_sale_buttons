@@ -2,6 +2,7 @@
 
 - Cantidad mínima por producto: 6.
 - Tintes NNP: múltiplos de 5, al múltiplo más cercano (22 -> 20, 23 -> 25), nunca menos de 5.
+- Aliset 69 gr: de 12 en 12 (docenas). Decolorantes: de 2 en 2. Ambientadores GODREJ POCKET: de 6 en 6.
 - Pedido mínimo (solo pedidos de la web): B/. 150 sobre el subtotal sin impuestos
   (parámetro del sistema `dkh.min_order`).
 
@@ -14,26 +15,38 @@ from odoo.exceptions import ValidationError
 MIN_UNITS = 6
 TINTE_MIN = 5
 TINTE_STEP = 5
+ALISET_STEP = 12      # Aliset 69 gr: por docenas
+DECOLORANTE_STEP = 2  # decolorantes: de 2 en 2
+POCKET_STEP = 6       # ambientadores Pocket: por display de 6
 MIN_ORDER_PARAM = 'dkh.min_order'
 MIN_ORDER_DEFAULT = 150.0
 
 
-def normalize_qty(is_tinte, qty):
-    """Cantidad válida más cercana a la pedida. 0 (o menos) significa "quitar" y no se toca."""
+def normalize_qty(minimum, step, qty):
+    """Cantidad válida más cercana a la pedida (múltiplo de `step`, nunca menos de `minimum`).
+    0 (o menos) significa "quitar" y no se toca. Ej. step 5: 22 -> 20, 23 -> 25."""
     try:
         qty = int(qty)
     except (TypeError, ValueError):
         qty = 0
     if qty <= 0:
         return 0
+    step = max(1, int(step))
+    return max(minimum, ((qty + step // 2) // step) * step)
+
+
+def rule_for(name, is_tinte=False):
+    """(mínimo, salto) según el producto. Por nombre, sin importar mayúsculas."""
+    up = (name or '').upper()
     if is_tinte:
-        return max(TINTE_MIN, ((qty + 2) // TINTE_STEP) * TINTE_STEP)
-    return max(MIN_UNITS, qty)
-
-
-def qty_rule(is_tinte):
-    """(mínimo, salto) que usa la pantalla para el + y el −."""
-    return (TINTE_MIN, TINTE_STEP) if is_tinte else (MIN_UNITS, 1)
+        return TINTE_MIN, TINTE_STEP
+    if 'ALISET' in up and '69GR' in up.replace(' ', ''):
+        return ALISET_STEP, ALISET_STEP
+    if 'DECOLORANTE' in up:
+        return DECOLORANTE_STEP, DECOLORANTE_STEP
+    if 'POCKET' in up and ('GODREJ' in up or 'AER' in up):
+        return POCKET_STEP, POCKET_STEP
+    return MIN_UNITS, 1
 
 
 class ProductTemplate(models.Model):
@@ -57,12 +70,13 @@ class ProductTemplate(models.Model):
         """(mínimo, salto, es_tinte) para pintar la tarjeta."""
         self.ensure_one()
         is_tinte = self._dkh_is_tinte()
-        minimum, step = qty_rule(is_tinte)
+        minimum, step = rule_for(self.name, is_tinte)
         return minimum, step, is_tinte
 
     def _dkh_normalize_qty(self, qty):
         self.ensure_one()
-        return normalize_qty(self._dkh_is_tinte(), qty)
+        minimum, step = rule_for(self.name, self._dkh_is_tinte())
+        return normalize_qty(minimum, step, qty)
 
 
 class ProductProduct(models.Model):

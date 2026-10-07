@@ -245,3 +245,13 @@
 .dkh-empty { color: var(--dkh-mute); }
 @media (max-width: 640px) { .dkh-snap > * { flex-basis: 70vw; } }
 .dkh .dk-cline.dk-pending { opacity: .85; }
+
+/* Pedido rápido: pestañas Escribir | Foto */
+.dkh #dk-home.qo .qo-tabs { display: inline-flex; gap: 4px; padding: 5px; border-radius: 999px; background: var(--dkh-soft); align-self: flex-start; }
+.dkh #dk-home.qo .qo-tab { border: 0; border-radius: 999px; padding: 10px 26px; background: transparent; color: var(--dkh-navy); font: 600 15px var(--dkh-font); cursor: pointer; }
+.dkh #dk-home.qo .qo-tab.on { background: var(--dkh-navy); color: #fff; }
+.dkh #dk-home.qo .qo-photo[hidden], .dkh #dk-home.qo textarea[hidden], .dkh #dk-home.qo .qo-btn[hidden] { display: none !important; }
+.dkh #dk-home.qo .qo-photo { display: flex; flex-direction: column; gap: 14px; padding: 22px; border-radius: 28px; background: var(--dkh-pink); }
+.dkh #dk-home.qo .qo-file { padding: 14px; border-radius: 20px; background: #fff; font: 500 14px var(--dkh-font); }
+.dkh #dk-home.qo .qo-thumbs { display: flex; flex-wrap: wrap; gap: 10px; }
+.dkh #dk-home.qo .qo-thumbs img { width: 84px; height: 84px; object-fit: cover; border-radius: 16px; background: #fff; }

@@ -534,4 +534,12 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   no la tienen): el Inicio H los muestra en un carrusel deslizable de hasta 12. (3) "Lo más pedido" del
   Inicio H = `_dk_bestsellers_by_category`: el más vendido (90 días) de cada categoría raíz, en orden de
   ventas. (4) En las filas de categorías deslizables (`.dk-chips`) la elegida se acerca al principio.
+- 2026-10-08: LOTE D parte 1 (v18.0.3.6.0). (1) Reglas de cantidad nuevas en `rule_for()` (`dkh_rules.py`, solo
+  pedidos web): ALISET ...69GR = de 12 en 12 (mín. 12); DECOLORANTE = de 2 en 2 (hoy no hay ninguno
+  publicado); GODREJ POCKET (o AER POCKET) = de 6 en 6. Cualquier cantidad se redondea al múltiplo más cercano
+  (empate hacia arriba). (2) Pedido rápido por FOTO (solo con `/dkh`): `/pedido-rapido/foto` reduce las fotos en
+  memoria (no se guardan), las manda a Claude (`claude-haiku-4-5`, librería `anthropic`, clave en la variable
+  de entorno `ANTHROPIC_API_KEY` del contenedor, NUNCA en el repo) y devuelve el texto que alimenta el mismo
+  revisor del modo escribir. Sin clave o sin librería responde 503 con un aviso amable. `deploy.sh` paso 5
+  instala `anthropic` en el contenedor nuevo (se pierde si EasyPanel recrea el contenedor sin deploy).
 

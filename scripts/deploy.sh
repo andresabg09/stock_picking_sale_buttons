@@ -44,5 +44,27 @@ echo "== 4/4: Reiniciando el servicio Odoo (para recargar el código Python) =="
 docker service update --force "$SERVICE"
 
 echo
+echo "== 5/5: Asegurando la librería 'anthropic' (modo foto del Pedido rápido) =="
+# El contenedor se recrea en el paso 4, así que se instala en el contenedor NUEVO. No es crítico:
+# si falla, el resto de la tienda funciona y solo el modo foto avisa que no está instalado.
+set +e
+NEW=""
+for i in $(seq 1 30); do
+  NEW=$(docker ps --filter "name=${SERVICE}." --format "{{.Names}}" | head -n1)
+  if [ -n "$NEW" ] && [ "$NEW" != "$CID" ] && docker exec "$NEW" true 2>/dev/null; then break; fi
+  sleep 2
+done
+if [ -n "$NEW" ]; then
+  if docker exec "$NEW" python3 -c "import anthropic" 2>/dev/null; then
+    echo "anthropic ya está instalada."
+  else
+    docker exec "$NEW" pip install --quiet anthropic 2>/dev/null \
+      || docker exec "$NEW" pip install --quiet --break-system-packages anthropic 2>/dev/null \
+      && echo "anthropic instalada." || echo "AVISO: no se pudo instalar anthropic (el modo foto quedará apagado)."
+  fi
+fi
+set -e
+
+echo
 echo "Listo. Para ver que arrancó bien:"
 echo "  docker service logs ${SERVICE} --tail 100 -f"

@@ -1,4 +1,8 @@
+import base64
+import io
 import json
+import logging
+import os
 import re
 
 from odoo import http
@@ -7,7 +11,20 @@ from odoo.osv import expression
 
 from ..models.shop_search_synonym import normalize_text
 
+_logger = logging.getLogger(__name__)
+
 MAX_LINES = 200
+MAX_PHOTOS = 5
+MAX_PHOTO_BYTES = 12 * 1024 * 1024
+PHOTO_MAX_SIDE = 1600
+PHOTO_MODEL = 'claude-haiku-4-5'
+PHOTO_PROMPT = (
+    'La imagen es una lista de pedido escrita a mano (o impresa) de un cliente de una distribuidora '
+    'de productos de belleza en Panamá. Transcríbela EXACTAMENTE, una línea por producto, en el '
+    'formato "cantidad x nombre del producto" (si no se ve la cantidad, escribe solo el nombre). '
+    'No inventes productos, no corrijas ni expliques, no agregues títulos ni comentarios. Si algo '
+    'no se lee, escribe lo que se alcance a ver. Responde solo con las líneas.'
+)
 MAX_OPTIONS = 8
 MAX_QTY = 9999
 
@@ -34,6 +51,49 @@ class QuickOrder(http.Controller):
             'lines': lines,
             'truncated': len(parsed) > MAX_LINES,
         })
+
+    @http.route('/pedido-rapido/foto', type='http', auth='user', website=True,
+                methods=['POST'], sitemap=False)
+    def quick_order_photo(self, **kw):
+        """Modo foto: una o varias fotos de una lista -> texto transcrito por Claude. Las fotos
+        NO se guardan: se reducen en memoria, se mandan a la API y se descartan."""
+        if not os.environ.get('ANTHROPIC_API_KEY'):
+            return request.make_json_response({'error': 'El modo foto todavía no está activado.'}, status=503)
+        try:
+            import anthropic
+        except ImportError:
+            return request.make_json_response({'error': 'El modo foto todavía no está instalado en el servidor.'}, status=503)
+        files = request.httprequest.files.getlist('fotos')[:MAX_PHOTOS]
+        if not files:
+            return request.make_json_response({'error': 'Elige al menos una foto.'}, status=400)
+        blocks = []
+        for storage in files:
+            raw = storage.read(MAX_PHOTO_BYTES + 1)
+            if not raw or len(raw) > MAX_PHOTO_BYTES:
+                continue
+            try:
+                from PIL import Image, ImageOps
+                img = ImageOps.exif_transpose(Image.open(io.BytesIO(raw))).convert('RGB')
+                img.thumbnail((PHOTO_MAX_SIDE, PHOTO_MAX_SIDE))
+                buf = io.BytesIO()
+                img.save(buf, format='JPEG', quality=85)
+            except Exception:
+                continue
+            blocks.append({'type': 'image', 'source': {
+                'type': 'base64', 'media_type': 'image/jpeg',
+                'data': base64.standard_b64encode(buf.getvalue()).decode('ascii')}})
+        if not blocks:
+            return request.make_json_response({'error': 'No se pudo leer ninguna de las fotos.'}, status=400)
+        try:
+            client = anthropic.Anthropic(timeout=60.0)
+            reply = client.messages.create(
+                model=PHOTO_MODEL, max_tokens=2000,
+                messages=[{'role': 'user', 'content': blocks + [{'type': 'text', 'text': PHOTO_PROMPT}]}])
+        except anthropic.APIError as exc:
+            _logger.warning('Pedido rápido por foto: error de la API (%s)', exc)
+            return request.make_json_response({'error': 'No pudimos leer la foto ahora. Intenta de nuevo.'}, status=502)
+        text = '\n'.join(b.text for b in reply.content if b.type == 'text').strip()
+        return request.make_json_response({'texto': text})
 
     @http.route('/pedido-rapido/olvidar', type='http', auth='user', website=True,
                 methods=['POST'], sitemap=False)
