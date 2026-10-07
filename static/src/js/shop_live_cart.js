@@ -231,12 +231,17 @@
             setTimeout(function () { el.select(); }, 0);
         }
     });
-    document.addEventListener('mouseup', function (ev) {
-        var el = ev.target;
-        if (el && el.classList && el.classList.contains('dk-q') && document.activeElement === el) {
-            ev.preventDefault(); // evita que el clic deshaga la selección
-        }
-    });
+    // Solo con mouse (computadora): evita que el clic deshaga la selección. En pantallas táctiles
+    // NO se cancela el mouseup: en Android eso impide que salga el teclado y no deja escribir.
+    var fine = window.matchMedia && window.matchMedia('(pointer: fine)').matches;
+    if (fine) {
+        document.addEventListener('mouseup', function (ev) {
+            var el = ev.target;
+            if (el && el.classList && el.classList.contains('dk-q') && document.activeElement === el) {
+                ev.preventDefault();
+            }
+        });
+    }
 
     document.addEventListener('keydown', function (ev) {
         if (ev.key === 'Enter' && ev.target.classList && ev.target.classList.contains('dk-q')) {
