@@ -302,3 +302,7 @@
 .dkh #dk-home.qo .qo-state { position: absolute; top: 10px; left: 12px; border-radius: 999px; padding: 3px 10px; font: 700 11px var(--dkh-font); }
 .dkh #dk-home.qo .qo-state.no { background: #EEF0F5; color: var(--dkh-mute); }
 .dkh #dk-home.qo .qo-state.yes { background: #DDF3E6; color: #1F6B45; }
+
+/* Aviso de reglas de cantidad: por encima de la barra inferior en el celular */
+.dkh .dk-toast { border-radius: 18px; background: var(--dkh-navy); font-family: var(--dkh-font); text-align: center; line-height: 1.4; }
+@media (max-width: 640px) { .dkh .dk-toast { bottom: 112px; } }

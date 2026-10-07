@@ -134,10 +134,10 @@
         var inp=el('input','qo-sug-q'); inp.type='text'; inp.setAttribute('inputmode','numeric'); inp.value=o.q; inp.setAttribute('aria-label','Cantidad');
         var pl=el('button','qo-sug-s','+'); pl.type='button'; pl.setAttribute('aria-label','Más');
         var r=o.rule;
-        mi.addEventListener('click',function(){o.q=Math.max(r[0],o.q-r[1]); inp.value=o.q;});
+        mi.addEventListener('click',function(){ if(o.q-r[1]&lt;r[0]){ if(window.dkToast){window.dkToast(window.dkRuleMsg({min:r[0],step:r[1]}));} return; } o.q=o.q-r[1]; inp.value=o.q; });
         pl.addEventListener('click',function(){o.q=o.q+r[1]; inp.value=o.q;});
         inp.addEventListener('focus',function(){inp.select();});
-        inp.addEventListener('change',function(){o.q=norm(o,inp.value); inp.value=o.q;});
+        inp.addEventListener('change',function(){var t=parseInt(inp.value,10); o.q=norm(o,inp.value); inp.value=o.q; if(t!==o.q&amp;&amp;window.dkToast){window.dkToast(window.dkRuleMsg({min:r[0],step:r[1]})+' Quedó en '+o.q+'.');}});
         var ab=el('button','qo-sug-add',o.added?'Agregar más':'Agregar'); ab.type='button';
         ab.addEventListener('click',function(){o.q=norm(o,inp.value); addOne(l,o,ab);});
         ctl.appendChild(mi); ctl.appendChild(inp); ctl.appendChild(pl); ctl.appendChild(ab);

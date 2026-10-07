@@ -89,6 +89,18 @@
         }, 3500);
     }
 
+    // Aviso de la regla de compra del producto (para que el cliente sepa que no es un error).
+    function ruleMsg(r) {
+        if (r.step > 1) {
+            return r.min === r.step
+                ? 'Este producto se pide de a ' + r.step + ' unidades.'
+                : 'Este producto se pide desde ' + r.min + ', de a ' + r.step + ' unidades.';
+        }
+        return 'El mínimo de este producto es ' + r.min + ' unidades.';
+    }
+    window.dkRuleMsg = ruleMsg;
+    window.dkToast = toast;
+
     function updateCart(d) {
         all('.my_cart_quantity').forEach(function (el) {
             el.textContent = String(d.cart_quantity);
@@ -200,8 +212,12 @@
         } else if (btn.classList.contains('dk-plus')) {
             next = cur > 0 ? cur + rule.step : rule.min;
         } else {
-            // Bajar del mínimo quita el producto del carrito.
-            next = cur - rule.step < rule.min ? 0 : cur - rule.step;
+            // No se baja del mínimo: se avisa la regla (para quitarlo, se escribe 0).
+            if (cur - rule.step < rule.min) {
+                toast(ruleMsg(rule) + ' Para quitarlo, escribe 0.');
+                return;
+            }
+            next = cur - rule.step;
         }
         change(box, next);
     });
@@ -217,9 +233,13 @@
             input.value = String(currentQty(box) || ruleOf(box).min);
             return;
         }
+        var typed = n;
         n = norm(box, n);
         if (n > 0) {
             input.value = String(n); // se ve ya corregido (p. ej. 23 -> 25 en tintes)
+            if (typed !== n) {
+                toast(ruleMsg(ruleOf(box)) + ' Quedó en ' + n + '.');
+            }
         }
         change(box, n);
     });

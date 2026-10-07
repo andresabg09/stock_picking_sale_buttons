@@ -116,7 +116,13 @@
             setQty(line, 0);
         } else if (t.querySelector('.fa-minus')) {
             var down = cur - step;
-            schedule(line, down < min ? 0 : down);
+            if (down < min) {
+                if (window.dkToast && window.dkRuleMsg) {
+                    window.dkToast(window.dkRuleMsg({ min: min, step: step }) + ' Para quitarlo, usa "Quitar".');
+                }
+                return;
+            }
+            schedule(line, down);
         } else {
             schedule(line, cur ? cur + step : min);
         }
@@ -133,6 +139,15 @@
         }
         ev.stopImmediatePropagation();
         var n = parseInt(input.value, 10);
+        if (n > 0) {
+            var cmin = parseInt(line.getAttribute('data-min'), 10) || 1;
+            var cstep = parseInt(line.getAttribute('data-step'), 10) || 1;
+            var fixed = Math.max(cmin, Math.floor((n + Math.floor(cstep / 2)) / cstep) * cstep);
+            if (fixed !== n && window.dkToast && window.dkRuleMsg) {
+                window.dkToast(window.dkRuleMsg({ min: cmin, step: cstep }) + ' Quedó en ' + fixed + '.');
+            }
+            n = fixed;
+        }
         schedule(line, n > 0 ? n : 0);
     }, true);
 
