@@ -190,9 +190,9 @@ body.dkh-lock { overflow: hidden; }
 }
 
 /* ---- Encabezado fijo: se esconde al bajar y reaparece al subir ---- */
-.dkh-bar { position: sticky; top: 0; z-index: 1030; background: #fff; box-shadow: 0 1px 0 var(--dkh-line); transition: transform .3s ease; }
-.dkh-bar.is-hidden { transform: translateY(-100%); }
-.dkh-bar .dkh-hd { padding-top: 14px; padding-bottom: 14px; }
+.dkh-top { flex: 0 0 auto; width: 100%; position: sticky; top: 0; z-index: 1030; background: #fff; box-shadow: 0 1px 0 var(--dkh-line); transition: transform .3s ease; }
+.dkh-top.is-hidden { transform: translateY(-100%); }
+.dkh-top .dkh-hd { padding-top: 14px; padding-bottom: 14px; }
 .dkh-cart { gap: 8px; }
 .dkh-cart-count { display: inline-flex; align-items: center; justify-content: center; min-width: 24px; height: 24px; padding: 0 7px; border-radius: 999px; background: #fff; color: var(--dkh-navy); font-size: 13px; font-weight: 800; }
 .dkh-cart-count[hidden] { display: none; }
@@ -201,4 +201,4 @@ body.dkh-lock { overflow: hidden; }
 .dkh-fly { position: fixed; z-index: 1300; margin: 0; pointer-events: none; object-fit: contain; border-radius: 18px; background: #fff; box-shadow: 0 10px 30px rgba(22, 33, 58, .25); will-change: transform, opacity; }
 /* La pastilla flotante de abajo ya no se usa: el carrito vive en el encabezado */
 .dkh .dk-pill { display: none !important; }
-@media (prefers-reduced-motion: reduce) { .dkh-bar { transition: none; } .dkh-cart.bump { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .dkh-top { transition: none; } .dkh-cart.bump { animation: none; } }

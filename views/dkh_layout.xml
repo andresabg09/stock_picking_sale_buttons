@@ -84,7 +84,7 @@
     <template id="dkh_header" name="DKH: encabezado H">
         <t t-set="dkh_order" t-value="website.sale_get_order() if website.has_ecommerce_access() else False"/>
         <t t-set="dkh_path" t-value="request.httprequest.path"/>
-        <div class="dkh-bar">
+        <div class="dkh-top">
         <header class="dkh-hd dkh-wrap" data-name="Header">
             <a href="/" class="dkh-logo" aria-label="Shalom, inicio">shalom<span>.</span></a>
             <!-- Computadora: cápsula azul oscuro; la sección activa va en blanco. -->

@@ -288,7 +288,7 @@
     window.dkSetCartCount = setCartCount;
 
     function bar() {
-        return document.querySelector('.dkh-bar');
+        return document.querySelector('.dkh-top');
     }
 
     function initBar() {
