@@ -36,4 +36,5 @@ class DkhCheckout(http.Controller):
         return {
             'found': True, 'name': found.name, 'qty': int(line.product_uom_qty) if line else 0,
             'url': found.website_url, 'cart_amount': order.amount_untaxed,
+            'cart_lines': len(order.website_order_line),
         }

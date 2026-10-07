@@ -101,6 +101,7 @@
   function anyAdded(l){return l.options.some(function(o){return o.added;});}
   function addOne(l,o,btn){
     var n=norm(o,o.q||o.rule[0]);
+    if(window.dkFly){window.dkFly(btn);}
     btn.disabled=true; btn.textContent='Agregando…';
     post('/pedido-rapido/agregar',{items:JSON.stringify([{template_id:o.template_id,qty:n,name:o.name,alias:l.text,learn:(l.status==='suggest')}])})
       .then(function(d){

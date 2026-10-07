@@ -542,4 +542,10 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   de entorno `ANTHROPIC_API_KEY` del contenedor, NUNCA en el repo) y devuelve el texto que alimenta el mismo
   revisor del modo escribir. Sin clave o sin librería responde 503 con un aviso amable. `deploy.sh` paso 5
   instala `anthropic` en el contenedor nuevo (se pierde si EasyPanel recrea el contenedor sin deploy).
+- 2026-10-08: v18.0.3.7.0 / 3.8.0. Avisos de regla de cantidad (`dkRuleMsg`/`dkToast` en shop_live_cart.js): al bajar
+  del mínimo NO se quita el producto (se avisa; quitar = escribir 0 o "Quitar" en el carrito) y al escribir una
+  cantidad que se ajusta sale el aviso. Encabezado H fijo (`.dkh-bar`, sticky): se esconde al bajar y reaparece al
+  subir (escucha scroll de `window` y de `#wrapwrap`); el botón dice "Carrito" + cantidad de productos
+  (`.dkh-cart-count`, líneas del pedido, se actualiza en vivo); la píldora flotante `.dk-pill` se oculta bajo `.dkh`;
+  `window.dkFly(elemento)` hace volar la foto del producto hacia el carrito al agregar (tarjetas, Pedido rápido).
 

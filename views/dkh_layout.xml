@@ -84,6 +84,7 @@
     <template id="dkh_header" name="DKH: encabezado H">
         <t t-set="dkh_order" t-value="website.sale_get_order() if website.has_ecommerce_access() else False"/>
         <t t-set="dkh_path" t-value="request.httprequest.path"/>
+        <div class="dkh-bar">
         <header class="dkh-hd dkh-wrap" data-name="Header">
             <a href="/" class="dkh-logo" aria-label="Shalom, inicio">shalom<span>.</span></a>
             <!-- Computadora: cápsula azul oscuro; la sección activa va en blanco. -->
@@ -104,8 +105,10 @@
                     <t t-call="stock_picking_sale_buttons.dkh_icon_qr"/>
                 </button>
             </div>
-            <a href="/shop/cart" class="dkh-cart">Pedido · <span class="dkh-cart-total" t-out="'B/. %.2f' % (dkh_order.amount_untaxed if dkh_order else 0.0)"/></a>
+            <t t-set="dkh_n" t-value="len(dkh_order.website_order_line) if dkh_order else 0"/>
+            <a href="/shop/cart" class="dkh-cart" aria-label="Carrito">Carrito<span class="dkh-cart-count" t-att-hidden="'hidden' if not dkh_n else None" t-out="dkh_n"/></a>
         </header>
+        </div>
 
         <!-- Tablet: riel lateral con íconos. Celular: barra inferior con botón central para escanear. -->
         <nav class="dkh-dock" aria-label="Menú">

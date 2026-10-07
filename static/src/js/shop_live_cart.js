@@ -102,6 +102,9 @@
     window.dkToast = toast;
 
     function updateCart(d) {
+        if (window.dkSetCartCount) {
+            window.dkSetCartCount(d.cart_lines);
+        }
         all('.my_cart_quantity').forEach(function (el) {
             el.textContent = String(d.cart_quantity);
             el.classList.toggle('d-none', !d.cart_quantity);
@@ -218,6 +221,9 @@
                 return;
             }
             next = cur - rule.step;
+        }
+        if (window.dkFly && (btn.classList.contains('dk-add') || btn.classList.contains('dk-plus'))) {
+            window.dkFly(btn);
         }
         change(box, next);
     });

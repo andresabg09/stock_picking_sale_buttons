@@ -44,10 +44,9 @@
                         cur.replaceWith(neu);
                     }
                 });
-                var tot = document.querySelector('.dkh-cart-total');
-                var ntot = doc.querySelector('.dkh-cart-total');
-                if (tot && ntot) {
-                    tot.textContent = ntot.textContent;
+                var ncount = doc.querySelector('.dkh-cart-count');
+                if (ncount && window.dkSetCartCount) {
+                    window.dkSetCartCount(ncount.hidden ? 0 : parseInt(ncount.textContent, 10) || 0);
                 }
             });
     }
