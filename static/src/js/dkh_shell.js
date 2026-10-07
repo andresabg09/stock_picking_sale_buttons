@@ -187,20 +187,25 @@
         }
     }
 
-    function toggleDrawer() {
-        var drawer = byId('dkh-drawer');
-        var btn = document.querySelector('[data-dkh-burger]');
-        if (!drawer) {
+    function setMore(open) {
+        var more = byId('dkh-more');
+        var btn = document.querySelector('[data-dkh-more]');
+        if (!more) {
             return;
         }
-        drawer.hidden = !drawer.hidden;
+        more.hidden = !open;
         if (btn) {
-            btn.setAttribute('aria-expanded', drawer.hidden ? 'false' : 'true');
+            btn.setAttribute('aria-expanded', open ? 'true' : 'false');
         }
     }
 
+    function toggleMore() {
+        var more = byId('dkh-more');
+        setMore(!!(more && more.hidden));
+    }
+
     document.addEventListener('click', function (ev) {
-        var t = ev.target.closest ? ev.target.closest('[data-dkh-scan], [data-dkh-burger], .dkh-scrim') : null;
+        var t = ev.target.closest ? ev.target.closest('[data-dkh-scan], [data-dkh-more], .dkh-more, .dkh-scrim') : null;
         if (!t) {
             return;
         }
@@ -210,9 +215,11 @@
         } else if (t.matches('[data-dkh-scan="close"]')) {
             ev.preventDefault();
             closeScan();
-        } else if (t.matches('[data-dkh-burger]')) {
+        } else if (t.matches('[data-dkh-more]')) {
             ev.preventDefault();
-            toggleDrawer();
+            toggleMore();
+        } else if (t.classList.contains('dkh-more') && ev.target === t) {
+            setMore(false); // clic en el fondo oscuro
         } else if (t.classList.contains('dkh-scrim') && ev.target === t) {
             closeScan(); // clic en el fondo oscuro
         }
@@ -220,6 +227,7 @@
 
     document.addEventListener('keydown', function (ev) {
         if (ev.key === 'Escape') {
+            setMore(false);
             closeScan();
         }
     });

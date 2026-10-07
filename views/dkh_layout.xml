@@ -86,6 +86,7 @@
         <t t-set="dkh_path" t-value="request.httprequest.path"/>
         <header class="dkh-hd dkh-wrap" data-name="Header">
             <a href="/" class="dkh-logo" aria-label="Shalom, inicio">shalom<span>.</span></a>
+            <!-- Computadora: cápsula azul oscuro; la sección activa va en blanco. -->
             <nav class="dkh-nav" aria-label="Principal">
                 <t t-foreach="website.menu_id.child_id" t-as="dkh_m">
                     <a t-if="dkh_m.is_visible" t-att-href="dkh_m.url"
@@ -104,14 +105,33 @@
                 </button>
             </div>
             <a href="/shop/cart" class="dkh-cart">Pedido · <span class="dkh-cart-total" t-out="'B/. %.2f' % (dkh_order.amount_untaxed if dkh_order else 0.0)"/></a>
-            <button type="button" class="dkh-burger" data-dkh-burger="toggle" aria-label="Menú" aria-expanded="false" aria-controls="dkh-drawer">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
-            </button>
         </header>
-        <div id="dkh-drawer" class="dkh-drawer" hidden="hidden">
-            <t t-foreach="website.menu_id.child_id" t-as="dkh_m">
-                <a t-if="dkh_m.is_visible" t-att-href="dkh_m.url" t-out="dkh_m.name"/>
-            </t>
+
+        <!-- Tablet: riel lateral con íconos. Celular: barra inferior con botón central para escanear. -->
+        <nav class="dkh-dock" aria-label="Menú">
+            <a href="/" t-attf-class="dkh-tab #{'on' if dkh_path in ('/', '/inicio') else ''}">
+                <span class="dkh-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11l9-8 9 8v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg></span>Inicio</a>
+            <a href="/shop" t-attf-class="dkh-tab #{'on' if dkh_path.startswith('/shop') else ''}">
+                <span class="dkh-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h16l-1.5 12a1 1 0 0 1-1 .9H6.5a1 1 0 0 1-1-.9z"/><path d="M9 7a3 3 0 0 1 6 0"/></svg></span>Tienda</a>
+            <button type="button" class="dkh-tab dkh-tab-scan" data-dkh-scan="open" aria-label="Escanear código de barras o QR">
+                <span class="dkh-ic"><t t-call="stock_picking_sale_buttons.dkh_icon_qr"/></span><span class="dkh-tab-t">Escanear</span></button>
+            <a href="/pedido-rapido" t-attf-class="dkh-tab #{'on' if dkh_path.startswith('/pedido-rapido') else ''}">
+                <span class="dkh-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></span>Rápido</a>
+            <a href="/contactus" class="dkh-tab dkh-tab-t">
+                <span class="dkh-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v11H8l-4 4z"/></svg></span>Contacto</a>
+            <button type="button" class="dkh-tab dkh-tab-m" data-dkh-more="toggle" aria-expanded="false" aria-controls="dkh-more">
+                <span class="dkh-ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" aria-hidden="true"><path d="M5 12h.01M12 12h.01M19 12h.01"/></svg></span>Más</button>
+        </nav>
+
+        <!-- Celular: hoja "Más" que sube desde abajo. -->
+        <div id="dkh-more" class="dkh-more" hidden="hidden">
+            <div class="dkh-more-sheet" role="dialog" aria-label="Más opciones">
+                <span class="dkh-grab" aria-hidden="true"/>
+                <a href="/contactus" class="dkh-more-a dkh-more-pink">Contáctanos <span aria-hidden="true">→</span></a>
+                <a href="/my/orders" class="dkh-more-a dkh-more-blue">Mis pedidos <span aria-hidden="true">→</span></a>
+                <a href="/my" class="dkh-more-a">Mi cuenta <span aria-hidden="true">→</span></a>
+                <a href="https://wa.me/50768337354" target="_blank" rel="noopener" class="dkh-more-a">WhatsApp ventas <span aria-hidden="true">→</span></a>
+            </div>
         </div>
 
         <!-- Ventana del escáner: usa la cámara (código de barras y QR). Necesita HTTPS. -->

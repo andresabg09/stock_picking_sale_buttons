@@ -522,4 +522,10 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   (transferencia si el proveedor es `custom`, si no tarjeta) e ITBMS sí, sin abrir el pop-up de ruta.
   (4) `_check_cart_is_ready_to_be_paid` exige el pedido mínimo en el servidor con la H encendida
   (si este Odoo no trae ese método, no tiene efecto). Hoy NO hay `payment.provider` activo.
+- 2026-10-08: Menú H = "Opción C" elegida por Andrés (v18.0.3.4.0, diseño en el lienzo
+  claude.ai/artifact/6tmeuj5KZ5BzGEmWT5qWDa). Computadora: cápsula azul oscuro con la sección activa en
+  blanco (items de `website.menu`). Tablet (≤1024): riel lateral fijo de 96 px (`.dkh-dock`, `#wrapwrap`
+  con padding-left). Celular (≤640): barra inferior con botón central "Escanear" y hoja "Más"
+  (Contáctanos / Mis pedidos / Mi cuenta / WhatsApp, `#dkh-more`). Se quitó el menú hamburguesa y el
+  cajón. Los enlaces del dock son fijos (/, /shop, /pedido-rapido, /contactus), no salen de website.menu.
 
