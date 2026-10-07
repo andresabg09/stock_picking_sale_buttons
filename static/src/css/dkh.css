@@ -109,20 +109,15 @@ body.dkh-lock { overflow: hidden; }
 .dkh-x { width: 44px; height: 44px; border: 0; border-radius: 50%; background: var(--dkh-soft); color: var(--dkh-navy); display: flex; align-items: center; justify-content: center; cursor: pointer; }
 .dkh-sheet p { margin: 16px 0 18px; font-size: 15px; line-height: 1.55; color: var(--dkh-ink-2); }
 .dkh-vf { position: relative; aspect-ratio: 1/1; border-radius: 28px; overflow: hidden; background: linear-gradient(160deg, #25335A, #0F1830); }
+.dkh-vf video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
 .dkh-vf i { position: absolute; width: 44px; height: 44px; border: 4px solid #F6A6C0; }
 .dkh-vf i:nth-child(1) { left: 12%; top: 12%; border-right: 0; border-bottom: 0; border-radius: 14px 0 0 0; }
 .dkh-vf i:nth-child(2) { right: 12%; top: 12%; border-left: 0; border-bottom: 0; border-radius: 0 14px 0 0; }
 .dkh-vf i:nth-child(3) { left: 12%; bottom: 12%; border-right: 0; border-top: 0; border-radius: 0 0 0 14px; }
 .dkh-vf i:nth-child(4) { right: 12%; bottom: 12%; border-left: 0; border-top: 0; border-radius: 0 0 14px 0; }
 .dkh-vf u { position: absolute; left: 14%; right: 14%; height: 3px; background: linear-gradient(90deg, transparent, #F6A6C0, transparent); animation: dkh-scan 2.4s ease-in-out infinite; }
-.dkh-vf span { position: absolute; left: 0; right: 0; bottom: 16px; text-align: center; color: #C9D4EE; font-size: 13px; }
+.dkh-vf span { padding: 0 16px; text-shadow: 0 1px 6px rgba(0,0,0,.6); position: absolute; left: 0; right: 0; bottom: 16px; text-align: center; color: #C9D4EE; font-size: 13px; }
 @keyframes dkh-scan { 0%, 100% { top: 16%; } 50% { top: 82%; } }
-.dkh-sheet-form { display: flex; gap: 10px; flex-wrap: wrap; }
-.dkh-sheet-form input {
-    flex: 1; min-width: 200px; height: 50px; border: 0 !important; border-radius: 999px; background: var(--dkh-soft) !important;
-    padding: 0 18px; font: 400 15px var(--dkh-font); color: var(--dkh-navy) !important;
-}
-.dkh-sheet-form input:focus { outline: 2px solid var(--dkh-navy); }
 
 /* ---- Pie ---- */
 .dkh-footer { display: none; background: var(--dkh-navy); color: #B9C3DA; font-size: 14px; }

@@ -114,8 +114,7 @@
             </t>
         </div>
 
-        <!-- Ventana del escáner. En esta etapa ya funciona escribir el código (busca por código
-             de barras); la cámara se conecta en la etapa del escáner. -->
+        <!-- Ventana del escáner: usa la cámara (código de barras y QR). Necesita HTTPS. -->
         <div id="dkh-scan" class="dkh-scrim" hidden="hidden" role="dialog" aria-modal="true" aria-label="Escanear código">
             <div class="dkh-sheet">
                 <div class="dkh-sheet-h">
@@ -124,13 +123,11 @@
                         <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
                     </button>
                 </div>
-                <div class="dkh-vf" aria-hidden="true"><i/><i/><i/><i/><u/><span>Apunta al código de barras o QR</span></div>
-                <p>Escanea el código del producto que ya tienes en tu local y lo agregamos a tu pedido. Después ajustas la cantidad.</p>
-                <form action="/shop" method="get" class="dkh-sheet-form">
-                    <label for="dkh-code" class="dkh-sr">Escribir el código</label>
-                    <input id="dkh-code" type="search" name="search" placeholder="O escribe el código…" autocomplete="off" inputmode="numeric"/>
-                    <button type="submit" class="dkh-btn">Buscar</button>
-                </form>
+                <div class="dkh-vf">
+                    <video id="dkh-video" playsinline="playsinline" muted="muted" autoplay="autoplay"/>
+                    <i/><i/><i/><i/><u/><span id="dkh-scan-msg">Apunta al código de barras o QR</span>
+                </div>
+                <p>Escanea el código del producto y lo buscamos en la tienda.</p>
             </div>
         </div>
     </template>
