@@ -109,7 +109,7 @@
     if(!lines.length){return;}
     var list=el('div','qo-list'), total=0, ready=0, pending=0, missing=0;
     lines.forEach(function(l){
-      var row=el('div','qo-row'+(l.skip?' skip':''));
+      var row=el('div','qo-row'+(l.skip?' skip':'')+(l.status==='suggest'?' sug':''));
       var left=el('div','qo-left');
       left.appendChild(el('div','qo-raw',l.raw));
       if(l.fuzzy){left.appendChild(el('div','qo-note','Buscado como «'+l.fuzzy+'»'));}
@@ -123,7 +123,9 @@
         if(l.status==='suggest'){
           var chips=el('div','qo-sugs');
           l.options.forEach(function(o,k){
-            var b=el('button','qo-sug'+(l.pick===k?' on':''),o.name); b.type='button';
+            var b=el('button','qo-sug'+(l.pick===k?' on':'')); b.type='button';
+            var im=el('img'); im.src=o.image; im.alt=''; im.loading='lazy'; b.appendChild(im);
+            var tx=el('span','qo-sug-t'); tx.appendChild(el('b',null,o.name)); tx.appendChild(el('small',null,money(o.price)+' c/u')); b.appendChild(tx);
             b.addEventListener('click',function(){l.pick=(l.pick===k?null:k); render();});
             chips.appendChild(b);
           });
