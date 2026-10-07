@@ -104,42 +104,67 @@
     var o=l.options[l.pick];
     return (o&amp;&amp;!o.variants)?o:null;
   }
+  function anyAdded(l){return l.options.some(function(o){return o.added;});}
+  function addOne(l,o,btn){
+    var n=norm(o,o.q||o.rule[0]);
+    btn.disabled=true; btn.textContent='Agregando…';
+    post('/pedido-rapido/agregar',{items:JSON.stringify([{template_id:o.template_id,qty:n,name:o.name,alias:l.text,learn:(l.status==='suggest')}])})
+      .then(function(d){
+        if(d.skipped&amp;&amp;d.skipped.length){btn.disabled=false; btn.textContent='Agregar'; alert('No se pudo agregar: '+d.skipped.join(', ')); return;}
+        o.added=(o.added||0)+n; render();
+      })
+      .catch(function(){btn.disabled=false; btn.textContent='Agregar'; alert('No se pudo agregar. Intenta de nuevo.');});
+  }
+  /* Opciones como catálogo: foto, nombre, precio, cantidad y botón Agregar en cada tarjeta. */
+  function catalog(l){
+    var grid=el('div','qo-sugs');
+    l.options.forEach(function(o){
+      if(!o.q){o.q=norm(o,l.qty);}
+      var card=el('div','qo-sug'+(o.added?' on':''));
+      var im=el('img'); im.src=o.image; im.alt=''; im.loading='lazy'; card.appendChild(im);
+      var tx=el('div','qo-sug-t'); tx.appendChild(el('b',null,o.name)); tx.appendChild(el('small',null,money(o.price)+' c/u'));
+      if(o.added){tx.appendChild(el('span','qo-adj','✓ '+o.added+' en tu pedido'));}
+      card.appendChild(tx);
+      if(o.variants){
+        var a=el('a','qo-link','Tiene variantes: ábrelo'); a.href=o.url; card.appendChild(a);
+      } else {
+        var ctl=el('div','qo-sug-c');
+        var mi=el('button','qo-sug-s','−'); mi.type='button'; mi.setAttribute('aria-label','Menos');
+        var inp=el('input','qo-sug-q'); inp.type='text'; inp.setAttribute('inputmode','numeric'); inp.value=o.q; inp.setAttribute('aria-label','Cantidad');
+        var pl=el('button','qo-sug-s','+'); pl.type='button'; pl.setAttribute('aria-label','Más');
+        var r=o.rule;
+        mi.addEventListener('click',function(){o.q=Math.max(r[0],o.q-r[1]); inp.value=o.q;});
+        pl.addEventListener('click',function(){o.q=o.q+r[1]; inp.value=o.q;});
+        inp.addEventListener('focus',function(){inp.select();});
+        inp.addEventListener('change',function(){o.q=norm(o,inp.value); inp.value=o.q;});
+        var ab=el('button','qo-sug-add',o.added?'Agregar más':'Agregar'); ab.type='button';
+        ab.addEventListener('click',function(){o.q=norm(o,inp.value); addOne(l,o,ab);});
+        ctl.appendChild(mi); ctl.appendChild(inp); ctl.appendChild(pl); ctl.appendChild(ab);
+        card.appendChild(ctl);
+      }
+      grid.appendChild(card);
+    });
+    return grid;
+  }
   function render(){
     out.textContent='';
     if(!lines.length){return;}
-    var list=el('div','qo-list'), total=0, ready=0, pending=0, missing=0;
+    var list=el('div','qo-list'), total=0, ready=0, pending=0, missing=0, added=0;
     lines.forEach(function(l){
-      var row=el('div','qo-row'+(l.skip?' skip':'')+(l.status==='suggest'?' sug':''));
+      var row=el('div','qo-row'+(l.skip?' skip':'')+((l.status==='suggest'||l.status==='choose')?' sug':''));
       var left=el('div','qo-left');
       left.appendChild(el('div','qo-raw',l.raw));
       if(l.fuzzy){left.appendChild(el('div','qo-note','Buscado como «'+l.fuzzy+'»'));}
-      if(l.status==='suggest'&amp;&amp;l.pick===null){left.appendChild(el('div','qo-note','No lo encontramos igual. ¿Quisiste decir…?'));}
+      if(l.status==='suggest'){left.appendChild(el('div','qo-note','No lo encontramos igual. ¿Quisiste decir…?'));}
+      if(l.status==='choose'&amp;&amp;l.total&gt;l.options.length){left.appendChild(el('div','qo-note','Hay '+l.total+' productos parecidos: mostramos '+l.options.length+'. Escribe un poco más para afinar.'));}
       row.appendChild(left);
       var mid=el('div','qo-mid');
       if(l.status==='missing'){
         mid.appendChild(el('span','qo-chip bad','No encontrado'));
         if(!l.skip){missing++;}
       } else {
-        if(l.status==='suggest'){
-          var chips=el('div','qo-sugs');
-          l.options.forEach(function(o,k){
-            var b=el('button','qo-sug'+(l.pick===k?' on':'')); b.type='button';
-            var im=el('img'); im.src=o.image; im.alt=''; im.loading='lazy'; b.appendChild(im);
-            var tx=el('span','qo-sug-t'); tx.appendChild(el('b',null,o.name)); tx.appendChild(el('small',null,money(o.price)+' c/u')); b.appendChild(tx);
-            b.addEventListener('click',function(){l.pick=(l.pick===k?null:k); render();});
-            chips.appendChild(b);
-          });
-          mid.appendChild(chips);
-        } else if(l.options.length&gt;1){
-          var sel=el('select','qo-sel');
-          var ph=el('option',null,'Elige el producto…'); ph.value=''; sel.appendChild(ph);
-          l.options.forEach(function(o,k){
-            var op=el('option',null,o.name+' — '+money(o.price)); op.value=String(k);
-            if(l.pick===k){op.selected=true;}
-            sel.appendChild(op);
-          });
-          sel.addEventListener('change',function(){l.pick=(sel.value===''?null:parseInt(sel.value,10)); render();});
-          mid.appendChild(sel);
+        if(l.status==='suggest'||(l.status==='choose'&amp;&amp;l.options.length&gt;1)){
+          mid.appendChild(catalog(l));
         }
         var o=(l.pick===null)?null:l.options[l.pick];
         if(o&amp;&amp;!l.skip){fixQty(l);}
@@ -161,7 +186,9 @@
         }
         if(!l.skip){
           var cur=current(l);
-          if(cur){ready++; total+=cur.price*l.qty;} else {pending++;}
+          if(cur){ready++; total+=cur.price*l.qty;}
+          else if(l.status==='suggest'||l.status==='choose'){ if(anyAdded(l)){added++;} else {pending++;} }
+          else {pending++;}
         }
       }
       row.appendChild(mid);
@@ -178,11 +205,11 @@
     });
     out.appendChild(list);
     var sum=el('div','qo-sum'), st=el('div','qo-sumtxt');
-    st.appendChild(el('div',null,ready+' listas'+(pending?' · '+pending+' por elegir':'')+(missing?' · '+missing+' no encontradas':'')));
+    st.appendChild(el('div',null,ready+' listas'+(added?' · '+added+' ya en tu pedido':'')+(pending?' · '+pending+' por elegir':'')+(missing?' · '+missing+' no encontradas':'')));
     st.appendChild(el('div','qo-total',money(total)));
     sum.appendChild(st);
-    var add=el('button','qo-btn','Agregar al carrito'); add.type='button'; add.disabled=(ready===0);
-    add.addEventListener('click',function(){addAll(add);});
+    var add=el('button','qo-btn',(ready===0&amp;&amp;added)?'Ir al carrito':'Agregar al carrito'); add.type='button'; add.disabled=(ready===0&amp;&amp;!added);
+    add.addEventListener('click',function(){ if(ready===0&amp;&amp;added){window.location.href='/shop/cart';} else {addAll(add);} });
     sum.appendChild(add);
     out.appendChild(sum);
   }
