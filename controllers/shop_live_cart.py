@@ -27,6 +27,11 @@ class ShopLiveCart(http.Controller):
         if not product or not allowed or tmpl.product_variant_count != 1:
             return {'error': 'Este producto no se puede agregar desde aquí.'}
 
+        if qty > 0:
+            # Reglas de compra (mínimo 6; tintes NNP de 5 en 5): se aplican aquí y de nuevo en
+            # sale.order._cart_update, así ninguna ruta del carrito las salta.
+            qty = tmpl._dkh_normalize_qty(qty)
+
         order = request.website.sale_get_order(force_create=True)
         if order.state != 'draft':
             # Mismo manejo que /shop/cart/update: carrito ya no editable -> uno nuevo.
@@ -53,4 +58,6 @@ class ShopLiveCart(http.Controller):
             'line_total': format_amount(request.env, line._get_cart_display_price(), currency) if line else '',
             'cart_quantity': order.cart_quantity,
             'cart_lines': len(lines),
+            'cart_amount': order.amount_untaxed,
+            'min_missing': order._dkh_min_missing(),
         }

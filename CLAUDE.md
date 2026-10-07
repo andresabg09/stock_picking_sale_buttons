@@ -19,6 +19,9 @@ redimensionadas en Traslados (`stock.picking`), Ventas (`sale.order`), Facturas
    4. Andrés prueba en producción.
    REGLA DEFINITIVA (2026-08-20, confirmada explícitamente por Andrés tras varias
    idas y vueltas — no volver a cambiar sin que él lo pida de nuevo).
+   EXCEPCIÓN pedida por Andrés (2026-10-07) SOLO para el rediseño "Versión H": se trabaja
+   en lotes de 3 etapas y se hace UN commit + push por lote (no por cambio). El plan está
+   en el doc "Plan de rediseño H para Odoo" (claude.ai/code/artifact/4a80a50e-eafc-4ccc-a061-2fbf89f055d4).
 2. Para cambios de diseño/alcance no triviales (formato de un reporte, estructura de un
    Excel, flujo nuevo, etc.): primero **mostrar el diseño/plan y esperar la confirmación
    explícita de Andrés**, sin tocar código ni git. Recién cuando él confirma, se codifica
@@ -480,3 +483,16 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   False. Se sigue precargando encendido SOLO si ese cliente específico ya
   lo tuvo encendido en un pedido anterior (sin tocar esa parte de la
   lógica, solo el fallback).
+- 2026-10-07: REDISEÑO "VERSIÓN H" (tienda completa), lote A = etapas 0-2, v18.0.3.0.0. Diseño en el
+  lienzo claude.ai/artifact/3EHWT6Gt3saSMwWaJTDcTr. Todo lo nuevo vive bajo la clase `dkh` del
+  <body> y SOLO se ve en vista previa: entrar a `/dkh` (cookie en ese navegador; `/dkh?off=1` la
+  apaga) o poner el parámetro del sistema `dkh.enabled` = 1 (todos). Etapa 0: línea base en
+  `scripts/tienda_backup/BASELINE_2026-10-07/` (LEEME.md, vista 3329, capturas). Etapa 1: encabezado
+  H con buscador + botón QR, pie H, `views/dkh_layout.xml`, `static/src/css/dkh.css`,
+  `static/src/js/dkh_shell.js`, `models/website_dkh.py` (`website.dkh_active()`), `controllers/
+  dkh_preview.py`. Etapa 2: reglas de cantidad en el SERVIDOR (`models/dkh_rules.py`): mínimo 6,
+  tintes NNP al múltiplo de 5 más cercano (22→20, 23→25), solo pedidos con `website_id`;
+  `sale.order._cart_update` las aplica y `/shop/dk/set_qty` también; `shop_live_cart.js` ya
+  selecciona al tocar y respeta `data-min`/`data-step`. Pedido mínimo B/. 150 (`dkh.min_order`):
+  existe `_dkh_min_missing()`; el bloqueo al confirmar entra en la etapa 6. Pendiente de Andrés:
+  HTTPS para la cámara (web.base.url hoy es http://).

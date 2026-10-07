@@ -1,0 +1,137 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- ============================================================================
+         REDISEÑO "VERSIÓN H" — Etapa 1: cimientos (encabezado, pie, vista previa).
+         Todo lo nuevo vive bajo la clase `dkh` del <body>, que solo se pone en la vista
+         previa (/dkh) o cuando el parámetro del sistema `dkh.enabled` vale 1.
+         Quien no entró por /dkh sigue viendo la tienda de siempre.
+         Para apagar todo: visitar /dkh?off=1 (tu navegador) o poner dkh.enabled = 0.
+         ============================================================================ -->
+
+    <!-- Fuente de la Versión H. Va en el <head> para todos (el head se guarda en caché por
+         página, por eso no puede depender de la vista previa); solo se usa bajo `.dkh`. -->
+    <template id="dkh_head" inherit_id="website.layout" name="DKH: fuente" priority="30">
+        <xpath expr="//head" position="inside">
+            <link rel="preconnect" href="https://fonts.googleapis.com"/>
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&amp;display=swap"/>
+        </xpath>
+    </template>
+
+    <!-- Clase `dkh` en el <body> (solo vista previa / encendido). -->
+    <template id="dkh_body_class" inherit_id="website.layout" name="DKH: clase del body" priority="30">
+        <xpath expr="//html" position="before">
+            <t t-if="website and website.dkh_active()">
+                <t t-set="body_classname" t-value="((body_classname or '') + ' dkh').strip()"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Marca para el CSS: el tema anterior (vista 3329) solo fuerza texto negro dentro de
+         `main` cuando NO existe un elemento #dk-home. Con esta marca el tema viejo no pisa
+         el diseño nuevo. Solo en vista previa. -->
+    <template id="dkh_main_marker" inherit_id="website.layout" name="DKH: marca en main" priority="30">
+        <xpath expr="//main" position="inside">
+            <span t-if="website and website.dkh_active()" id="dk-home" class="dkh-marker" hidden="hidden"/>
+        </xpath>
+    </template>
+
+    <!-- Encabezado H (antes del encabezado de Odoo, que en vista previa se oculta por CSS). -->
+    <template id="dkh_header_inject" inherit_id="website.layout" name="DKH: encabezado" priority="30">
+        <xpath expr="//header[@id='top']" position="before">
+            <t t-if="website and website.dkh_active()">
+                <t t-call="stock_picking_sale_buttons.dkh_header"/>
+            </t>
+        </xpath>
+    </template>
+
+    <!-- Pie H: va SIEMPRE en el HTML (el pie de Odoo se guarda en caché y no puede depender de
+         la vista previa); el CSS lo muestra solo bajo `.dkh`. -->
+    <template id="dkh_footer_inject" inherit_id="website.layout" name="DKH: pie" priority="30">
+        <xpath expr="//div[@id='footer']" position="inside">
+            <div class="dkh-footer">
+                <div class="dkh-wrap dkh-footer-in">
+                    <div>
+                        <div class="dkh-footer-logo">shalom<span>.</span></div>
+                        <p>Distribuidor de productos Nevada a nivel nacional.</p>
+                    </div>
+                    <div>
+                        <a href="/shop">Tienda</a>
+                        <a href="/pedido-rapido">Pedido rápido</a>
+                        <a href="/my/orders">Mis pedidos</a>
+                        <a href="/contactus">Contáctanos</a>
+                    </div>
+                    <div>
+                        <a href="mailto:ventas@shalompma.com">ventas@shalompma.com</a>
+                        <a href="https://wa.me/50768337354" target="_blank" rel="noopener">WhatsApp +507 6833-7354</a>
+                        <span>Ciudad de Panamá, Rep. de Panamá</span>
+                    </div>
+                </div>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- Piezas reutilizables -->
+
+    <template id="dkh_icon_search" name="DKH: ícono lupa">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+    </template>
+
+    <template id="dkh_icon_qr" name="DKH: ícono QR">
+        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><path d="M14 14h3v3h-3zM20 14v.01M14 20h3M20 17v4"/></svg>
+    </template>
+
+    <!-- Encabezado: logo, menú, buscador + botón QR, pedido y botón de menú (tablet/celular). -->
+    <template id="dkh_header" name="DKH: encabezado H">
+        <t t-set="dkh_order" t-value="website.sale_get_order() if website.has_ecommerce_access() else False"/>
+        <t t-set="dkh_path" t-value="request.httprequest.path"/>
+        <header class="dkh-hd dkh-wrap" data-name="Header">
+            <a href="/" class="dkh-logo" aria-label="Shalom, inicio">shalom<span>.</span></a>
+            <nav class="dkh-nav" aria-label="Principal">
+                <t t-foreach="website.menu_id.child_id" t-as="dkh_m">
+                    <a t-if="dkh_m.is_visible" t-att-href="dkh_m.clean_url()"
+                       t-attf-class="#{'on' if ((dkh_m.url == '/' and dkh_path in ('/', '/inicio')) or (dkh_m.url != '/' and dkh_path.startswith(dkh_m.url))) else ''}"
+                       t-out="dkh_m.name"/>
+                </t>
+            </nav>
+            <div class="dkh-sgroup">
+                <form class="dkh-search o_searchbar_form" action="/shop" method="get" role="search">
+                    <t t-call="stock_picking_sale_buttons.dkh_icon_search"/>
+                    <label for="dkh-q" class="dkh-sr">Buscar productos</label>
+                    <input id="dkh-q" type="search" name="search" class="dk-hsearch-input dkh-search-input" placeholder="Buscar productos…" autocomplete="off"/>
+                </form>
+                <button type="button" class="dkh-scanb" data-dkh-scan="open" aria-label="Escanear código de barras o QR" title="Escanear código de barras o QR">
+                    <t t-call="stock_picking_sale_buttons.dkh_icon_qr"/>
+                </button>
+            </div>
+            <a href="/shop/cart" class="dkh-cart">Pedido · <span class="dkh-cart-total" t-out="'B/. %.2f' % (dkh_order.amount_untaxed if dkh_order else 0.0)"/></a>
+            <button type="button" class="dkh-burger" data-dkh-burger="toggle" aria-label="Menú" aria-expanded="false" aria-controls="dkh-drawer">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M4 7h16M4 12h16M4 17h16"/></svg>
+            </button>
+        </header>
+        <div id="dkh-drawer" class="dkh-drawer" hidden="hidden">
+            <t t-foreach="website.menu_id.child_id" t-as="dkh_m">
+                <a t-if="dkh_m.is_visible" t-att-href="dkh_m.clean_url()" t-out="dkh_m.name"/>
+            </t>
+        </div>
+
+        <!-- Ventana del escáner. En esta etapa ya funciona escribir el código (busca por código
+             de barras); la cámara se conecta en la etapa del escáner. -->
+        <div id="dkh-scan" class="dkh-scrim" hidden="hidden" role="dialog" aria-modal="true" aria-label="Escanear código">
+            <div class="dkh-sheet">
+                <div class="dkh-sheet-h">
+                    <b>Escanea el código</b>
+                    <button type="button" class="dkh-x" data-dkh-scan="close" aria-label="Cerrar">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                    </button>
+                </div>
+                <div class="dkh-vf" aria-hidden="true"><i/><i/><i/><i/><u/><span>Apunta al código de barras o QR</span></div>
+                <p>Escanea el código del producto que ya tienes en tu local y lo agregamos a tu pedido. Después ajustas la cantidad.</p>
+                <form action="/shop" method="get" class="dkh-sheet-form">
+                    <label for="dkh-code" class="dkh-sr">Escribir el código</label>
+                    <input id="dkh-code" type="search" name="search" placeholder="O escribe el código…" autocomplete="off" inputmode="numeric"/>
+                    <button type="submit" class="dkh-btn">Buscar</button>
+                </form>
+            </div>
+        </div>
+    </template>
+</odoo>

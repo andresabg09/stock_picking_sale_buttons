@@ -18,6 +18,26 @@
         return all('.dk-buy[data-product-id="' + pid + '"]');
     }
 
+    // Reglas de cantidad (Versión H). El servidor las vuelve a aplicar siempre: aquí solo se
+    // adelanta para que el campo muestre el número correcto al instante.
+    // data-min / data-step vienen de la tarjeta: 6 y de 1 en 1; tintes NNP: 5 y de 5 en 5.
+    function ruleOf(box) {
+        return {
+            min: parseInt(box.dataset.min, 10) || 1,
+            step: parseInt(box.dataset.step, 10) || 1
+        };
+    }
+
+    function norm(box, n) {
+        var r = ruleOf(box);
+        n = parseInt(n, 10);
+        if (isNaN(n) || n <= 0) {
+            return 0; // 0 = quitar del carrito
+        }
+        var half = Math.floor(r.step / 2);
+        return Math.max(r.min, Math.floor((n + half) / r.step) * r.step);
+    }
+
     function currentQty(box) {
         if (box.dataset.state !== 'in') {
             return 0;
@@ -48,7 +68,7 @@
             }
             setInLine(box, total || '');
         } else {
-            input.value = '1';
+            input.value = String(ruleOf(box).min);
         }
     }
 
@@ -143,7 +163,7 @@
 
     function change(box, qty) {
         var pid = box.dataset.productId;
-        qty = Math.max(0, Math.min(qty, 99999));
+        qty = Math.min(norm(box, qty), 99999);
         boxesFor(pid).forEach(function (b) { render(b, qty, ''); });
         clearTimeout(timers[pid]);
         timers[pid] = setTimeout(function () { send(pid, qty); }, DEBOUNCE_MS);
@@ -172,14 +192,16 @@
         ev.preventDefault();
         var cur = currentQty(box);
         var next;
+        var rule = ruleOf(box);
         if (btn.classList.contains('dk-pre')) {
-            next = parseInt(btn.dataset.qty, 10) || 1;
+            next = parseInt(btn.dataset.qty, 10) || rule.min;
         } else if (btn.classList.contains('dk-add')) {
-            next = 1;
+            next = rule.min;
         } else if (btn.classList.contains('dk-plus')) {
-            next = cur + 1;
+            next = cur > 0 ? cur + rule.step : rule.min;
         } else {
-            next = Math.max(0, cur - 1);
+            // Bajar del mínimo quita el producto del carrito.
+            next = cur - rule.step < rule.min ? 0 : cur - rule.step;
         }
         change(box, next);
     });
@@ -192,10 +214,28 @@
         }
         var n = parseInt(String(input.value).replace(/[^0-9]/g, ''), 10);
         if (isNaN(n)) {
-            input.value = String(currentQty(box) || 1);
+            input.value = String(currentQty(box) || ruleOf(box).min);
             return;
         }
+        n = norm(box, n);
+        if (n > 0) {
+            input.value = String(n); // se ve ya corregido (p. ej. 23 -> 25 en tintes)
+        }
         change(box, n);
+    });
+
+    // Al tocar la cantidad queda todo seleccionado: escribir reemplaza el número, sin borrar.
+    document.addEventListener('focusin', function (ev) {
+        var el = ev.target;
+        if (el && el.classList && el.classList.contains('dk-q')) {
+            setTimeout(function () { el.select(); }, 0);
+        }
+    });
+    document.addEventListener('mouseup', function (ev) {
+        var el = ev.target;
+        if (el && el.classList && el.classList.contains('dk-q') && document.activeElement === el) {
+            ev.preventDefault(); // evita que el clic deshaga la selección
+        }
     });
 
     document.addEventListener('keydown', function (ev) {

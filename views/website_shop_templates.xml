@@ -18,12 +18,13 @@
                 <t t-set="dk_order" t-value="website.sale_get_order()"/>
                 <t t-set="dk_line" t-value="dk_order.website_order_line.filtered_domain([('product_id', '=', dk_variant)])[:1]"/>
                 <t t-set="dk_qty" t-value="int(dk_line.product_uom_qty) if dk_line else 0"/>
-                <div class="dk-buy" t-att-data-product-id="dk_variant" t-att-data-qty="dk_qty" t-att-data-state="'in' if dk_qty else 'out'">
+                <t t-set="dk_rule" t-value="product._dkh_qty_rule()"/>
+                <div class="dk-buy" t-att-data-product-id="dk_variant" t-att-data-min="dk_rule[0]" t-att-data-step="dk_rule[1]" t-att-data-qty="dk_qty" t-att-data-state="'in' if dk_qty else 'out'">
                     <button type="button" class="dk-add btn btn-primary">Agregar</button>
                     <div class="dk-live">
                         <div class="dk-stp">
                             <button type="button" class="dk-minus" aria-label="Menos">&#8722;</button>
-                            <input type="text" inputmode="numeric" class="dk-q" t-att-value="dk_qty or 1" aria-label="Cantidad"/>
+                            <input type="text" inputmode="numeric" class="dk-q" t-att-value="dk_qty or dk_rule[0]" aria-label="Cantidad"/>
                             <button type="button" class="dk-plus" aria-label="Más">+</button>
                         </div>
                         <div class="dk-in">
@@ -77,12 +78,13 @@
                     <del t-if="dk_info.get('has_discounted_price')"><span t-out="dk_info['list_price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/></del>
                 </div>
                 <t t-if="dk_can_add">
-                    <div class="dk-buy" t-att-data-product-id="dk_variant" t-att-data-qty="dk_qty" t-att-data-state="'in' if dk_qty else 'out'">
+                    <t t-set="dk_rule" t-value="p._dkh_qty_rule()"/>
+                    <div class="dk-buy" t-att-data-product-id="dk_variant" t-att-data-min="dk_rule[0]" t-att-data-step="dk_rule[1]" t-att-data-qty="dk_qty" t-att-data-state="'in' if dk_qty else 'out'">
                         <button type="button" class="dk-add btn btn-primary">Agregar</button>
                         <div class="dk-live">
                             <div class="dk-stp">
                                 <button type="button" class="dk-minus" aria-label="Menos">&#8722;</button>
-                                <input type="text" inputmode="numeric" class="dk-q" t-att-value="dk_qty or 1" aria-label="Cantidad"/>
+                                <input type="text" inputmode="numeric" class="dk-q" t-att-value="dk_qty or dk_rule[0]" aria-label="Cantidad"/>
                                 <button type="button" class="dk-plus" aria-label="Más">+</button>
                             </div>
                             <div class="dk-in">
@@ -145,12 +147,13 @@
                 <t t-set="dk_qty" t-value="int(dk_line.product_uom_qty) if dk_line else 0"/>
                 <div class="dk-pbox">
                     <div class="dk-pbox-title">Cantidad</div>
-                    <div class="dk-buy dk-buy-lg" t-att-data-product-id="product_variant.id" t-att-data-qty="dk_qty" t-att-data-state="'in' if dk_qty else 'out'">
+                    <t t-set="dk_rule" t-value="product_variant._dkh_qty_rule()"/>
+                    <div class="dk-buy dk-buy-lg" t-att-data-product-id="product_variant.id" t-att-data-min="dk_rule[0]" t-att-data-step="dk_rule[1]" t-att-data-qty="dk_qty" t-att-data-state="'in' if dk_qty else 'out'">
                         <button type="button" class="dk-add btn btn-primary btn-lg">Agregar al carrito</button>
                         <div class="dk-live">
                             <div class="dk-stp">
                                 <button type="button" class="dk-minus" aria-label="Menos">&#8722;</button>
-                                <input type="text" inputmode="numeric" class="dk-q" t-att-value="dk_qty or 1" aria-label="Cantidad"/>
+                                <input type="text" inputmode="numeric" class="dk-q" t-att-value="dk_qty or dk_rule[0]" aria-label="Cantidad"/>
                                 <button type="button" class="dk-plus" aria-label="Más">+</button>
                             </div>
                             <div class="dk-in">
@@ -158,10 +161,9 @@
                             </div>
                         </div>
                         <div class="dk-presets">
-                            <button type="button" class="dk-pre" data-qty="12">12</button>
-                            <button type="button" class="dk-pre" data-qty="24">24</button>
-                            <button type="button" class="dk-pre" data-qty="48">48</button>
-                            <button type="button" class="dk-pre" data-qty="96">96</button>
+                            <t t-foreach="([10, 25, 50, 100] if dk_rule[2] else [12, 24, 48, 96])" t-as="pq">
+                                <button type="button" class="dk-pre" t-att-data-qty="pq" t-out="pq"/>
+                            </t>
                         </div>
                     </div>
                     <div t-attf-class="dk-actions #{'' if dk_order.website_order_line else 'd-none'}">

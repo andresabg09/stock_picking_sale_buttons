@@ -1,0 +1,72 @@
+<!-- Respaldo de ir.ui.view 3329 "DIANKE tema, barra superior (nuevo)" — arch_db leído por MCP el 2026-10-07 (write_date 2026-10-05 00:18:06).
+     key website.dianke_theme · hereda website.layout (1013) · prioridad 99 · sitio 1. -->
+<data>
+<xpath expr="//head" position="inside">
+<style id="dk-theme">
+@import url("https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap");
+:root{--bs-primary:#0B1F3A;--bs-primary-rgb:11,31,58;--bs-link-color:#0B1F3A;--bs-link-color-rgb:11,31,58;--bs-link-hover-color:#000000;--bs-link-hover-color-rgb:0,0,0;--bs-body-font-family:'Manrope',system-ui,sans-serif}
+body,#wrapwrap{font-family:'Manrope',system-ui,sans-serif;color:#0A0A0A}
+#wrapwrap{background:#F4F5F7}
+html,body,#wrapwrap,#wrapwrap &gt; main,#wrap{background-color:#F4F5F7 !important;color:#0A0A0A}
+.o_cc.o_cc1,.o_cc.o_cc2,.o_cc.o_cc3,.o_cc.o_cc4,.o_colored_level.o_cc1,.o_colored_level.o_cc2{--o-cc-bg:#FFFFFF;--o-cc-text:#0A0A0A;--o-cc-headings:#0A0A0A;--o-cc-link:#0B1F3A;--o-cc-border-color:#E3E6EB;background-color:#FFFFFF !important;color:#0A0A0A !important}
+.o_cc1 h1,.o_cc1 h2,.o_cc1 h3,.o_cc1 h4,.o_cc1 h5,.o_cc1 h6,.o_cc2 h1,.o_cc2 h2,.o_cc2 h3,.o_cc2 h4,.o_cc2 h5,.o_cc2 h6,.o_cc3 h1,.o_cc3 h2,.o_cc3 h3,.o_cc4 h1,.o_cc4 h2,.o_cc4 h3{color:#0A0A0A !important}
+.o_cc1 a:not(.btn),.o_cc2 a:not(.btn){color:#0B1F3A}
+.o_cc1 .text-muted,.o_cc2 .text-muted{color:#5A6577 !important}
+.dropdown-menu{background:#fff;color:#0A0A0A;border:1px solid #E3E6EB}
+.dropdown-item{color:#0A0A0A}
+.form-control,.form-select{background:#fff;color:#0A0A0A;border-color:#B8C0CE}
+h1,h2,h3,h4,h5,.h1,.h2,.h3,.h4,.h5{font-family:'Manrope',system-ui,sans-serif;font-weight:800;color:#0A0A0A;letter-spacing:-.01em}
+a{color:#0B1F3A}
+a:hover{color:#000}
+.btn{border-radius:6px;font-weight:700}
+.btn-primary{--bs-btn-bg:#0B1F3A;--bs-btn-border-color:#0B1F3A;--bs-btn-color:#fff;--bs-btn-hover-bg:#000;--bs-btn-hover-border-color:#000;--bs-btn-hover-color:#fff;--bs-btn-active-bg:#000;--bs-btn-active-border-color:#000;--bs-btn-active-color:#fff;--bs-btn-disabled-bg:#0B1F3A;--bs-btn-disabled-border-color:#0B1F3A}
+.btn-secondary,.btn-outline-primary{--bs-btn-color:#0B1F3A;--bs-btn-border-color:#0B1F3A;--bs-btn-bg:transparent;--bs-btn-hover-bg:#0B1F3A;--bs-btn-hover-border-color:#0B1F3A;--bs-btn-hover-color:#fff;--bs-btn-active-bg:#0B1F3A;--bs-btn-active-color:#fff}
+header#top,header#top .navbar{background:#fff !important;box-shadow:none !important}
+header#top{border-bottom:1px solid #E3E6EB}
+header#top .nav-link,header#top .navbar-nav .nav-link{font-weight:600;font-size:14px;color:#0A0A0A !important}
+header#top .nav-link:hover{color:#0B1F3A !important}
+header#top .o_wsale_my_cart .badge,header#top .my_cart_quantity{background:#0B1F3A !important;color:#fff !important}
+.dk-topbar{background:#0B1F3A;color:#fff;font-size:13px;padding:8px 0}
+.dk-topbar a{color:#fff;text-decoration:underline}
+.dk-topbar .container{display:flex;flex-wrap:wrap;justify-content:space-between;gap:4px 16px}
+#products_grid .oe_product_cart,.o_wsale_product_grid_wrapper .oe_product_cart{background:#fff;border:1px solid #E3E6EB;border-radius:8px;box-shadow:none;overflow:hidden}
+.o_wsale_products_item_title a,.oe_product_cart h6 a{color:#0A0A0A;font-weight:700;overflow-wrap:anywhere}
+.oe_currency_value{font-weight:800}
+.o_wsale_products_grid_table_wrapper .o_wsale_product_btn .btn,.oe_product_cart .a-submit{border-radius:6px}
+.page-link{color:#0B1F3A}
+.page-item.active .page-link{background:#0B1F3A;border-color:#0B1F3A;color:#fff}
+.dk-footer{background:#0A0A0A;color:#fff;padding:36px 0}
+.dk-footer a{color:#B3BAC7;text-decoration:none}
+.dk-footer a:hover{color:#fff}
+.dk-footer .container{display:flex;flex-wrap:wrap;justify-content:space-between;gap:24px}
+.dk-footer .dk-fb{font-weight:800;font-size:18px;letter-spacing:.1em}
+.dk-footer p,.dk-footer li{color:#B3BAC7;font-size:14px;margin:0}
+.dk-footer ul{list-style:none;padding:0;margin:0;display:flex;flex-direction:column;gap:6px}
+.dk-footer h6{color:#fff;font-size:13px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;margin-bottom:10px}
+#footer{padding:0}
+/* Encabezado: buscador visible junto al logo */
+.dk-hsearch{display:flex;align-items:stretch;height:44px;border:1px solid #B8C0CE;border-radius:6px;background:#fff;overflow:hidden;flex:1 1 360px;max-width:640px;margin:0 16px}
+.dk-hsearch:focus-within{border-color:#0B1F3A;box-shadow:0 0 0 2px rgba(11,31,58,.15)}
+.dk-hsearch-input{flex:1;min-width:0;border:0 !important;outline:0 !important;padding:0 14px;font:inherit;font-size:15px;background:transparent !important;color:#0A0A0A !important;box-shadow:none !important}
+.dk-hsearch-btn{flex:0 0 52px;border:0;background:#0B1F3A;color:#fff;cursor:pointer;font-size:16px}
+.dk-hsearch-btn:hover{background:#000}
+header#top li:has([data-bs-target="#o_search_modal"]),header#top li:has(a[href^="tel:"]),header#top li:has(.btn_cta){display:none !important}
+header#top #top_menu{margin-left:auto !important;margin-right:0 !important}
+.o_header_mobile .dk-hsearch{order:3;flex:0 0 100%;max-width:none;margin:8px 0 6px}
+/* Lectura clara: fondo claro y texto negro en tienda, producto, carrito y login */
+main:not(:has(#dk-home)),main:not(:has(#dk-home)) #wrap{background-color:#F4F5F7 !important}
+.oe_website_sale,#products_grid,.o_wsale_products_grid_table_wrapper,.o_wsale_product_grid_wrapper,#product_detail,.o_portal_wrap,.oe_website_login_container,.oe_login_form,.o_wsale_products_page,#wrap.js_sale{background-color:transparent !important;background-image:none !important;box-shadow:none !important}
+.oe_product_cart,.card,.modal-content,.offcanvas,.accordion-item,.list-group-item,.oe_product_image{background-color:#fff !important;background-image:none !important;border-color:#E3E6EB !important;box-shadow:none !important}
+main:not(:has(#dk-home)) *:not(.btn):not(.btn *):not(.badge):not(.o_ribbon):not(.fa):not(img):not(svg):not(svg *):not(.o_cc3):not(.o_cc3 *):not(.o_cc5):not(.o_cc5 *){color:#0A0A0A !important;text-shadow:none !important}
+main:not(:has(#dk-home)) input:not([type=hidden]):not([type=checkbox]):not([type=radio]),main:not(:has(#dk-home)) select,main:not(:has(#dk-home)) textarea{background-color:#fff !important;color:#0A0A0A !important;border:1px solid #B8C0CE !important}
+main ::placeholder{color:#4B5563 !important;opacity:1}
+main .text-white,main .text-light,main .text-muted,main .text-secondary,main .text-body-secondary{color:#0A0A0A !important}
+.btn-primary,.btn-primary:hover,.btn-primary:focus,.btn-primary:active{background-color:#0B1F3A !important;border-color:#0B1F3A !important;color:#fff !important;box-shadow:none !important}
+.btn-primary:hover{background-color:#000 !important}
+.btn,.btn:focus{box-shadow:none !important}
+</style>
+</xpath>
+<xpath expr="//header" position="before">
+<div class="dk-topbar d-none d-md-block"><div class="container"><span>Despachos a todo Panamá · lunes a sábado, 8:00 a. m. a 5:00 p. m.</span><span>Tel. +507 6976-4893 · <a href="https://wa.me/50768337354" target="_blank">WhatsApp +507 6833-7354</a> · <a href="mailto:ventas@shalompma.com">ventas@shalompma.com</a></span></div></div>
+</xpath>
+</data>

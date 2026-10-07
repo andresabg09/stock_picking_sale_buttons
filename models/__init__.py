@@ -13,3 +13,5 @@ from . import product_template_search
 from . import website_search
 from . import product_template_shop
 from . import product_public_category
+from . import website_dkh
+from . import dkh_rules
