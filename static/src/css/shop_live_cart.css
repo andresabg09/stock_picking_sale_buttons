@@ -395,3 +395,34 @@
 .dk-card .dk-buy {
     margin-top: 2px;
 }
+
+/* Botón Eliminar: reemplaza al Agregar cuando el producto ya está en el carrito (y en las líneas del carrito) */
+.dk-del {
+    display: block;
+    width: 100%;
+    height: 40px;
+    margin-top: 8px;
+    padding: 0 14px;
+    border: 1px solid #B8C0CE;
+    border-radius: 6px;
+    background: #fff;
+    color: #2B3445;
+    font-size: 14px;
+    font-weight: 700;
+    line-height: 38px;
+    text-align: center;
+    text-decoration: none;
+    cursor: pointer;
+}
+.dk-del:hover {
+    border-color: #8C1D1D;
+    color: #8C1D1D;
+}
+.dk-cline-del .dk-del {
+    display: inline-block;
+    width: auto;
+    height: 36px;
+    margin-top: 0;
+    line-height: 34px;
+    font-size: 13px;
+}

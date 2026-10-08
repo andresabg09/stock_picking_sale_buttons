@@ -105,9 +105,26 @@
              Orden: [banner + servicios] · cintillo de marcas · banners editables · Nuevos · Lo más pedido.
              El "Nuevos" viejo de la vista website.inicio se oculta por CSS (body.dki). -->
         <t t-if="website.dki_active()">
-            <div class="dkh-ribbon dki-ribbon" aria-hidden="true">
-                <div class="dkh-marq">
-                    <t t-foreach="range(4)" t-as="dki_r"><t t-foreach="website.dkh_brands()" t-as="dki_br"><span t-out="dki_br"/></t></t>
+            <!-- Cinta de promociones: borde a borde, sin principio ni final. Sin promociones, muestra las marcas. -->
+            <t t-set="dki_promos" t-value="request.env['product.template']._dk_promo_products(12)"/>
+            <t t-set="dki_n" t-value="len(dki_promos) or len(website.dkh_brands())"/>
+            <t t-set="dki_reps" t-value="max(1, 14 // dki_n + 1)"/>
+            <div class="dki-ribbon" role="region" aria-label="Promociones">
+                <div class="dki-marq">
+                    <t t-foreach="range(2)" t-as="dki_half">
+                        <div class="dki-half" t-att-aria-hidden="'true' if dki_half else None">
+                            <t t-foreach="range(dki_reps)" t-as="dki_rep">
+                                <t t-if="dki_promos">
+                                    <t t-foreach="dki_promos" t-as="dki_pp">
+                                        <a class="dki-rb" t-att-href="dki_pp.website_url" t-att-tabindex="'-1' if dki_half else None" t-out="dki_pp.name.capitalize()"/>
+                                    </t>
+                                </t>
+                                <t t-else="">
+                                    <t t-foreach="website.dkh_brands()" t-as="dki_br"><span class="dki-rb" t-out="dki_br"/></t>
+                                </t>
+                            </t>
+                        </div>
+                    </t>
                 </div>
             </div>
 

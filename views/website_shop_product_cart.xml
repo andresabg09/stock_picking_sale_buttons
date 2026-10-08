@@ -47,7 +47,7 @@
                                 <t t-set="div_class" t-value="''"/>
                             </t>
                             <div name="o_wsale_cart_line_button_container" class="dk-cline-del">
-                                <a href="#" class="js_delete_product" aria-label="Quitar del carrito" title="Quitar del carrito"><i class="fa fa-trash-o" aria-hidden="true"/> Quitar</a>
+                                <a href="#" class="js_delete_product dk-del" role="button" aria-label="Eliminar del carrito" title="Eliminar del carrito">Eliminar</a>
                             </div>
                             <t t-if="line.product_type == 'combo'">
                                 <div t-foreach="line.linked_line_ids" t-as="combo_item_line">

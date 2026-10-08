@@ -199,7 +199,7 @@
     }
 
     document.addEventListener('click', function (ev) {
-        var btn = ev.target.closest ? ev.target.closest('.dk-add, .dk-minus, .dk-plus, .dk-pre') : null;
+        var btn = ev.target.closest ? ev.target.closest('.dk-add, .dk-minus, .dk-plus, .dk-pre, .dk-del') : null;
         var box = btn && btn.closest('.dk-buy');
         if (!box) {
             return;
@@ -208,7 +208,9 @@
         var cur = currentQty(box);
         var next;
         var rule = ruleOf(box);
-        if (btn.classList.contains('dk-pre')) {
+        if (btn.classList.contains('dk-del')) {
+            next = 0; // Eliminar: quita el producto del carrito
+        } else if (btn.classList.contains('dk-pre')) {
             next = parseInt(btn.dataset.qty, 10) || rule.min;
         } else if (btn.classList.contains('dk-add')) {
             next = rule.min;
@@ -217,7 +219,7 @@
         } else {
             // No se baja del mínimo: se avisa la regla (para quitarlo, se escribe 0).
             if (cur - rule.step < rule.min) {
-                toast(ruleMsg(rule) + ' Para quitarlo, escribe 0.');
+                toast(ruleMsg(rule) + ' Para quitarlo, usa Eliminar.');
                 return;
             }
             next = cur - rule.step;

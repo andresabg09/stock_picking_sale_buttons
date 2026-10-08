@@ -117,7 +117,7 @@
             var down = cur - step;
             if (down < min) {
                 if (window.dkToast && window.dkRuleMsg) {
-                    window.dkToast(window.dkRuleMsg({ min: min, step: step }) + ' Para quitarlo, usa "Quitar".');
+                    window.dkToast(window.dkRuleMsg({ min: min, step: step }) + ' Para quitarlo, usa Eliminar.');
                 }
                 return;
             }

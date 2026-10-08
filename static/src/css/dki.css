@@ -118,8 +118,25 @@ body.dki #dk-home.qo .qo-adj { border-radius: 6px; background: #E8ECF3; }
 
 /* ---- Inicio (Versión I): cintillo, banners editables, Nuevos y Lo más pedido ---- */
 body.dki #dk-home .dk-wrap > section:has(> .dk-snap) { display: none; }   /* el "Nuevos" viejo: lo reemplaza el nuevo */
-body.dki .dki-ribbon { margin: 0; border-radius: 10px; background: var(--dkh-navy); color: #E6ECF6; padding: 13px 0; font-size: 12px; letter-spacing: .26em; font-weight: 700; }
-body.dki .dki-ribbon .dkh-marq { gap: 56px; }
+/* Cinta de promociones: de borde a borde de la pantalla, sin cajas ni esquinas, en movimiento continuo */
+body.dki #dk-home { overflow-x: clip; }
+body.dki .dki-ribbon {
+    --dki-rail: 0px;
+    width: calc(100vw - var(--dki-rail)); margin-left: calc(50% - 50vw + var(--dki-rail) / 2); margin-right: 0;
+    background: var(--dkh-navy); color: #E6ECF6; overflow: hidden; border-radius: 0; padding: 0; height: 44px; display: flex; align-items: center;
+}
+@media (min-width: 641px) and (max-width: 1024px) { body.dki .dki-ribbon { --dki-rail: 96px; } }
+body.dki .dki-marq { display: flex; width: max-content; animation: dki-mq 60s linear infinite; }
+body.dki .dki-ribbon:hover .dki-marq, body.dki .dki-ribbon:focus-within .dki-marq { animation-play-state: paused; }
+body.dki .dki-half { display: flex; flex: 0 0 auto; }
+body.dki .dki-rb {
+    display: inline-flex; align-items: center; white-space: nowrap; padding: 0 28px; position: relative;
+    color: #E6ECF6 !important; font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; text-decoration: none;
+}
+body.dki .dki-rb::after { content: ""; position: absolute; right: -2px; top: 50%; width: 4px; height: 4px; margin-top: -2px; border-radius: 50%; background: rgba(230, 236, 246, .45); }
+body.dki a.dki-rb:hover { color: #fff !important; text-decoration: underline; }
+@keyframes dki-mq { to { transform: translateX(-50%); } }
+@media (prefers-reduced-motion: reduce) { body.dki .dki-marq { animation: none; } }
 body.dki .dki-g21 { margin-top: 0; }
 body.dki .dkh-slot { border-radius: 10px; }
 body.dki .dkh-slot-mid, body.dki .dkh-slot-small { height: 200px; border-radius: 10px; }
@@ -149,3 +166,6 @@ body.dki .dki-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px
 @media (min-width: 641px) and (max-width: 900px) {
     body.dki #dk-home .dk-hero { width: calc(100vw - 96px); margin-left: calc(50% - 50vw + 48px); margin-right: 0; }
 }
+
+/* Eliminar: sobrio, igual en tarjetas y carrito */
+body.dki .dk-del { border-radius: var(--dki-radius); background: #fff; }

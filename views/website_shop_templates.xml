@@ -27,6 +27,7 @@
                             <input type="text" inputmode="numeric" class="dk-q" t-att-value="dk_qty or dk_rule[0]" aria-label="Cantidad"/>
                             <button type="button" class="dk-plus" aria-label="Más">+</button>
                         </div>
+                        <button type="button" class="dk-del">Eliminar</button>
                         <div class="dk-in">
                             <i class="fa fa-check" aria-hidden="true"/> En tu carrito<span class="dk-in-total" t-if="dk_line"> · <span t-out="dk_line._get_cart_display_price()" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/></span>
                         </div>
@@ -87,6 +88,7 @@
                                 <input type="text" inputmode="numeric" class="dk-q" t-att-value="dk_qty or dk_rule[0]" aria-label="Cantidad"/>
                                 <button type="button" class="dk-plus" aria-label="Más">+</button>
                             </div>
+                            <button type="button" class="dk-del">Eliminar</button>
                             <div class="dk-in">
                                 <i class="fa fa-check" aria-hidden="true"/> En tu carrito<span class="dk-in-total" t-if="dk_line"> · <span t-out="dk_line._get_cart_display_price()" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/></span>
                             </div>
@@ -156,6 +158,7 @@
                                 <input type="text" inputmode="numeric" class="dk-q" t-att-value="dk_qty or dk_rule[0]" aria-label="Cantidad"/>
                                 <button type="button" class="dk-plus" aria-label="Más">+</button>
                             </div>
+                            <button type="button" class="dk-del">Eliminar</button>
                             <div class="dk-in">
                                 <i class="fa fa-check" aria-hidden="true"/> En tu carrito<span class="dk-in-total" t-if="dk_line"> · <span t-out="dk_line._get_cart_display_price()" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/></span>
                             </div>

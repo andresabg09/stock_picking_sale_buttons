@@ -130,6 +130,33 @@ class ProductTemplate(models.Model):
         return self.search(domain, limit=limit, order='create_date desc')
 
     @api.model
+    def _dk_promo_products(self, limit=12, per_program=3):
+        """Productos con promoción activa ("compra X y llévate Y"): hasta `per_program` de cada programa,
+        para que la cinta del Inicio muestre variedad. Solo productos publicados de la tienda."""
+        programs = self.env['loyalty.program'].sudo().search([
+            ('program_type', '=', 'buy_x_get_y'), ('active', '=', True)])
+        shop_domain = self._dk_shop_domain()
+        picked = []
+        for program in programs:
+            ids = []
+            for rule in program.rule_ids:
+                tmpl_ids = rule.product_ids.mapped('product_tmpl_id').ids
+                if rule.product_category_id:
+                    cats = self.env['product.category'].sudo().search(
+                        [('id', 'child_of', rule.product_category_id.id)])
+                    tmpl_ids += self.env['product.template'].sudo().search(
+                        [('categ_id', 'in', cats.ids)], limit=40).ids
+                ids += tmpl_ids
+            if not ids:
+                continue
+            found = self.search(expression.AND([shop_domain, [('id', 'in', list(set(ids)))]]),
+                                limit=per_program, order='name asc')
+            for t in found:
+                if t.id not in picked:
+                    picked.append(t.id)
+        return self.browse(picked[:limit])
+
+    @api.model
     def _dk_bestsellers_by_category(self, limit=8, days=90):
         """Lo más pedido con variedad: el producto que más rota de CADA categoría (por unidades
         vendidas en `days` días), en orden de ventas. Si hay menos categorías que `limit`, se

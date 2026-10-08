@@ -577,4 +577,10 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
 - 2026-10-08: Fix tablet (v18.0.4.1.1): en 641–900 px (iPad mini/Air/Pro 11) el banner del Inicio usaba `100vw` a todo el ancho de la
   pantalla, pero con el riel lateral (96 px, `#wrapwrap` con padding-left) se salía 48 px a cada lado y se cortaba. `dki.css` lo calcula
   como `calc(100vw - 96px)` con margen compensado. Verificado con navegador real contra la tienda en 744/768/810/820/834/1024 px.
+- 2026-10-08: v18.0.4.2.0. (1) Cinta del Inicio (Versión I): de borde a borde (`.dki-ribbon`, ancho `100vw` menos el riel en tablet),
+  sin esquinas, movimiento continuo sin hueco (dos mitades iguales, cada una con ≥14 elementos), se pausa al pasar el mouse. Muestra los
+  PRODUCTOS CON PROMOCIÓN (`product.template._dk_promo_products`: programas `buy_x_get_y` activos, hasta 3 por programa, solo el nombre,
+  enlazado al producto); sin promociones muestra las marcas (`dkh.brands`). (2) Botón Eliminar: al agregar un producto, el estado "en el
+  carrito" muestra − cantidad + y un botón de texto "Eliminar" (`.dk-del`, quita el producto); en el carrito el enlace "Quitar" pasó a ser
+  el mismo botón (`.js_delete_product.dk-del`). Bajar del mínimo solo avisa ("usa Eliminar").
 
