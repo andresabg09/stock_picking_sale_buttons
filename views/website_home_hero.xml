@@ -5,6 +5,32 @@
          .dk-prev y .dk-next, así que se conservan esos nombres. Estilos en shop_redesign.css.
          Fotos en static/src/img/banner/ (el frasco "Mais Cachos" es PNG sin fondo). -->
     <template id="dk_home_hero" name="Inicio: banner y franja de servicios">
+        <!-- Versión I: cinta de promociones ARRIBA del bloque 1 (debajo del encabezado). -->
+        <t t-if="website.dki_active()">
+            <!-- Cinta de promociones: borde a borde, sin principio ni final. Sin promociones, muestra las marcas. -->
+            <t t-set="dki_promos" t-value="request.env['product.template']._dk_promo_products(12)"/>
+            <t t-set="dki_n" t-value="len(dki_promos) or len(website.dkh_brands())"/>
+            <t t-set="dki_reps" t-value="max(1, 14 // dki_n + 1)"/>
+            <div class="dki-ribbon" role="region" aria-label="Promociones">
+                <div class="dki-marq">
+                    <t t-foreach="range(2)" t-as="dki_half">
+                        <div class="dki-half" t-att-aria-hidden="'true' if dki_half else None">
+                            <t t-foreach="range(dki_reps)" t-as="dki_rep">
+                                <t t-if="dki_promos">
+                                    <t t-foreach="dki_promos" t-as="dki_pp">
+                                        <a class="dki-rb" t-att-href="dki_pp.website_url" t-att-tabindex="'-1' if dki_half else None" t-out="dki_pp.name.capitalize()"/>
+                                    </t>
+                                </t>
+                                <t t-else="">
+                                    <t t-foreach="website.dkh_brands()" t-as="dki_br"><span class="dki-rb" t-out="dki_br"/></t>
+                                </t>
+                            </t>
+                        </div>
+                    </t>
+                </div>
+            </div>
+        </t>
+
         <section class="dk-hero" aria-roledescription="carrusel" aria-label="Destacados">
             <div class="dk-slides" id="dk-slides">
 
@@ -102,32 +128,9 @@
         </section>
 
         <!-- Versión I (solo con la vista previa /dki o dki.enabled): lo nuevo del Inicio, en el diseño anterior.
-             Orden: [banner + servicios] · cintillo de marcas · banners editables · Nuevos · Lo más pedido.
+             Orden: cinta de promociones (arriba del banner) · [banner + servicios] · banners editables · Nuevos · Lo más pedido.
              El "Nuevos" viejo de la vista website.inicio se oculta por CSS (body.dki). -->
         <t t-if="website.dki_active()">
-            <!-- Cinta de promociones: borde a borde, sin principio ni final. Sin promociones, muestra las marcas. -->
-            <t t-set="dki_promos" t-value="request.env['product.template']._dk_promo_products(12)"/>
-            <t t-set="dki_n" t-value="len(dki_promos) or len(website.dkh_brands())"/>
-            <t t-set="dki_reps" t-value="max(1, 14 // dki_n + 1)"/>
-            <div class="dki-ribbon" role="region" aria-label="Promociones">
-                <div class="dki-marq">
-                    <t t-foreach="range(2)" t-as="dki_half">
-                        <div class="dki-half" t-att-aria-hidden="'true' if dki_half else None">
-                            <t t-foreach="range(dki_reps)" t-as="dki_rep">
-                                <t t-if="dki_promos">
-                                    <t t-foreach="dki_promos" t-as="dki_pp">
-                                        <a class="dki-rb" t-att-href="dki_pp.website_url" t-att-tabindex="'-1' if dki_half else None" t-out="dki_pp.name.capitalize()"/>
-                                    </t>
-                                </t>
-                                <t t-else="">
-                                    <t t-foreach="website.dkh_brands()" t-as="dki_br"><span class="dki-rb" t-out="dki_br"/></t>
-                                </t>
-                            </t>
-                        </div>
-                    </t>
-                </div>
-            </div>
-
             <t t-set="dki_mid" t-value="request.env['dkh.banner']._dkh_for('mid')"/>
             <t t-set="dki_small" t-value="request.env['dkh.banner']._dkh_for('small')"/>
             <div t-if="dki_mid or dki_small or website.dkh_is_designer()" class="dkh-g21 dki-g21">

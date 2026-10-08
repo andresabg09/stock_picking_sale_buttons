@@ -586,4 +586,6 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
 - 2026-10-08: Fix (v18.0.4.2.1): en el Inicio, el CSS inline de la vista website.inicio (`#dk-home .dk-add { display: flex }`) pisaba la regla
   `.dk-buy[data-state="in"] .dk-add { display: none }` y el botón Agregar seguía visible tras agregar. `shop_live_cart.css` ahora lleva las
   mismas reglas con `#dk-home` delante. Verificado con navegador real contra la tienda (respuesta del carrito simulada, sin tocar la BD).
+- 2026-10-08: v18.0.4.2.2: la cinta de promociones del Inicio (Versión I) pasó ARRIBA del bloque 1 (banner), pegada al encabezado, no
+  entre el banner y "Nuevos". Orden del Inicio I: cinta · banner + servicios · banners editables · Nuevos · Lo más pedido · categorías · marcas.
 

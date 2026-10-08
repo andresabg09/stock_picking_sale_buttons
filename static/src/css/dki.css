@@ -169,3 +169,8 @@ body.dki .dki-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px
 
 /* Eliminar: sobrio, igual en tarjetas y carrito */
 body.dki .dk-del { border-radius: var(--dki-radius); background: #fff; }
+
+/* La cinta va arriba del banner, pegada al encabezado (se anula el relleno superior del Inicio) */
+body.dki #dk-home { padding-top: 0; }
+body.dki #dk-home .dk-wrap { gap: 28px; }
+body.dki #dk-home .dk-wrap > .dki-ribbon:first-child { margin-bottom: -4px; }
