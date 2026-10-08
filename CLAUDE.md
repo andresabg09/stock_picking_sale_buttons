@@ -554,6 +554,6 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   #0B1F3A / negro / blanco, Manrope, esquinas discretas) refinado, con TODAS las funciones de la H (cintillo de marcas, menú
   app: barra inferior en celular, riel en tablet, barra superior en computadora; encabezado fijo; Carrito con número de
   productos distintos; reglas de cantidad y avisos; escáner; Pedido rápido con foto/sugerencias; animaciones). Se reutiliza la
-  lógica (JS, controladores, modelos) y solo cambia la piel. Tono/textos: los mismos de la H. Trabajo por lotes de 3 con plan
+  lógica (JS, controladores, modelos) y solo cambia la piel. Colores, tipografía y formas = los del diseño anterior (NO cambian); la redacción de los textos (palabras que ve el cliente) = la de la H. Trabajo por lotes de 3 con plan
   previo y vista previa privada.
 
