@@ -47,11 +47,11 @@
                     <div class="qo-wrap">
                         <h1>Pedido rápido</h1>
                         <input type="hidden" id="qo-csrf" t-att-value="request.csrf_token()"/>
-                        <div t-if="website.dkh_active()" class="qo-tabs" role="tablist">
+                        <div t-if="website.dkh_active() and website.dkh_photo_enabled()" class="qo-tabs" role="tablist">
                             <button type="button" class="qo-tab on" id="qo-tab-t" role="tab" aria-selected="true">Escribir</button>
                             <button type="button" class="qo-tab" id="qo-tab-p" role="tab" aria-selected="false">Foto</button>
                         </div>
-                        <div t-if="website.dkh_active()" id="qo-photo" class="qo-photo" hidden="hidden">
+                        <div t-if="website.dkh_active() and website.dkh_photo_enabled()" id="qo-photo" class="qo-photo" hidden="hidden">
                             <input type="file" id="qo-files" accept="image/*" multiple="multiple" class="qo-file"/>
                             <div id="qo-thumbs" class="qo-thumbs"></div>
                             <button type="button" class="qo-btn" id="qo-read" disabled="disabled">Leer lista</button>

@@ -34,3 +34,9 @@ class Website(models.Model):
     def dkh_today(self):
         from odoo import fields
         return fields.Date.context_today(self).isoformat()
+
+    def dkh_photo_enabled(self):
+        """El modo foto del Pedido rápido solo se ofrece si el servidor tiene la clave de la API."""
+        import os
+        return bool(os.environ.get('ANTHROPIC_API_KEY'))
+
