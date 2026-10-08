@@ -583,4 +583,7 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   enlazado al producto); sin promociones muestra las marcas (`dkh.brands`). (2) Botón Eliminar: al agregar un producto, el estado "en el
   carrito" muestra − cantidad + y un botón de texto "Eliminar" (`.dk-del`, quita el producto); en el carrito el enlace "Quitar" pasó a ser
   el mismo botón (`.js_delete_product.dk-del`). Bajar del mínimo solo avisa ("usa Eliminar").
+- 2026-10-08: Fix (v18.0.4.2.1): en el Inicio, el CSS inline de la vista website.inicio (`#dk-home .dk-add { display: flex }`) pisaba la regla
+  `.dk-buy[data-state="in"] .dk-add { display: none }` y el botón Agregar seguía visible tras agregar. `shop_live_cart.css` ahora lleva las
+  mismas reglas con `#dk-home` delante. Verificado con navegador real contra la tienda (respuesta del carrito simulada, sin tocar la BD).
 

@@ -426,3 +426,14 @@
     line-height: 34px;
     font-size: 13px;
 }
+
+/* En el Inicio, el CSS del propio Inicio (#dk-home .dk-add { display: flex }) pisaba esta regla y el botón
+   Agregar seguía visible después de agregar. Con #dk-home gana la regla correcta. */
+#dk-home .dk-buy[data-state="in"] .dk-add,
+#dk-home .dk-buy[data-state="out"] .dk-live {
+    display: none;
+}
+#dk-home .dk-buy .dk-add {
+    width: 100%;
+    height: 44px;
+}
