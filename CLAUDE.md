@@ -548,4 +548,12 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   subir (escucha scroll de `window` y de `#wrapwrap`); el botón dice "Carrito" + cantidad de productos
   (`.dkh-cart-count`, líneas del pedido, se actualiza en vivo); la píldora flotante `.dk-pill` se oculta bajo `.dkh`;
   `window.dkFly(elemento)` hace volar la foto del producto hacia el carrito al agregar (tarjetas, Pedido rápido).
+- 2026-10-08: ACTIVADA y luego DESACTIVADA la Versión H. `dkh.enabled` (ir.config_parameter id 66) se creó en 1 (v18.0.3.8.2) y
+  se puso en 0 el mismo día: a Andrés no le gustó el diseño H. El código H NO se borra (sigue como alternativa, visible solo
+  entrando por /dkh); se reactiva con `dkh.enabled` = 1. Decisión: nueva "VERSIÓN I" = el diseño ANTERIOR a la H (azul oscuro
+  #0B1F3A / negro / blanco, Manrope, esquinas discretas) refinado, con TODAS las funciones de la H (cintillo de marcas, menú
+  app: barra inferior en celular, riel en tablet, barra superior en computadora; encabezado fijo; Carrito con número de
+  productos distintos; reglas de cantidad y avisos; escáner; Pedido rápido con foto/sugerencias; animaciones). Se reutiliza la
+  lógica (JS, controladores, modelos) y solo cambia la piel. Tono/textos: los mismos de la H. Trabajo por lotes de 3 con plan
+  previo y vista previa privada.
 
