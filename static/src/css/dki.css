@@ -174,3 +174,11 @@ body.dki .dk-del { border-radius: var(--dki-radius); background: #fff; }
 body.dki #dk-home { padding-top: 0; }
 body.dki #dk-home .dk-wrap { gap: 28px; }
 body.dki #dk-home .dk-wrap > .dki-ribbon:first-child { margin-bottom: -4px; }
+
+/* ---- Lote 3: pulido ---- */
+/* Ficha: la referencia/código ya salen en la tarjeta Detalles; se evita repetirlas bajo el título */
+body.dki .dk-meta { display: none; }
+/* Pedido rápido: "Agregar más" nunca se parte en dos líneas */
+body.dki #dk-home.qo .qo-sug-add { white-space: nowrap; padding: 0 12px; min-width: 0; }
+/* Sin desborde horizontal de 1 px en celular/tablet */
+@media (max-width: 744px) { body.dki #wrapwrap { overflow-x: clip; } }

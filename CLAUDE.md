@@ -589,3 +589,5 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
 - 2026-10-08: v18.0.4.2.2: la cinta de promociones del Inicio (Versión I) pasó ARRIBA del bloque 1 (banner), pegada al encabezado, no
   entre el banner y "Nuevos". Orden del Inicio I: cinta · banner + servicios · banners editables · Nuevos · Lo más pedido · categorías · marcas.
 
+
+- 2026-10-08: Versión I, Lote 3 (v18.0.4.3.0): pulido en `dki.css` — se oculta `.dk-meta` de la ficha (duplicaba Detalles), "Agregar más" del Pedido rápido sin partirse, sin desborde de 1 px en ≤744 px. Pendiente: activar para clientes (`dki.enabled`=1 por MCP, con confirmación de Andrés).
