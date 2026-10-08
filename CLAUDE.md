@@ -591,3 +591,4 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
 
 
 - 2026-10-08: Versión I, Lote 3 (v18.0.4.3.0): pulido en `dki.css` — se oculta `.dk-meta` de la ficha (duplicaba Detalles), "Agregar más" del Pedido rápido sin partirse, sin desborde de 1 px en ≤744 px. Pendiente: activar para clientes (`dki.enabled`=1 por MCP, con confirmación de Andrés).
+- 2026-10-08: VERSIÓN I ACTIVADA para todos (`dki.enabled` = 1, ir.config_parameter id 67, por MCP con permiso de Andrés; `dkh.enabled` sigue en 0). Lote 3 (v18.0.4.3.0) desplegado. Revertir: `dki.enabled` = 0. Pendiente: `ANTHROPIC_API_KEY` (pestaña Foto), imágenes de banners, proveedor de pago, búsqueda "Tinte rojo 6", productos de julio sin categoría web.
