@@ -569,4 +569,9 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   títulos gigantes, Tienda/Producto/Carrito) ahora van con `.dkh:not(.dki)`: con la I activa se ve el diseño ANTERIOR de esas
   páginas (shop_live_cart.css + shop_redesign.css) y solo se suman encabezado, menú app, funciones, avisos y animaciones.
   `dki.css` ya no re-pinta tarjetas/botones antiguos: solo piezas nuevas y el Pedido rápido.
+- 2026-10-08: VERSIÓN I, LOTE 2 (v18.0.4.1.0). Inicio con la I: al final de `dk_home_hero` (website_home_hero.xml, `t-if website.dki_active()`)
+  se agregan cintillo de marcas (`dkh.brands`), banners editables mid/small (`dkh.banner`, solo si existen o si es administrador),
+  "Nuevos productos" (carrusel, `_dk_new_products(12)`) y "Lo más pedido" (`_dk_bestsellers_by_category(8)`); el "Nuevos" viejo de
+  website.inicio (vista de BD 3328, NO editada) se oculta por CSS `section:has(> .dk-snap)`. `dkh_slot` acepta `only_real` (sin
+  diseño de ejemplo para clientes). Tienda (todas las versiones): su "Lo más pedido" ahora es `_dk_bestsellers_by_category(4)`.
 

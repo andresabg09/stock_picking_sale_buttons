@@ -100,5 +100,45 @@
                 <span class="dk-svc-t"><b>Repite tu último pedido</b><small>Revisa tus pedidos anteriores</small></span>
             </a>
         </section>
+
+        <!-- Versión I (solo con la vista previa /dki o dki.enabled): lo nuevo del Inicio, en el diseño anterior.
+             Orden: [banner + servicios] · cintillo de marcas · banners editables · Nuevos · Lo más pedido.
+             El "Nuevos" viejo de la vista website.inicio se oculta por CSS (body.dki). -->
+        <t t-if="website.dki_active()">
+            <div class="dkh-ribbon dki-ribbon" aria-hidden="true">
+                <div class="dkh-marq">
+                    <t t-foreach="range(4)" t-as="dki_r"><t t-foreach="website.dkh_brands()" t-as="dki_br"><span t-out="dki_br"/></t></t>
+                </div>
+            </div>
+
+            <t t-set="dki_mid" t-value="request.env['dkh.banner']._dkh_for('mid')"/>
+            <t t-set="dki_small" t-value="request.env['dkh.banner']._dkh_for('small')"/>
+            <div t-if="dki_mid or dki_small or website.dkh_is_designer()" class="dkh-g21 dki-g21">
+                <t t-call="stock_picking_sale_buttons.dkh_slot">
+                    <t t-set="slot" t-value="'mid'"/><t t-set="tone" t-value="'pink'"/><t t-set="only_real" t-value="True"/><t t-set="size" t-value="'Banner mediano · 1000 × 400 px'"/>
+                    <t t-set="ftitle" t-value="'Tu promo'"/>
+                </t>
+                <t t-call="stock_picking_sale_buttons.dkh_slot">
+                    <t t-set="slot" t-value="'small'"/><t t-set="tone" t-value="'blue'"/><t t-set="only_real" t-value="True"/><t t-set="size" t-value="'Banner pequeño · 500 × 400 px'"/>
+                    <t t-set="ftitle" t-value="'Destacado'"/>
+                </t>
+            </div>
+
+            <t t-set="dki_new" t-value="request.env['product.template']._dk_new_products(12)"/>
+            <section t-if="dki_new" class="dki-sec">
+                <div class="dk-head"><h2>Nuevos productos</h2><a href="/shop?order=create_date+desc">Ver todos</a></div>
+                <div class="dkh-snap dki-snap">
+                    <t t-foreach="dki_new" t-as="dki_np"><t t-call="stock_picking_sale_buttons.dk_card"><t t-set="p" t-value="dki_np"/></t></t>
+                </div>
+            </section>
+
+            <t t-set="dki_best" t-value="request.env['product.template']._dk_bestsellers_by_category(8)"/>
+            <section t-if="dki_best" class="dki-sec">
+                <div class="dk-head"><h2>Lo más pedido</h2><a href="/shop">Ver tienda</a></div>
+                <div class="dk-grid dki-grid">
+                    <t t-foreach="dki_best" t-as="dki_bp"><t t-call="stock_picking_sale_buttons.dk_card"><t t-set="p" t-value="dki_bp"/></t></t>
+                </div>
+            </section>
+        </t>
     </template>
 </odoo>

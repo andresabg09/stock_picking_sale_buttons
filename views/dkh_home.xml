@@ -24,7 +24,7 @@
     <template id="dkh_slot" name="DKH: espacio de banner">
         <t t-set="dkh_bs" t-value="request.env['dkh.banner']._dkh_for(slot)"/>
         <t t-set="dkh_adm" t-value="website.dkh_is_designer()"/>
-        <div t-attf-class="dkh-slot dkh-slot-#{slot} #{cls or ''}">
+        <div t-if="dkh_bs or dkh_adm or not only_real" t-attf-class="dkh-slot dkh-slot-#{slot} #{cls or ''}">
             <t t-if="dkh_bs">
                 <div t-attf-class="dkh-track #{'dkh-hero-track' if slot == 'hero' and len(dkh_bs) &gt; 1 else ''}">
                     <t t-foreach="dkh_bs" t-as="dkh_b">

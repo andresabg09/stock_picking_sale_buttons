@@ -20,7 +20,7 @@
                 <t t-set="dk_front" t-value="not search and not category and dk_page == 1 and not request.params.get('order')"/>
                 <t t-set="dk_total" t-value="search_count or len(products or [])"/>
                 <t t-set="dk_new" t-value="request.env['product.template']._dk_new_products(4) if dk_front else request.env['product.template']"/>
-                <t t-set="dk_best" t-value="request.env['product.template']._dk_bestsellers(4) if dk_front else request.env['product.template']"/>
+                <t t-set="dk_best" t-value="request.env['product.template']._dk_bestsellers_by_category(4) if dk_front else request.env['product.template']"/>
 
                 <div class="dk-shop-in container">
                     <div class="dk-crumb">
