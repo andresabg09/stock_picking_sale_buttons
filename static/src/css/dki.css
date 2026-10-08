@@ -1,0 +1,101 @@
+/* ==========================================================================
+   Versión I — la identidad de mi diseño ANTERIOR (azul oscuro, negro y blanco, Manrope, líneas finas y
+   esquinas discretas) sobre la estructura y las funciones de la Versión H.
+   Todo bajo `body.dki`: solo se ve con la vista previa /dki o con el parámetro `dki.enabled` = 1.
+   Se carga DESPUÉS de dkh.css y dkh_pages.css, así que solo redefine colores, tipografía y formas.
+   ========================================================================== */
+
+body.dki {
+    --dkh-navy: #0B1F3A;
+    --dkh-ink-2: #2B3445;
+    --dkh-mute: #5A6577;
+    --dkh-line: #E3E6EB;
+    --dkh-soft: #F4F5F7;
+    --dkh-pink: #EDF0F5;      /* los "rosas" de la H pasan a gris azulado muy claro */
+    --dkh-pink-d: #0B1F3A;    /* el acento pasa a azul oscuro */
+    --dkh-blue: #EDF0F5;
+    --dkh-blue-d: #B8C7E0;
+    --dkh-font: 'Manrope', system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --dki-radius: 8px;
+}
+
+/* ---- Base ---- */
+body.dki, body.dki #wrapwrap, body.dki #wrapwrap > main, body.dki #wrap { background: #F4F5F7 !important; font-family: var(--dkh-font); }
+body.dki h1, body.dki h2, body.dki h3, body.dki h4 { font-family: var(--dkh-font); letter-spacing: -.01em; }
+
+/* ---- Botones y campos: sobrios ---- */
+body.dki .dkh-btn, body.dki .btn-primary { border-radius: var(--dki-radius) !important; font-weight: 700; min-height: 44px; }
+body.dki .dkh-btn:hover, body.dki .btn-primary:hover { transform: none; box-shadow: none; background: #000 !important; border-color: #000 !important; }
+body.dki .btn-outline-primary { border-radius: var(--dki-radius) !important; }
+body.dki .dkh-btn-soft { background: #fff !important; border: 1px solid var(--dkh-line) !important; }
+
+/* ---- Encabezado ---- */
+body.dki .dkh-top { background: #fff; box-shadow: 0 1px 0 var(--dkh-line); }
+body.dki .dkh-hd { gap: 12px 18px; }
+body.dki .dkh-logo { font-size: 19px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--dkh-navy); }
+body.dki .dkh-logo span { display: none; }
+body.dki .dkh-search { border-radius: var(--dki-radius); background: #F4F5F7; border: 1px solid var(--dkh-line); height: 44px; }
+body.dki .dkh-search:focus-within { box-shadow: 0 0 0 2px var(--dkh-navy); background: #fff; }
+body.dki .dkh-scanb { border-radius: var(--dki-radius); width: 44px; height: 44px; background: #fff; border: 1px solid var(--dkh-line); color: var(--dkh-navy); }
+body.dki .dkh-scanb:hover { background: var(--dkh-navy); color: #fff; transform: none; }
+body.dki .dkh-cart { border-radius: var(--dki-radius); min-height: 44px; background: var(--dkh-navy); font-weight: 700; }
+body.dki .dkh-cart:hover { transform: none; box-shadow: none; background: #000; }
+body.dki .dkh-cart-count { background: #fff; color: var(--dkh-navy); border-radius: 6px; }
+
+/* Menú de computadora: barra sobria con la sección activa subrayada */
+body.dki .dkh-nav { background: transparent; padding: 0; border-radius: 0; gap: 4px; margin: 0 auto 0 8px; }
+body.dki .dkh-nav a { color: var(--dkh-navy) !important; padding: 10px 14px; border-radius: var(--dki-radius); font-weight: 600; background: transparent; }
+body.dki .dkh-nav a:hover { background: #F4F5F7; }
+body.dki .dkh-nav a.on { background: transparent; color: var(--dkh-navy) !important; box-shadow: inset 0 -2px 0 var(--dkh-navy); border-radius: 0; }
+
+/* ---- Menú tipo app: riel (tablet) y barra inferior (celular) ---- */
+body.dki .dkh-dock { border-color: var(--dkh-line); }
+body.dki .dkh-tab { color: var(--dkh-mute) !important; }
+body.dki .dkh-tab.on { color: var(--dkh-navy) !important; }
+body.dki .dkh-tab.on .dkh-ic { background: #E8ECF3; }
+body.dki .dkh-tab-scan .dkh-ic { background: var(--dkh-navy); color: #fff; }
+@media (max-width: 640px) {
+    body.dki .dkh-dock { border: 1px solid var(--dkh-line); border-radius: 16px; box-shadow: 0 8px 28px rgba(11, 31, 58, .14); }
+    body.dki .dkh-tab-scan .dkh-ic { border-color: #fff; box-shadow: 0 6px 18px rgba(11, 31, 58, .3); }
+    body.dki .dkh-more-sheet { border-radius: 18px 18px 0 0; }
+    body.dki .dkh-more-a { border-radius: 10px; background: #F4F5F7; font-weight: 700; }
+    body.dki .dkh-more-pink, body.dki .dkh-more-blue { background: #F4F5F7; }
+}
+
+/* ---- Ventana del escáner y avisos ---- */
+body.dki .dkh-sheet { border-radius: 14px; box-shadow: 0 24px 60px rgba(0, 0, 0, .3); }
+body.dki .dkh-x { border-radius: var(--dki-radius); background: #F4F5F7; }
+body.dki .dkh-vf { border-radius: 12px; background: linear-gradient(160deg, #1B2F4E, #0A1526); }
+body.dki .dkh-vf i { border-color: #fff; }
+body.dki .dkh-vf u { background: linear-gradient(90deg, transparent, #fff, transparent); }
+body.dki .dk-toast { border-radius: var(--dki-radius); background: var(--dkh-navy); font-family: var(--dkh-font); }
+body.dki .dkh-fly { border-radius: 10px; }
+
+/* ---- Pie ---- */
+body.dki .dkh-footer { background: var(--dkh-navy); }
+body.dki .dkh-footer-logo { text-transform: uppercase; letter-spacing: .08em; font-size: 20px; }
+body.dki .dkh-footer-logo span { display: none; }
+
+/* ---- Tarjetas de producto: blancas, borde fino, esquinas discretas ---- */
+body.dki .dk-grid > .dk-card, body.dki .dkh-snap > .dk-card, body.dki .dkh-g4 > .dk-card, body.dki .dk-card {
+    background: #fff !important; border: 1px solid var(--dkh-line); border-radius: 10px; box-shadow: none;
+}
+body.dki .dk-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(11, 31, 58, .08); }
+body.dki .dk-card-img img { mix-blend-mode: normal; filter: none; }
+body.dki .dk-card-body { margin: 0; border-radius: 0 0 10px 10px; padding: 12px 14px 14px; background: transparent; }
+body.dki .dk-card-name { font-weight: 700; color: var(--dkh-navy) !important; }
+body.dki .dk-badge { border-radius: 6px; letter-spacing: .06em; }
+body.dki .dk-badge-sale { background: #8C1D1D !important; }
+body.dki .dk-stp { border-radius: var(--dki-radius); border-color: #B8C0CE; }
+body.dki .dk-stp button { border-radius: 6px; }
+body.dki .dk-stp input.dk-q:focus { border-radius: 6px; }
+body.dki .dk-add { border-radius: var(--dki-radius); }
+body.dki .dk-pre { border-radius: 6px; }
+
+/* ---- Barra de pedido mínimo ---- */
+body.dki .dkh-pbar, body.dki .dkh-pbar-t { border-radius: 12px; }
+body.dki .dkh-pbar { background: var(--dkh-navy); }
+body.dki .dkh-bar i { background: #fff; }
+body.dki .dkh-confirm { background: #fff; border: 1px solid var(--dkh-line); border-radius: 12px; }
+
+@media (prefers-reduced-motion: reduce) { body.dki .dk-card:hover { transform: none; } }

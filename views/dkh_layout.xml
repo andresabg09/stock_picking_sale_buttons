@@ -13,6 +13,7 @@
     <template id="dkh_head" inherit_id="website.layout" name="DKH: fuente" priority="30">
         <xpath expr="//head" position="inside">
             <link rel="preconnect" href="https://fonts.googleapis.com"/>
+            <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&amp;display=swap"/>
             <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600;12..96,700;12..96,800&amp;display=swap"/>
         </xpath>
     </template>
@@ -22,6 +23,9 @@
         <xpath expr="//html" position="before">
             <t t-if="website and website.dkh_active()">
                 <t t-set="body_classname" t-value="((body_classname or '') + ' dkh').strip()"/>
+                <t t-if="website.dki_active()">
+                    <t t-set="body_classname" t-value="((body_classname or '') + ' dki').strip()"/>
+                </t>
             </t>
         </xpath>
     </template>

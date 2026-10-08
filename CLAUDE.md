@@ -556,4 +556,11 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   productos distintos; reglas de cantidad y avisos; escáner; Pedido rápido con foto/sugerencias; animaciones). Se reutiliza la
   lógica (JS, controladores, modelos) y solo cambia la piel. Colores, tipografía y formas = los del diseño anterior (NO cambian); la redacción de los textos (palabras que ve el cliente) = la de la H. Trabajo por lotes de 3 con plan
   previo y vista previa privada.
+- 2026-10-08: VERSIÓN I, LOTE 1 (v18.0.4.0.0). Se activa con la vista previa `/dki` (cookie `dki_preview`, `/dki?off=1` la apaga) o
+  el parámetro `dki.enabled` = 1 (todos). `website.dki_active()`; `dkh_active()` devuelve True también cuando la I está activa (la
+  estructura y las funciones son las de la H); el body lleva `dkh dki`. La piel vive en `static/src/css/dki.css` (carga DESPUÉS de
+  dkh.css/dkh_pages.css, todo bajo `body.dki`): redefine las variables `--dkh-*` (azul oscuro #0B1F3A, grises, Manrope, acento
+  azul) y las formas (esquinas 8–10 px, botones sobrios, tarjetas blancas con borde fino). Menú: computadora = barra con la
+  sección activa subrayada; tablet = riel; celular = barra inferior. Pendiente: Lote 2 (Inicio, Tienda, Producto) y Lote 3
+  (Carrito, Pedido rápido, pruebas, cambio). Si ambas (`dkh.enabled` y `dki.enabled`) están en 1, gana la I.
 
