@@ -23,10 +23,9 @@ body.dki {
 body.dki, body.dki #wrapwrap, body.dki #wrapwrap > main, body.dki #wrap { background: #F4F5F7 !important; font-family: var(--dkh-font); }
 body.dki h1, body.dki h2, body.dki h3, body.dki h4 { font-family: var(--dkh-font); letter-spacing: -.01em; }
 
-/* ---- Botones y campos: sobrios ---- */
-body.dki .dkh-btn, body.dki .btn-primary { border-radius: var(--dki-radius) !important; font-weight: 700; min-height: 44px; }
-body.dki .dkh-btn:hover, body.dki .btn-primary:hover { transform: none; box-shadow: none; background: #000 !important; border-color: #000 !important; }
-body.dki .btn-outline-primary { border-radius: var(--dki-radius) !important; }
+/* ---- Botones nuevos (los de la tienda anterior conservan su estilo) ---- */
+body.dki .dkh-btn { border-radius: var(--dki-radius) !important; font-weight: 700; min-height: 44px; }
+body.dki .dkh-btn:hover { transform: none; box-shadow: none; background: #000 !important; }
 body.dki .dkh-btn-soft { background: #fff !important; border: 1px solid var(--dkh-line) !important; }
 
 /* ---- Encabezado ---- */
@@ -76,21 +75,11 @@ body.dki .dkh-footer { background: var(--dkh-navy); }
 body.dki .dkh-footer-logo { text-transform: uppercase; letter-spacing: .08em; font-size: 20px; }
 body.dki .dkh-footer-logo span { display: none; }
 
-/* ---- Tarjetas de producto: blancas, borde fino, esquinas discretas ---- */
-body.dki .dk-grid > .dk-card, body.dki .dkh-snap > .dk-card, body.dki .dkh-g4 > .dk-card, body.dki .dk-card {
-    background: #fff !important; border: 1px solid var(--dkh-line); border-radius: 10px; box-shadow: none;
-}
+/* ---- Tarjetas de producto: las de la tienda anterior; solo se les suma la animación suave ---- */
+body.dki .dk-card { transition: transform .3s, box-shadow .3s; }
 body.dki .dk-card:hover { transform: translateY(-3px); box-shadow: 0 10px 24px rgba(11, 31, 58, .08); }
-body.dki .dk-card-img img { mix-blend-mode: normal; filter: none; }
-body.dki .dk-card-body { margin: 0; border-radius: 0 0 10px 10px; padding: 12px 14px 14px; background: transparent; }
-body.dki .dk-card-name { font-weight: 700; color: var(--dkh-navy) !important; }
-body.dki .dk-badge { border-radius: 6px; letter-spacing: .06em; }
-body.dki .dk-badge-sale { background: #8C1D1D !important; }
-body.dki .dk-stp { border-radius: var(--dki-radius); border-color: #B8C0CE; }
-body.dki .dk-stp button { border-radius: 6px; }
-body.dki .dk-stp input.dk-q:focus { border-radius: 6px; }
-body.dki .dk-add { border-radius: var(--dki-radius); }
-body.dki .dk-pre { border-radius: 6px; }
+body.dki .dk-card-img img { transition: transform .5s; }
+body.dki .dk-card:hover .dk-card-img img { transform: scale(1.04); }
 
 /* ---- Barra de pedido mínimo ---- */
 body.dki .dkh-pbar, body.dki .dkh-pbar-t { border-radius: 12px; }
@@ -98,4 +87,31 @@ body.dki .dkh-pbar { background: var(--dkh-navy); }
 body.dki .dkh-bar i { background: #fff; }
 body.dki .dkh-confirm { background: #fff; border: 1px solid var(--dkh-line); border-radius: 12px; }
 
-@media (prefers-reduced-motion: reduce) { body.dki .dk-card:hover { transform: none; } }
+
+/* ---- Pedido rápido: sobrio (formas del diseño anterior) ---- */
+body.dki #dk-home.qo { background: transparent; }
+body.dki #dk-home.qo h1 { text-transform: none; font-size: clamp(26px, 4vw, 34px); letter-spacing: -.01em; }
+body.dki #dk-home.qo .qo-tabs { border-radius: var(--dki-radius); background: #fff; border: 1px solid var(--dkh-line); padding: 4px; }
+body.dki #dk-home.qo .qo-tab { border-radius: 6px; padding: 9px 22px; font-weight: 700; }
+body.dki #dk-home.qo textarea { border: 1px solid #B8C0CE; border-radius: 10px; background: #fff; }
+body.dki #dk-home.qo .qo-btn { border-radius: var(--dki-radius); height: 48px; background: var(--dkh-navy); }
+body.dki #dk-home.qo .qo-btn:hover { background: #000; }
+body.dki #dk-home.qo .qo-btn:disabled { background: #8A93A3; }
+body.dki #dk-home.qo .qo-list, body.dki #dk-home.qo .qo-sum { background: #fff; border: 1px solid var(--dkh-line); border-radius: 10px; }
+body.dki #dk-home.qo .qo-qty, body.dki #dk-home.qo .qo-sel { border: 1px solid #B8C0CE; border-radius: 6px; background: #fff; }
+body.dki #dk-home.qo .qo-photo { background: #fff; border: 1px solid var(--dkh-line); border-radius: 10px; }
+body.dki #dk-home.qo .qo-file { background: #F4F5F7; border-radius: 8px; }
+body.dki #dk-home.qo .qo-thumbs img { border-radius: 8px; }
+body.dki #dk-home.qo .qo-sbox { background: #fff; border: 1px dashed #8A93A3; border-radius: 10px; }
+body.dki #dk-home.qo .qo-stag { border-radius: 6px; }
+body.dki #dk-home.qo .qo-sug { border: 1px solid var(--dkh-line); border-radius: 10px; background: #fff; }
+body.dki #dk-home.qo .qo-sug:hover { border-color: var(--dkh-line); }
+body.dki #dk-home.qo .qo-sug.on, body.dki #dk-home.qo .qo-sug.on:hover { border-color: var(--dkh-navy); background: #fff; }
+body.dki #dk-home.qo .qo-sug img { border-radius: 8px; }
+body.dki #dk-home.qo .qo-sug-s { border-radius: 6px; }
+body.dki #dk-home.qo .qo-sug-q { border-radius: 6px; border: 1px solid #B8C0CE; background: #fff; }
+body.dki #dk-home.qo .qo-sug-add { border-radius: var(--dki-radius); }
+body.dki #dk-home.qo .qo-state { border-radius: 6px; }
+body.dki #dk-home.qo .qo-adj { border-radius: 6px; background: #E8ECF3; }
+
+@media (prefers-reduced-motion: reduce) { body.dki .dk-card, body.dki .dk-card-img img { transition: none; } body.dki .dk-card:hover { transform: none; } }

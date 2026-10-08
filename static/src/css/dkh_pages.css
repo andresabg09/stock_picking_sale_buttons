@@ -3,47 +3,47 @@
    ========================================================================== */
 
 /* ---- Botones y campos de la tienda con la identidad H ---- */
-.dkh .btn-primary, .dkh .dkh-btn {
+.dkh:not(.dki) .btn-primary, .dkh:not(.dki) .dkh-btn {
     background: var(--dkh-navy) !important; border-color: var(--dkh-navy) !important; color: #fff !important;
     border-radius: 999px !important; font-weight: 600; font-family: var(--dkh-font);
 }
-.dkh .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(22, 33, 58, .16); }
-.dkh .btn-outline-primary { border-radius: 999px !important; color: var(--dkh-navy) !important; border-color: var(--dkh-navy) !important; background: #fff !important; font-weight: 600; }
+.dkh:not(.dki) .btn-primary:hover { transform: translateY(-2px); box-shadow: 0 14px 28px rgba(22, 33, 58, .16); }
+.dkh:not(.dki) .btn-outline-primary { border-radius: 999px !important; color: var(--dkh-navy) !important; border-color: var(--dkh-navy) !important; background: #fff !important; font-weight: 600; }
 .dkh .dkh-btn-w { background: #fff !important; color: var(--dkh-navy) !important; border-color: #fff !important; }
 .dkh .dkh-btn { text-decoration: none; }
 
 /* ---- Cantidad viva (dk-buy) en estilo H ---- */
-.dkh .dk-stp { border: 1.5px solid var(--dkh-line); border-radius: 999px; background: #fff; }
-.dkh .dk-stp button { border-radius: 999px; color: var(--dkh-navy); }
-.dkh .dk-stp button:hover { background: var(--dkh-soft); }
-.dkh .dk-stp input.dk-q { font-family: var(--dkh-font); font-weight: 700; color: var(--dkh-navy) !important; background: transparent !important; border: 0 !important; }
-.dkh .dk-stp input.dk-q:focus { background: var(--dkh-soft) !important; box-shadow: inset 0 0 0 2px var(--dkh-navy); border-radius: 12px; }
-.dkh .dk-in { color: #2F7D5B; font-weight: 600; }
-.dkh .dk-pill { background: var(--dkh-navy); border-radius: 999px; }
+.dkh:not(.dki) .dk-stp { border: 1.5px solid var(--dkh-line); border-radius: 999px; background: #fff; }
+.dkh:not(.dki) .dk-stp button { border-radius: 999px; color: var(--dkh-navy); }
+.dkh:not(.dki) .dk-stp button:hover { background: var(--dkh-soft); }
+.dkh:not(.dki) .dk-stp input.dk-q { font-family: var(--dkh-font); font-weight: 700; color: var(--dkh-navy) !important; background: transparent !important; border: 0 !important; }
+.dkh:not(.dki) .dk-stp input.dk-q:focus { background: var(--dkh-soft) !important; box-shadow: inset 0 0 0 2px var(--dkh-navy); border-radius: 12px; }
+.dkh:not(.dki) .dk-in { color: #2F7D5B; font-weight: 600; }
+.dkh:not(.dki) .dk-pill { background: var(--dkh-navy); border-radius: 999px; }
 
 /* ---- Tarjetas de producto (dk_card) ---- */
-.dkh .dk-grid { gap: 22px; }
-.dkh .dk-card {
+.dkh:not(.dki) .dk-grid { gap: 22px; }
+.dkh:not(.dki) .dk-card {
     border: 0; border-radius: 34px; background: var(--dkh-soft); position: relative;
     transition: transform .4s, box-shadow .4s;
 }
-.dkh .dk-grid > .dk-card:nth-child(4n+1) { background: var(--dkh-pink); }
-.dkh .dk-grid > .dk-card:nth-child(4n+2) { background: var(--dkh-blue); }
-.dkh .dk-grid > .dk-card:nth-child(4n+3) { background: #F6EAF2; }
-.dkh .dk-grid > .dk-card:nth-child(4n) { background: #EAF1FB; }
+.dkh:not(.dki) .dk-grid > .dk-card:nth-child(4n+1) { background: var(--dkh-pink); }
+.dkh:not(.dki) .dk-grid > .dk-card:nth-child(4n+2) { background: var(--dkh-blue); }
+.dkh:not(.dki) .dk-grid > .dk-card:nth-child(4n+3) { background: #F6EAF2; }
+.dkh:not(.dki) .dk-grid > .dk-card:nth-child(4n) { background: #EAF1FB; }
 .dkh-g4 > .dk-card:nth-child(1) { background: var(--dkh-pink); }
 .dkh-g4 > .dk-card:nth-child(2) { background: var(--dkh-blue); }
 .dkh-g4 > .dk-card:nth-child(3) { background: #F6EAF2; }
-.dkh .dk-card:hover { transform: translateY(-6px); box-shadow: 0 26px 50px rgba(22, 33, 58, .12); }
-.dkh .dk-card:has(.dk-buy[data-state="in"]) { outline: 2px solid var(--dkh-navy); outline-offset: -2px; }
-.dkh .dk-card-img { margin: 14px 14px 0; background: transparent; }
-.dkh .dk-card-img img { mix-blend-mode: multiply; filter: brightness(1.05) contrast(1.06); transition: transform .6s; }
-.dkh .dk-card:hover .dk-card-img img { transform: scale(1.06); }
-.dkh .dk-card-body { background: #fff; margin: 0 10px 10px; border-radius: 26px; padding: 16px 18px 18px; }
-.dkh .dk-card-name { font-weight: 600; font-size: 15px; color: var(--dkh-navy) !important; }
-.dkh .dk-card-price { font-size: 21px; color: var(--dkh-navy); }
-.dkh .dk-badge { border-radius: 999px; background: var(--dkh-navy) !important; color: #fff !important; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
-.dkh .dk-badge-sale { background: var(--dkh-pink-d) !important; }
+.dkh:not(.dki) .dk-card:hover { transform: translateY(-6px); box-shadow: 0 26px 50px rgba(22, 33, 58, .12); }
+.dkh:not(.dki) .dk-card:has(.dk-buy[data-state="in"]) { outline: 2px solid var(--dkh-navy); outline-offset: -2px; }
+.dkh:not(.dki) .dk-card-img { margin: 14px 14px 0; background: transparent; }
+.dkh:not(.dki) .dk-card-img img { mix-blend-mode: multiply; filter: brightness(1.05) contrast(1.06); transition: transform .6s; }
+.dkh:not(.dki) .dk-card:hover .dk-card-img img { transform: scale(1.06); }
+.dkh:not(.dki) .dk-card-body { background: #fff; margin: 0 10px 10px; border-radius: 26px; padding: 16px 18px 18px; }
+.dkh:not(.dki) .dk-card-name { font-weight: 600; font-size: 15px; color: var(--dkh-navy) !important; }
+.dkh:not(.dki) .dk-card-price { font-size: 21px; color: var(--dkh-navy); }
+.dkh:not(.dki) .dk-badge { border-radius: 999px; background: var(--dkh-navy) !important; color: #fff !important; font-size: 11px; letter-spacing: .1em; text-transform: uppercase; }
+.dkh:not(.dki) .dk-badge-sale { background: var(--dkh-pink-d) !important; }
 
 /* ---- Banners ---- */
 .dkh-slot { position: relative; border-radius: 40px; overflow: hidden; }
@@ -117,26 +117,26 @@
 .dkh-home #wrap { display: none !important; }
 
 /* ---- Tienda ---- */
-.dkh .dk-shop { font-family: var(--dkh-font); }
-.dkh .dk-shop .dk-head-t h1 { font-weight: 800; letter-spacing: -.045em; font-size: clamp(36px, 5vw, 64px); text-transform: lowercase; }
-.dkh .dk-shop .dk-side { border: 0; border-radius: 34px; background: var(--dkh-soft); }
-.dkh .dk-shop .dk-side-h { color: var(--dkh-navy); }
-.dkh .dk-shop .dk-side-list a { border-radius: 999px; color: var(--dkh-navy) !important; }
-.dkh .dk-shop .dk-side-list a.act { background: var(--dkh-navy); color: #fff !important; }
-.dkh .dk-shop .dk-chip { border-radius: 999px; }
-.dkh .dk-shop .dk-chip.act { background: var(--dkh-navy); color: #fff !important; border-color: var(--dkh-navy); }
-.dkh .dk-sec-head h2 { font-weight: 800; letter-spacing: -.03em; color: var(--dkh-navy); }
-.dkh .dk-sec-head a { color: var(--dkh-navy) !important; font-weight: 600; }
+.dkh:not(.dki) .dk-shop { font-family: var(--dkh-font); }
+.dkh:not(.dki) .dk-shop .dk-head-t h1 { font-weight: 800; letter-spacing: -.045em; font-size: clamp(36px, 5vw, 64px); text-transform: lowercase; }
+.dkh:not(.dki) .dk-shop .dk-side { border: 0; border-radius: 34px; background: var(--dkh-soft); }
+.dkh:not(.dki) .dk-shop .dk-side-h { color: var(--dkh-navy); }
+.dkh:not(.dki) .dk-shop .dk-side-list a { border-radius: 999px; color: var(--dkh-navy) !important; }
+.dkh:not(.dki) .dk-shop .dk-side-list a.act { background: var(--dkh-navy); color: #fff !important; }
+.dkh:not(.dki) .dk-shop .dk-chip { border-radius: 999px; }
+.dkh:not(.dki) .dk-shop .dk-chip.act { background: var(--dkh-navy); color: #fff !important; border-color: var(--dkh-navy); }
+.dkh:not(.dki) .dk-sec-head h2 { font-weight: 800; letter-spacing: -.03em; color: var(--dkh-navy); }
+.dkh:not(.dki) .dk-sec-head a { color: var(--dkh-navy) !important; font-weight: 600; }
 
 /* ---- Producto ---- */
-.dkh .dk-pbox { border: 0; border-radius: 34px; background: var(--dkh-pink); }
-.dkh .dk-pbox-title { color: var(--dkh-navy); font-weight: 700; }
-.dkh .dk-pre { border-radius: 999px; border: 1.5px solid var(--dkh-navy); background: #fff; color: var(--dkh-navy); font-weight: 600; }
-.dkh .dk-pre:hover { background: var(--dkh-navy); color: #fff; }
-.dkh #product_detail h1 { font-weight: 800; letter-spacing: -.04em; color: var(--dkh-navy); }
-.dkh #product_detail .o_wsale_product_images { border-radius: 34px; overflow: hidden; background: var(--dkh-soft); }
-.dkh .dk-eyebrow, .dkh .dk-meta { color: var(--dkh-mute); }
-.dkh .dk-sections .dk-sec-head h2 { font-size: clamp(30px, 4vw, 48px); letter-spacing: -.045em; text-transform: lowercase; }
+.dkh:not(.dki) .dk-pbox { border: 0; border-radius: 34px; background: var(--dkh-pink); }
+.dkh:not(.dki) .dk-pbox-title { color: var(--dkh-navy); font-weight: 700; }
+.dkh:not(.dki) .dk-pre { border-radius: 999px; border: 1.5px solid var(--dkh-navy); background: #fff; color: var(--dkh-navy); font-weight: 600; }
+.dkh:not(.dki) .dk-pre:hover { background: var(--dkh-navy); color: #fff; }
+.dkh:not(.dki) #product_detail h1 { font-weight: 800; letter-spacing: -.04em; color: var(--dkh-navy); }
+.dkh:not(.dki) #product_detail .o_wsale_product_images { border-radius: 34px; overflow: hidden; background: var(--dkh-soft); }
+.dkh:not(.dki) .dk-eyebrow, .dkh:not(.dki) .dk-meta { color: var(--dkh-mute); }
+.dkh:not(.dki) .dk-sections .dk-sec-head h2 { font-size: clamp(30px, 4vw, 48px); letter-spacing: -.045em; text-transform: lowercase; }
 
 /* ---- Tablet ---- */
 @media (max-width: 1024px) {
@@ -169,9 +169,9 @@
     .dkh-pbar .dkh-btn { width: 100%; }
     .dkh-cats { grid-template-columns: 1fr; gap: 10px; }
     .dkh-cat { font-size: 18px; padding: 16px 22px; }
-    .dkh .dk-grid { gap: 12px; }
-    .dkh .dk-card { border-radius: 26px; }
-    .dkh .dk-card-body { margin: 0 6px 6px; border-radius: 20px; padding: 12px 12px 14px; }
+    .dkh:not(.dki) .dk-grid { gap: 12px; }
+    .dkh:not(.dki) .dk-card { border-radius: 26px; }
+    .dkh:not(.dki) .dk-card-body { margin: 0 6px 6px; border-radius: 20px; padding: 12px 12px 14px; }
 }
 
 @media (prefers-reduced-motion: reduce) {
@@ -183,10 +183,10 @@
    Lote C — carrito, confirmación, gracias, Pedido rápido y escáner (todo bajo .dkh)
    ========================================================================== */
 .dkh a[href^="/shop/checkout"]:not(.dkh-btn), .dkh [name="website_sale_main_button"] { display: none !important; }
-.dkh .dk-cart-head h1 { font-weight: 800; letter-spacing: -.045em; text-transform: lowercase; color: var(--dkh-navy); }
-.dkh .dk-cline { border: 0; border-radius: 26px; background: #F6F8FD; }
-.dkh .dk-cline-name { color: var(--dkh-navy) !important; font-weight: 600; }
-.dkh .dk-cline-price { color: var(--dkh-navy); font-weight: 800; }
+.dkh:not(.dki) .dk-cart-head h1 { font-weight: 800; letter-spacing: -.045em; text-transform: lowercase; color: var(--dkh-navy); }
+.dkh:not(.dki) .dk-cline { border: 0; border-radius: 26px; background: #F6F8FD; }
+.dkh:not(.dki) .dk-cline-name { color: var(--dkh-navy) !important; font-weight: 600; }
+.dkh:not(.dki) .dk-cline-price { color: var(--dkh-navy); font-weight: 800; }
 
 .dkh-confirm { margin: 34px 0; padding: 30px; border-radius: 34px; background: var(--dkh-pink); }
 .dkh-confirm h2 { margin: 0 0 20px; font-size: clamp(30px, 4vw, 48px); font-weight: 800; letter-spacing: -.045em; }

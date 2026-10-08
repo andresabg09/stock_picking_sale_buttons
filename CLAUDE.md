@@ -565,4 +565,8 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   (Carrito, Pedido rápido, pruebas, cambio). Si ambas (`dkh.enabled` y `dki.enabled`) están en 1, gana la I.
 - 2026-10-08: Versión I: con la I activa el Inicio es el ANTERIOR (vista website.inicio), no el Inicio H (`dkh_home` y la clase
   `dkh-home` solo salen cuando `dki_active()` es falso). La I = páginas anteriores + encabezado/menú app/avisos/animaciones/funciones.
+- 2026-10-08: Versión I (v18.0.4.0.2): las reglas de PÁGINAS de `dkh_pages.css` que dan el aspecto H (tarjetas pastel, píldoras,
+  títulos gigantes, Tienda/Producto/Carrito) ahora van con `.dkh:not(.dki)`: con la I activa se ve el diseño ANTERIOR de esas
+  páginas (shop_live_cart.css + shop_redesign.css) y solo se suman encabezado, menú app, funciones, avisos y animaciones.
+  `dki.css` ya no re-pinta tarjetas/botones antiguos: solo piezas nuevas y el Pedido rápido.
 
