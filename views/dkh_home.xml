@@ -6,7 +6,7 @@
 
     <template id="dkh_body_class_home" inherit_id="website.layout" name="DKH: clase del inicio" priority="31">
         <xpath expr="//html" position="before">
-            <t t-if="website and website.dkh_active() and request.httprequest.path in ('/', '/inicio')">
+            <t t-if="website and website.dkh_active() and not website.dki_active() and request.httprequest.path in ('/', '/inicio')">
                 <t t-set="body_classname" t-value="((body_classname or '') + ' dkh-home').strip()"/>
             </t>
         </xpath>
@@ -14,7 +14,7 @@
 
     <template id="dkh_home_inject" inherit_id="website.layout" name="DKH: inicio H" priority="31">
         <xpath expr="//main" position="inside">
-            <t t-if="website and website.dkh_active() and request.httprequest.path in ('/', '/inicio')">
+            <t t-if="website and website.dkh_active() and not website.dki_active() and request.httprequest.path in ('/', '/inicio')">
                 <t t-call="stock_picking_sale_buttons.dkh_home"/>
             </t>
         </xpath>

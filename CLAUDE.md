@@ -563,4 +563,6 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   azul) y las formas (esquinas 8–10 px, botones sobrios, tarjetas blancas con borde fino). Menú: computadora = barra con la
   sección activa subrayada; tablet = riel; celular = barra inferior. Pendiente: Lote 2 (Inicio, Tienda, Producto) y Lote 3
   (Carrito, Pedido rápido, pruebas, cambio). Si ambas (`dkh.enabled` y `dki.enabled`) están en 1, gana la I.
+- 2026-10-08: Versión I: con la I activa el Inicio es el ANTERIOR (vista website.inicio), no el Inicio H (`dkh_home` y la clase
+  `dkh-home` solo salen cuando `dki_active()` es falso). La I = páginas anteriores + encabezado/menú app/avisos/animaciones/funciones.
 
