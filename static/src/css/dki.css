@@ -143,3 +143,9 @@ body.dki .dki-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px
     body.dki .dki-g21 { grid-template-columns: 1fr; }
     body.dki .dkh-slot-mid, body.dki .dkh-slot-small { height: 150px; }
 }
+
+/* ---- Tablet con riel lateral (641–1024 px): el banner a todo el ancho se calcula sin los 96 px del riel ----
+   (si no, en iPad mini el banner se corta a ambos lados) */
+@media (min-width: 641px) and (max-width: 900px) {
+    body.dki #dk-home .dk-hero { width: calc(100vw - 96px); margin-left: calc(50% - 50vw + 48px); margin-right: 0; }
+}

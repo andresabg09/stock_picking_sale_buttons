@@ -574,4 +574,7 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   "Nuevos productos" (carrusel, `_dk_new_products(12)`) y "Lo más pedido" (`_dk_bestsellers_by_category(8)`); el "Nuevos" viejo de
   website.inicio (vista de BD 3328, NO editada) se oculta por CSS `section:has(> .dk-snap)`. `dkh_slot` acepta `only_real` (sin
   diseño de ejemplo para clientes). Tienda (todas las versiones): su "Lo más pedido" ahora es `_dk_bestsellers_by_category(4)`.
+- 2026-10-08: Fix tablet (v18.0.4.1.1): en 641–900 px (iPad mini/Air/Pro 11) el banner del Inicio usaba `100vw` a todo el ancho de la
+  pantalla, pero con el riel lateral (96 px, `#wrapwrap` con padding-left) se salía 48 px a cada lado y se cortaba. `dki.css` lo calcula
+  como `calc(100vw - 96px)` con margen compensado. Verificado con navegador real contra la tienda en 744/768/810/820/834/1024 px.
 
