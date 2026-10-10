@@ -5,9 +5,13 @@
 // web_responsive, así que si ese módulo no está instalado simplemente no hace nada.
 // Apagar en un navegador: localStorage.setItem("dkw_off", "1")  (encender: removeItem).
 // Diseño aprobado por Andrés (2026-10-10): lienzo "Animación del menú de apps — Propuesta".
+//
+// Rendimiento: la ola se dibuja en UN solo <canvas> (acelerado por hardware en celulares) dentro
+// del propio menú, en vez de recortar con clip-path tres capas a pantalla completa, que en
+// pantallas de alta densidad obligaba a redibujar tres máscaras enormes en cada cuadro.
 
 const BOX = "app-menu-container";
-const rects = new WeakMap(); // caja del menú -> rectángulo medido al abrir (para animar el cierre)
+const meta = new WeakMap(); // caja del menú -> { rect, col } medidos al abrir (para animar el cierre)
 let current = null; // animación de apertura en curso
 let observed = null;
 
@@ -27,16 +31,17 @@ function reduced() {
     }
 }
 
-// Ajustes por tamaño de pantalla: teléfono < 768, tablet < 1200, PC desde 1200
+// Ajustes por tamaño de pantalla: teléfono < 768, tablet < 1200, PC desde 1200.
+// dpr = resolución máxima de los lienzos (en el celular se dibuja más liviano).
 function cfg() {
     const w = window.innerWidth;
     if (w < 768) {
-        return { N: 36, amp: [34, 30, 26], lam: [200, 240, 280], flies: 10, speed: 0.72, core: 1.5 };
+        return { amp: [34, 30, 26], lam: [200, 240, 280], flies: 10, speed: 0.72, core: 1.5, dpr: 1 };
     }
     if (w < 1200) {
-        return { N: 48, amp: [52, 46, 40], lam: [300, 350, 400], flies: 18, speed: 0.88, core: 1.8 };
+        return { amp: [52, 46, 40], lam: [300, 350, 400], flies: 18, speed: 0.88, core: 1.8, dpr: 1.25 };
     }
-    return { N: 56, amp: [70, 62, 54], lam: [360, 420, 480], flies: 26, speed: 1, core: 1.8 };
+    return { amp: [70, 62, 54], lam: [360, 420, 480], flies: 26, speed: 1, core: 1.8, dpr: 1.5 };
 }
 
 function ease(k) {
@@ -44,18 +49,15 @@ function ease(k) {
 }
 
 // Frente de la ola: línea diagonal (x + y = F) con ondulación suave que viaja.
-function waveClip(p, extra, amp, lam, ph, W, H, N) {
-    if (p <= 0.001) {
-        return "polygon(0px 0px, 0px 0px, 0px 0px)";
-    }
+// Devuelve los puntos del polígono que cubre todo lo que queda "detrás" del frente.
+function wavePoints(p, extra, amp, lam, ph, W, H) {
     const raw = p * (W + H + 2 * amp + extra);
     const a = amp * Math.min(1, raw / (4 * amp)); // la ondulación crece con la ola: sin picos al nacer
     const F = raw - a;
     // La línea del frente se extiende más allá de la caja por ambos lados (u de -0.4 a 1.4) y se
     // cierra por fuera de ella: así no quedan franjas finas en los bordes.
-    // Un punto cada ~14 px de borde (con tope según el dispositivo) para que la curva se vea suave.
-    const n = Math.min(N * 3, Math.max(40, Math.ceil((1.8 * F * 1.4142) / 14)));
-    const pts = ["-2000px -2000px"];
+    const n = Math.min(120, Math.max(36, Math.ceil((1.8 * F * 1.4142) / 14)));
+    const pts = [[-2000, -2000]];
     for (let i = 0; i <= n; i++) {
         const u = -0.4 + (1.8 * i) / n;
         const s = u * F * 1.4142;
@@ -63,65 +65,105 @@ function waveClip(p, extra, amp, lam, ph, W, H, N) {
             a *
             (0.72 * Math.sin((s / lam) * 6.2832 - ph) +
                 0.28 * Math.sin((s / (lam * 0.43)) * 6.2832 - ph * 1.7));
-        pts.push((F * u + w / 2).toFixed(1) + "px " + (F * (1 - u) + w / 2).toFixed(1) + "px");
+        pts.push([F * u + w / 2, F * (1 - u) + w / 2]);
     }
-    return "polygon(" + pts.join(",") + ")";
+    return pts;
 }
 
-function setClip(el, poly) {
-    el.style.clipPath = poly;
-    el.style.webkitClipPath = poly;
-}
-
-function applyWave(st, p) {
-    const W = st.rect.width;
-    const H = st.rect.height;
-    const c = st.c;
-    const ph = p * 11;
-    setClip(st.box, waveClip(p, 0, c.amp[2], c.lam[2], ph + 2.6, W, H, c.N));
-    setClip(st.mid, waveClip(p, 75, c.amp[1], c.lam[1], ph + 1.3, W, H, c.N));
-    setClip(st.back, waveClip(p, 150, c.amp[0], c.lam[0], ph, W, H, c.N));
-}
-
-// Capas de color de la ola (el color de la barra superior, y un tono medio)
-function makeLayer(cls, rect, color, mix) {
-    const el = document.createElement("div");
-    el.className = "dkw-layer " + cls;
-    el.setAttribute("aria-hidden", "true");
-    el.style.cssText =
-        "top:" + rect.top + "px;left:" + rect.left + "px;width:" + rect.width + "px;height:" + rect.height + "px;";
-    el.style.background = color;
-    if (mix) {
-        el.style.background = "color-mix(in srgb, " + color + " 52%, white)"; // si no lo soporta, queda el color base
+function fillPoly(ctx, pts, style) {
+    ctx.fillStyle = style;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) {
+        ctx.lineTo(pts[i][0], pts[i][1]);
     }
-    document.body.appendChild(el);
-    return el;
+    ctx.closePath();
+    ctx.fill();
 }
 
-function navColor() {
+// Colores: el de la barra superior (frente de la ola), un tono medio y el degradado del fondo del menú
+function parseRgb(s) {
+    const m = /rgba?\(\s*([\d.]+)[,\s]+([\d.]+)[,\s]+([\d.]+)/.exec(s || "");
+    return m ? [+m[1], +m[2], +m[3]] : null;
+}
+
+function readColors(box) {
+    let back = "rgb(113, 99, 158)";
     try {
         const n = document.querySelector(".o_main_navbar");
         if (n) {
             const c = window.getComputedStyle(n).backgroundColor;
-            if (c && c !== "rgba(0, 0, 0, 0)" && c !== "transparent") {
-                return c;
+            if (parseRgb(c) && c.indexOf("rgba(0, 0, 0, 0)") < 0) {
+                back = c;
             }
         }
     } catch (e) {
         /* se usa el color por defecto */
     }
-    return "#71639e";
+    const rgb = parseRgb(back) || [113, 99, 158];
+    const mid =
+        "rgb(" + rgb.map((v) => Math.round(v * 0.52 + 255 * 0.48)).join(",") + ")";
+    let g0 = "rgb(233, 230, 249)";
+    let g1 = "rgb(255, 255, 255)";
+    try {
+        const bg = window.getComputedStyle(box).backgroundImage || "";
+        const idx = bg.indexOf("linear-gradient");
+        if (idx >= 0) {
+            const cols = bg.slice(idx).match(/rgba?\([^)]*\)/g);
+            if (cols && cols.length >= 2) {
+                g0 = cols[0];
+                g1 = cols[cols.length - 1];
+            }
+        }
+    } catch (e) {
+        /* se usan los colores por defecto */
+    }
+    return { back: back, mid: mid, g0: g0, g1: g1 };
 }
 
-function makeLayers(st) {
-    const col = navColor();
-    st.back = makeLayer("dkw-back", st.rect, col, false);
-    st.mid = makeLayer("dkw-mid", st.rect, col, true);
+// Lienzo de la ola: dentro del menú, detrás de sus iconos, encima del fondo (que se vuelve transparente mientras dura)
+function ensureWave(st) {
+    let cv = st.box.querySelector("canvas.dkw-wave");
+    const rect = st.rect;
+    const dpr = Math.min(window.devicePixelRatio || 1, st.c.dpr);
+    if (!cv) {
+        cv = document.createElement("canvas");
+        cv.className = "dkw-wave";
+        cv.setAttribute("aria-hidden", "true");
+        cv.width = Math.max(1, Math.round(rect.width * dpr));
+        cv.height = Math.max(1, Math.round(rect.height * dpr));
+        cv.style.cssText =
+            "top:" + rect.top + "px;left:" + rect.left + "px;width:" + rect.width + "px;height:" + rect.height + "px;";
+        st.box.insertBefore(cv, st.box.firstChild);
+    }
+    const ctx = cv.getContext("2d");
+    if (!ctx) {
+        cv.remove();
+        return false;
+    }
+    ctx.setTransform(cv.width / rect.width, 0, 0, cv.height / rect.height, 0, 0);
+    st.cv = cv;
+    st.ctx = ctx;
+    const grad = ctx.createLinearGradient(0, 0, 0, rect.height);
+    grad.addColorStop(0, st.col.g0);
+    grad.addColorStop(1, st.col.g1);
+    st.grad = grad;
+    return true;
 }
 
-function removeLayers(st) {
-    [st.back, st.mid].forEach((el) => el && el.remove());
-    st.back = st.mid = null;
+function drawWave(st, p) {
+    const ctx = st.ctx;
+    const W = st.rect.width;
+    const H = st.rect.height;
+    const c = st.c;
+    ctx.clearRect(0, 0, W, H);
+    if (p <= 0.001) {
+        return;
+    }
+    const ph = p * 11;
+    fillPoly(ctx, wavePoints(p, 150, c.amp[0], c.lam[0], ph, W, H), st.col.back);
+    fillPoly(ctx, wavePoints(p, 75, c.amp[1], c.lam[1], ph + 1.3, W, H), st.col.mid);
+    fillPoly(ctx, wavePoints(p, 0, c.amp[2], c.lam[2], ph + 2.6, W, H), st.grad);
 }
 
 function later(st, fn, ms) {
@@ -136,7 +178,7 @@ function tween(st, from, to, ms, done) {
         }
         const k = Math.min(1, (now - t0) / ms);
         st.p = from + (to - from) * ease(k);
-        applyWave(st, st.p);
+        drawWave(st, st.p);
         if (k < 1) {
             st.raf = requestAnimationFrame(step);
         } else if (done) {
@@ -150,7 +192,6 @@ function cancel(st) {
     st.dead = true;
     cancelAnimationFrame(st.raf);
     st.timers.forEach(clearTimeout);
-    removeLayers(st);
 }
 
 // Iconos y buscador: aparecen en cascada cuando la ola ya pasó
@@ -158,7 +199,7 @@ function hideContent(st) {
     st.items = [];
     st.blocks = [];
     Array.from(st.box.children).forEach((ch) => {
-        if (ch.classList.contains("dkw-flies")) {
+        if (ch.tagName === "CANVAS") {
             return;
         }
         if (ch.classList.contains("o-app-menu-list")) {
@@ -205,7 +246,7 @@ function startFlies(st) {
     const cv = document.createElement("canvas");
     cv.className = "dkw-flies";
     cv.setAttribute("aria-hidden", "true");
-    const dpr = Math.min(window.devicePixelRatio || 1, 1.5);
+    const dpr = Math.min(window.devicePixelRatio || 1, c.dpr);
     cv.width = Math.max(1, Math.round(rect.width * dpr));
     cv.height = Math.max(1, Math.round(rect.height * dpr));
     cv.style.cssText =
@@ -287,7 +328,11 @@ function onOpen(box) {
     if (rect.width < 50 || rect.height < 50) {
         return;
     }
-    rects.set(box, { top: rect.top, left: rect.left, width: rect.width, height: rect.height });
+    const m = {
+        rect: { top: rect.top, left: rect.left, width: rect.width, height: rect.height },
+        col: readColors(box), // antes de volver transparente el fondo
+    };
+    meta.set(box, m);
     if (reduced()) {
         box.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160 });
         return;
@@ -296,7 +341,8 @@ function onOpen(box) {
     const ms = Math.round(1000 * c.speed);
     const st = {
         box: box,
-        rect: rects.get(box),
+        rect: m.rect,
+        col: m.col,
         c: c,
         p: 0,
         raf: 0,
@@ -306,9 +352,12 @@ function onOpen(box) {
         items: [],
         blocks: [],
     };
+    if (!ensureWave(st)) {
+        return;
+    }
     current = st;
-    makeLayers(st);
-    applyWave(st, 0); // se oculta antes del primer dibujo: sin parpadeo
+    box.style.background = "transparent"; // el fondo lo pone la ola mientras avanza
+    drawWave(st, 0); // se oculta antes del primer dibujo: sin parpadeo
     startFlies(st);
     hideContent(st);
     later(st, () => {
@@ -317,9 +366,8 @@ function onOpen(box) {
     }, ms * 0.5);
     later(st, () => clearContent(st), ms * 0.5 + 1500);
     tween(st, 0, 1, ms, () => {
-        box.style.clipPath = "";
-        box.style.webkitClipPath = "";
-        removeLayers(st);
+        box.style.background = ""; // vuelve el fondo real del menú, idéntico al que dibujó la ola
+        st.cv.remove();
         st.dead = true;
         if (current === st) {
             current = null;
@@ -330,8 +378,8 @@ function onOpen(box) {
 // Al cerrarse, Odoo quita el menú de golpe. Lo recuperamos (ya está desconectado) y lo
 // usamos de "fantasma" mientras la ola se retira y deja ver el módulo elegido.
 function onClose(box, root) {
-    const rect = rects.get(box);
-    if (!rect || disabled() || reduced()) {
+    const m = meta.get(box);
+    if (!m || disabled() || reduced()) {
         return;
     }
     let p0 = 1;
@@ -340,9 +388,9 @@ function onClose(box, root) {
         cancel(current);
         current = null;
     }
-    const cv = box.querySelector("canvas.dkw-flies");
-    if (cv) {
-        cv.remove();
+    const fl = box.querySelector("canvas.dkw-flies");
+    if (fl) {
+        fl.remove();
     }
     const c = cfg();
     const wrap = document.createElement("div");
@@ -352,7 +400,7 @@ function onClose(box, root) {
         wrap.setAttribute("data-theme", theme);
     }
     wrap.style.cssText =
-        "top:" + rect.top + "px;left:" + rect.left + "px;width:" + rect.width + "px;height:" + rect.height + "px;";
+        "top:" + m.rect.top + "px;left:" + m.rect.left + "px;width:" + m.rect.width + "px;height:" + m.rect.height + "px;";
     document.body.appendChild(wrap);
     wrap.appendChild(box);
     box.style.setProperty("position", "absolute", "important");
@@ -365,29 +413,36 @@ function onClose(box, root) {
 
     const st = {
         box: box,
-        rect: rect,
+        rect: m.rect,
+        col: m.col,
         c: c,
         p: p0,
         raf: 0,
         dead: false,
         timers: [],
     };
-    makeLayers(st);
-    applyWave(st, p0);
     const fade = p0 > 0.9 ? 160 : 0;
     if (fade) {
         Array.from(box.children).forEach((ch) => {
-            ch.style.transition = "opacity .16s ease";
-            ch.style.opacity = "0";
+            if (ch.tagName !== "CANVAS") {
+                ch.style.transition = "opacity .16s ease";
+                ch.style.opacity = "0";
+            }
         });
     }
+    const finish = () => {
+        st.dead = true;
+        wrap.remove();
+    };
     later(st, () => {
+        if (!ensureWave(st)) {
+            finish();
+            return;
+        }
+        box.style.background = "transparent"; // desde aquí el fondo lo pone la ola mientras se retira
+        drawWave(st, p0);
         const ms = Math.max(350, Math.round(1000 * c.speed * 0.9 * Math.max(p0, 0.4)));
-        tween(st, p0, 0, ms, () => {
-            st.dead = true;
-            removeLayers(st);
-            wrap.remove();
-        });
+        tween(st, p0, 0, ms, finish);
     }, fade);
 }
 
