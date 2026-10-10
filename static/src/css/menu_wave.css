@@ -1,0 +1,27 @@
+/* Animación del menú de apps (ola + luciérnagas). Ver static/src/js/menu_wave.js */
+
+.dkw-layer {
+    position: fixed;
+    pointer-events: none;
+    will-change: clip-path;
+}
+.dkw-back {
+    z-index: 998;
+}
+.dkw-mid {
+    z-index: 999;
+}
+
+/* Copia del menú que se queda mientras la ola se retira */
+.dkw-ghost {
+    position: fixed;
+    z-index: 1000;
+    pointer-events: none;
+}
+
+/* Luciérnagas: detrás de los iconos, encima del fondo del menú */
+.app-menu-container > canvas.dkw-flies {
+    position: fixed;
+    z-index: -1;
+    pointer-events: none;
+}
