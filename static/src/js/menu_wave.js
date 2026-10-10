@@ -44,6 +44,43 @@ function cfg() {
     return { amp: [70, 62, 54], lam: [360, 420, 480], flies: 26, speed: 1, core: 1.8, dpr: 1.5 };
 }
 
+// Diagnóstico (apagado por defecto): localStorage.setItem("dkw_debug", "1") muestra abajo a la
+// izquierda una bitácora con los tiempos del cierre y dónde están los buscadores del menú.
+function dbgOn() {
+    try {
+        return window.localStorage.getItem("dkw_debug") === "1";
+    } catch (e) {
+        return false;
+    }
+}
+let dbgEl = null;
+const dbgT0 = performance.now();
+function dbg(msg) {
+    if (!dbgOn()) {
+        return;
+    }
+    if (!dbgEl) {
+        dbgEl = document.createElement("pre");
+        dbgEl.style.cssText =
+            "position:fixed;left:4px;bottom:4px;z-index:99999;max-width:96vw;max-height:45vh;overflow:auto;" +
+            "margin:0;padding:6px 8px;background:rgba(0,0,0,.85);color:#9f9;font:11px/1.35 monospace;pointer-events:none";
+        document.body.appendChild(dbgEl);
+    }
+    dbgEl.textContent += ((performance.now() - dbgT0) | 0) + "ms " + msg + "\n";
+}
+function dbgScan(tag) {
+    if (!dbgOn()) {
+        return;
+    }
+    const found = Array.from(document.querySelectorAll(".search-container, .o_grid_apps_menu .search-input")).map((el) => {
+        const where = el.closest(".dkw-ghost") ? "fantasma" : el.closest(".app-menu-container") ? "menu" : "OTRO";
+        const cs = window.getComputedStyle(el);
+        const r = el.getBoundingClientRect();
+        return where + "(op=" + cs.opacity + ",vis=" + cs.visibility + ",y=" + (r.top | 0) + ",h=" + (r.height | 0) + ")";
+    });
+    dbg(tag + ": buscadores=" + (found.length ? found.join(" ") : "ninguno") + " | fantasmas=" + document.querySelectorAll(".dkw-ghost").length);
+}
+
 function ease(k) {
     return k < 0.5 ? 4 * k * k * k : 1 - Math.pow(-2 * k + 2, 3) / 2;
 }
@@ -337,6 +374,7 @@ function onOpen(box) {
         col: readColors(box), // antes de volver transparente el fondo
     };
     meta.set(box, m);
+    dbg("apertura: menú insertado " + Math.round(rect.width) + "x" + Math.round(rect.height));
     if (reduced()) {
         box.animate([{ opacity: 0 }, { opacity: 1 }], { duration: 160 });
         return;
@@ -427,20 +465,27 @@ function onClose(box, root) {
         dead: false,
         timers: [],
     };
-    const fade = p0 > 0.9 ? 160 : 0;
+    // Contenido del menú (buscador, iconos): se desvanece y luego se QUITA del fantasma, para que
+    // nada de él pueda quedarse a la vista mientras la ola se retira.
+    const kids = Array.from(box.children).filter((ch) => ch.tagName !== "CANVAS");
+    const fade = p0 > 0.9 ? 200 : 0;
     if (fade) {
-        Array.from(box.children).forEach((ch) => {
-            if (ch.tagName !== "CANVAS") {
-                ch.style.transition = "opacity .16s ease";
-                ch.style.opacity = "0";
-            }
+        void box.offsetWidth; // fuerza el cálculo de estilos: sin esto la transición no corre y se oculta de golpe
+        kids.forEach((ch) => {
+            ch.style.transition = "opacity .2s ease";
+            ch.style.opacity = "0";
         });
     }
+    dbg("cierre: fantasma creado, p0=" + p0.toFixed(2) + ", desvanecer " + fade + "ms");
+    [0, 250, 700, 1300, 2200].forEach((ms) => setTimeout(() => dbgScan("cierre +" + ms + "ms"), ms));
     const finish = () => {
         st.dead = true;
         wrap.remove();
+        dbg("cierre: fantasma retirado");
     };
     later(st, () => {
+        kids.forEach((ch) => ch.remove());
+        dbg("cierre: contenido quitado, empieza la retirada de la ola");
         if (!ensureWave(st)) {
             finish();
             return;
