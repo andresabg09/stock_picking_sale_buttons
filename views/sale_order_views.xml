@@ -16,7 +16,7 @@
             <!-- Botón para enviar manualmente a Dianke (solo si ya está confirmada) -->
             <xpath expr="//header/button[@name='action_confirm']" position="after">
                 <button name="action_send_dianke_export_now" string="Enviar a Dianke ahora" type="object"
-                        invisible="state != 'sale'" class="btn-secondary" data-hotkey="d"/>
+                        invisible="state != 'sale'" class="btn-secondary" data-hotkey="k"/>
             </xpath>
 
             <!-- Aviso de envío a Dianke: visible de inmediato al abrir la orden -->
