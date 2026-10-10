@@ -208,11 +208,15 @@ function hideContent(st) {
             st.blocks.push(ch);
         }
     });
+    // "transition: none" es clave: los iconos de web_responsive traen una transición de 0,3 s sobre
+    // todas sus propiedades, y sin esto se verían un instante antes de desvanecerse (destello).
     st.items.forEach((el) => {
+        el.style.transition = "none";
         el.style.opacity = "0";
         el.style.transform = "translateY(14px) scale(0.92)";
     });
     st.blocks.forEach((el) => {
+        el.style.transition = "none";
         el.style.opacity = "0";
     });
 }
@@ -356,6 +360,7 @@ function onOpen(box) {
         return;
     }
     current = st;
+    box.style.transition = "none";
     box.style.background = "transparent"; // el fondo lo pone la ola mientras avanza
     drawWave(st, 0); // se oculta antes del primer dibujo: sin parpadeo
     startFlies(st);
@@ -367,6 +372,7 @@ function onOpen(box) {
     later(st, () => clearContent(st), ms * 0.5 + 1500);
     tween(st, 0, 1, ms, () => {
         box.style.background = ""; // vuelve el fondo real del menú, idéntico al que dibujó la ola
+        box.style.transition = "";
         st.cv.remove();
         st.dead = true;
         if (current === st) {
