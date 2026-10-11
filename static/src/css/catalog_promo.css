@@ -1,9 +1,85 @@
-/* Catálogo de productos de Ventas: leyenda de promoción en vivo (ver static/src/js/catalog_promo.js) */
-.dk-catalog-promo {
-    margin-top: 0.35rem;
-    padding: 0.2rem 0.55rem;
+/* Catálogo de productos de Ventas: orden de la tarjeta, existencias y leyenda de promoción en vivo
+   (ver static/src/js/catalog_promo.js y views/product_catalog_views.xml). */
+
+/* --- Tarjeta: texto a la izquierda (ocupa lo que sobre) e imagen a la derecha, más chica --- */
+.dk-catalog-card {
+    gap: 0.5rem;
+    align-items: flex-start;
+}
+.dk-catalog-card > div:first-child {
+    flex: 1 1 0;
+    min-width: 0;
+    padding-right: 0 !important;
+}
+/* Nombre del producto: más chico para que no se parta letra por letra */
+.dk-catalog-card [name="name"] {
+    font-size: 1.05rem !important;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+.dk-catalog-card .o_product_catalog_price {
+    font-size: 0.9rem;
+}
+
+/* Imagen: 120 px en computadora, 88 px en celular (antes 200 px, que dejaba el texto sin espacio) */
+.dk-catalog-img {
+    flex: 0 0 120px;
+    width: 120px;
+    height: 120px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+.o_kanban_record .dk-catalog-img div[name="image_512"],
+.o_kanban_record .dk-catalog-img div[name="image_512"] .d-inline-block,
+.o_kanban_record .dk-catalog-img div[name="image_512"] img {
+    width: 100% !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    object-fit: contain !important;
+}
+@media (max-width: 767.98px) {
+    .dk-catalog-img {
+        flex-basis: 88px;
+        width: 88px;
+        height: 88px;
+    }
+    .dk-catalog-card [name="name"] {
+        font-size: 1rem !important;
+    }
+}
+
+/* --- Existencias: una etiqueta corta, sin partirse --- */
+.dk-stock-badge {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
     border-radius: 6px;
     font-size: 0.85rem;
+    font-weight: 600;
+    line-height: 1.3;
+    white-space: nowrap;
+}
+.dk-stock-danger {
+    background: #fde4e4;
+    color: #9b1c1c;
+}
+.dk-stock-warning {
+    background: #fff1d6;
+    color: #7a4b00;
+}
+.dk-stock-success {
+    background: #e3f5ea;
+    color: #14633a;
+}
+
+/* --- Leyenda de promoción (la misma de la columna Promo de la cotización) --- */
+.dk-catalog-promo {
+    margin-top: 0.25rem;
+    padding: 0.2rem 0.55rem;
+    border-radius: 6px;
+    font-size: 0.8rem;
     font-weight: 600;
     line-height: 1.3;
     width: fit-content;

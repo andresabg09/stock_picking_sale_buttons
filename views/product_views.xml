@@ -28,7 +28,7 @@
         <field name="inherit_id" ref="product.product_view_kanban_catalog"/>
         <field name="arch" type="xml">
             <xpath expr="//field[@name='image_128']" position="replace">
-                <div style="width:200px;height:200px;flex-shrink:0;display:flex;align-items:center;justify-content:center;overflow:hidden;">
+                <div class="dk-catalog-img">
                     <field name="image_512" widget="image" options="{'img_class': 'mw-100 mh-100 object-fit-contain'}" alt="Product" invisible="not image_512"/>
                 </div>
             </xpath>

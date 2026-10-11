@@ -1,8 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <odoo>
     <!-- Catálogo de productos (botón "Catálogo" de Ventas): en vez de "En mano" (lo que hay en bodega,
-         sin restar lo ya prometido a otros pedidos) se muestra lo DISPONIBLE (libre). Además deja un
-         espacio para la leyenda de promoción en vivo (ver static/src/js/catalog_promo.js). -->
+         sin restar lo ya prometido a otros pedidos) se muestra lo DISPONIBLE (libre), en una línea
+         corta (ver models/product_stock_label.py). Además deja un espacio para la leyenda de promoción
+         en vivo (ver static/src/js/catalog_promo.js) y marca la tarjeta con una clase para ordenarla
+         en computadora y celular (static/src/css/catalog_promo.css). -->
     <record id="view_product_kanban_catalog_free_qty" model="ir.ui.view">
         <field name="name">product.view.kanban.catalog.inherit.free.qty</field>
         <field name="model">product.product</field>
@@ -10,16 +12,22 @@
         <field name="priority">20</field>
         <field name="arch" type="xml">
             <field name="is_storable" position="after">
-                <field name="free_qty"/>
-                <field name="qty_available"/>
+                <field name="dk_stock_label"/>
+                <field name="dk_stock_tone"/>
+                <field name="dk_stock_extra"/>
             </field>
+            <xpath expr="//t[@t-name='card']/div" position="attributes">
+                <attribute name="class" add="dk-catalog-card" separator=" "/>
+            </xpath>
             <xpath expr="//div[@name='o_kanban_qty_available']" position="replace">
-                <div t-if="record.is_storable.raw_value" name="o_kanban_qty_available" class="mt-1">
-                    <span t-attf-class="badge {{ record.free_qty.raw_value &lt;= 0 ? 'text-bg-danger' : (record.free_qty.raw_value &lt;= 5 ? 'text-bg-warning' : 'text-bg-success') }}">
-                        <t t-if="record.free_qty.raw_value &lt;= 0">Sin existencia</t>
-                        <t t-else="">Disponible: <field name="free_qty"/></t>
+                <div t-if="record.is_storable.raw_value" name="o_kanban_qty_available"
+                     class="d-flex flex-column align-items-start gap-1 mt-1">
+                    <span t-attf-class="dk-stock-badge dk-stock-{{ record.dk_stock_tone.raw_value }}">
+                        <field name="dk_stock_label"/>
                     </span>
-                    <span class="text-muted ms-2 small">En bodega: <field name="qty_available"/></span>
+                    <span t-if="record.dk_stock_extra.raw_value" class="text-muted small">
+                        <field name="dk_stock_extra"/>
+                    </span>
                 </div>
                 <div name="o_kanban_promo" t-attf-id="product-{{record.id.raw_value}}-promo"/>
             </xpath>
