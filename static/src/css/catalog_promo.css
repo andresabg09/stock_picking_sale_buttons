@@ -1,54 +1,15 @@
-/* Catálogo de productos de Ventas: orden de la tarjeta, existencias y leyenda de promoción en vivo
+/* Catálogo de productos de Ventas: foto, existencias y leyenda de promoción en vivo
    (ver static/src/js/catalog_promo.js y views/product_catalog_views.xml). */
 
-/* --- Tarjeta: texto a la izquierda (ocupa lo que sobre) e imagen a la derecha, más chica --- */
-.dk-catalog-card {
-    gap: 0.5rem;
-    align-items: flex-start;
-}
-.dk-catalog-card > div:first-child {
-    flex: 1 1 0;
-    min-width: 0;
-    padding-right: 0 !important;
-}
-/* Nombre del producto: más chico para que no se parta letra por letra */
-.dk-catalog-card [name="name"] {
-    font-size: 1.05rem !important;
-    line-height: 1.25;
-    overflow-wrap: anywhere;
-}
-.dk-catalog-card .o_product_catalog_price {
-    font-size: 0.9rem;
-}
-
-/* Imagen: 120 px en computadora, 88 px en celular (antes 200 px, que dejaba el texto sin espacio) */
+/* --- Foto del producto: se queda en 200 x 200 px (así se vende; NO achicar) --- */
 .dk-catalog-img {
-    flex: 0 0 120px;
-    width: 120px;
-    height: 120px;
+    flex: 0 0 200px;
+    width: 200px;
+    height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
-}
-.o_kanban_record .dk-catalog-img div[name="image_512"],
-.o_kanban_record .dk-catalog-img div[name="image_512"] .d-inline-block,
-.o_kanban_record .dk-catalog-img div[name="image_512"] img {
-    width: 100% !important;
-    height: 100% !important;
-    max-width: 100% !important;
-    max-height: 100% !important;
-    object-fit: contain !important;
-}
-@media (max-width: 767.98px) {
-    .dk-catalog-img {
-        flex-basis: 88px;
-        width: 88px;
-        height: 88px;
-    }
-    .dk-catalog-card [name="name"] {
-        font-size: 1rem !important;
-    }
 }
 
 /* --- Existencias: una etiqueta corta, sin partirse --- */
