@@ -1,15 +1,125 @@
-/* Catálogo de productos de Ventas: foto, existencias y leyenda de promoción en vivo
-   (ver static/src/js/catalog_promo.js y views/product_catalog_views.xml). */
+/* Catálogo de productos de Ventas: orden de la tarjeta, existencias y leyenda de promoción en vivo.
+   Diseño aprobado por Andrés (2026-10-11), lienzo "Catálogo de Ventas — Propuesta de orden".
+   Ver static/src/js/catalog_promo.js, static/src/xml/catalog_promo.xml y views/product_catalog_views.xml.
 
-/* --- Foto del producto: se queda en 200 x 200 px (así se vende; NO achicar) --- */
+   LA FOTO SE QUEDA EN 200 x 200 px en computadora, tablet y celular (es lo esencial de la venta): NO achicar.
+
+   Orden de la tarjeta (igual en los tres tamaños; Odoo reparte solo 4 / 2 / 1 tarjetas por fila):
+     1. nombre completo de lado a lado   2. foto a la izquierda, precio y existencia a la derecha
+     3. leyenda de promoción de lado a lado   4. botones grandes de lado a lado */
+
+/* --- 1 y 2: la tarjeta pasa a una cuadrícula (la columna de texto se "deshace" con display: contents,
+   así sus piezas se acomodan solas sin tocar los ids que usan los portales de Odoo) --- */
+.o_kanban_record .dk-catalog-card.d-flex {
+    display: grid !important;
+    grid-template-columns: 200px minmax(0, 1fr);
+    column-gap: 12px;
+    row-gap: 6px;
+    align-items: start;
+    align-content: start;
+}
+.dk-catalog-card > div:first-child {
+    display: contents !important; /* gana a .d-flex (que Bootstrap fuerza con !important) */
+}
+/* nombre (con la estrella) */
+.dk-catalog-card > div:first-child > div:first-child {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    min-width: 0;
+}
+.dk-catalog-card [name="name"] {
+    font-size: 1.1rem !important;
+    line-height: 1.25;
+    overflow-wrap: anywhere;
+}
+/* foto: ocupa las filas 2 a 5 de la izquierda */
 .dk-catalog-img {
-    flex: 0 0 200px;
+    grid-column: 1;
+    grid-row: 2 / span 4;
     width: 200px;
     height: 200px;
     display: flex;
     align-items: center;
     justify-content: center;
     overflow: hidden;
+}
+/* derecha: precio, existencia, código y atributos, uno debajo del otro */
+.dk-catalog-card [name="o_kanban_price"] {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+}
+.dk-catalog-card [name="o_kanban_qty_available"] {
+    grid-column: 2;
+    grid-row: 3;
+    min-width: 0;
+}
+.dk-catalog-card > div:first-child > div:not([name]):not(:first-child) {
+    grid-column: 2;
+    grid-row: 4;
+    min-width: 0;
+    font-size: 0.85rem;
+    color: #6b7280;
+}
+.dk-catalog-card [name="product_template_attribute_value_ids"] {
+    grid-column: 2;
+    grid-row: 5;
+    min-width: 0;
+}
+/* promoción: de lado a lado, debajo de la foto */
+.dk-catalog-card [name="o_kanban_promo"] {
+    grid-column: 1 / -1;
+    grid-row: 6;
+    min-width: 0;
+}
+.dk-catalog-card [name="o_kanban_promo"]:empty {
+    display: none;
+}
+
+/* Precio: etiqueta chica y precio grande */
+.dk-price-label {
+    font-size: 0.8rem;
+    color: #6b7280;
+    line-height: 1.2;
+}
+.dk-price-value {
+    font-size: 1.45rem;
+    font-weight: 800;
+    line-height: 1.15;
+    color: #2d2650;
+}
+
+/* --- 4: botones grandes de lado a lado (solo en tarjetas con este orden) --- */
+.o_kanban_record:has(.dk-catalog-card) .o_product_catalog_buttons {
+    flex: 1 1 100%;
+    min-width: 0 !important;
+}
+.o_kanban_record:has(.dk-catalog-card) .o_product_catalog_buttons .btn {
+    height: 46px;
+    font-size: 1rem;
+    font-weight: 700;
+    width: 100%;
+}
+.o_kanban_record:has(.dk-catalog-card) .o_product_catalog_quantity {
+    flex: 1 1 0;
+    width: auto !important;
+}
+.o_kanban_record:has(.dk-catalog-card) .o_product_catalog_quantity .btn,
+.o_kanban_record:has(.dk-catalog-card) .o_product_catalog_quantity .form-control {
+    height: 46px;
+    font-size: 1.15rem;
+    font-weight: 700;
+}
+.o_kanban_record:has(.dk-catalog-card) .o_product_catalog_quantity .btn {
+    min-width: 54px;
+}
+/* con el − cantidad + a la izquierda, "Quitar" queda al lado, de tamaño justo */
+.o_kanban_record:has(.dk-catalog-card) .o_product_catalog_quantity ~ .o_product_catalog_buttons {
+    flex: 0 0 auto;
+    margin-left: 8px;
+}
+.o_kanban_record:has(.dk-catalog-card) .o_product_catalog_quantity ~ .o_product_catalog_buttons .btn {
+    width: auto;
 }
 
 /* --- Existencias: una etiqueta corta, sin partirse --- */
@@ -18,7 +128,7 @@
     padding: 0.15rem 0.55rem;
     border-radius: 6px;
     font-size: 0.85rem;
-    font-weight: 600;
+    font-weight: 700;
     line-height: 1.3;
     white-space: nowrap;
 }
@@ -37,14 +147,11 @@
 
 /* --- Leyenda de promoción (la misma de la columna Promo de la cotización) --- */
 .dk-catalog-promo {
-    margin-top: 0.25rem;
-    padding: 0.2rem 0.55rem;
+    padding: 0.35rem 0.6rem;
     border-radius: 6px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    line-height: 1.3;
-    width: fit-content;
-    max-width: 100%;
+    font-size: 0.85rem;
+    font-weight: 700;
+    line-height: 1.35;
 }
 .dk-catalog-promo.is-ok {
     background: #e3f5ea;
