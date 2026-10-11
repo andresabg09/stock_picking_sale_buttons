@@ -21,4 +21,5 @@ class DkhPreview(http.Controller):
             response.delete_cookie(COOKIE)
         else:
             response.set_cookie(COOKIE, '1', max_age=ONE_MONTH, httponly=True, samesite='Lax')
+            response.delete_cookie('dki_preview')  # la H y la I no pueden estar encendidas a la vez en un navegador
         return response

@@ -12,13 +12,18 @@ class Website(models.Model):
         """¿Esta visita ve la Versión I (diseño anterior refinado, con las funciones de la H)?
 
         Para todos si `dki.enabled` vale 1; solo para quien entró por /dki (cookie `dki_preview`).
-        La Versión I usa la misma estructura y funciones que la H (clase `dkh`) con otra "piel" (`dki`)."""
-        if self.env['ir.config_parameter'].sudo().get_param('dki.enabled') == '1':
-            return True
+        La Versión I usa la misma estructura y funciones que la H (clase `dkh`) con otra "piel" (`dki`).
+        Excepción: quien entró por /dkh (cookie `dkh_preview`) ve la H aunque la I esté encendida para
+        todos; así se puede revisar la H en su navegador sin tocar lo que ven los clientes."""
         try:
-            return bool(request and request.httprequest.cookies.get('dki_preview') == '1')
-        except RuntimeError:
+            cookies = request.httprequest.cookies if request else {}
+        except RuntimeError:  # fuera de una petición web (cron, shell)
+            cookies = {}
+        if cookies.get('dki_preview') == '1':
+            return True
+        if cookies.get(COOKIE) == '1':
             return False
+        return self.env['ir.config_parameter'].sudo().get_param('dki.enabled') == '1'
 
     def dkh_active(self):
         """¿Esta visita ve la estructura nueva (encabezado, menú app, funciones)?
