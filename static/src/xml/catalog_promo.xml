@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- Catálogo de Ventas: leyenda de promoción dentro de la tarjeta del producto (debajo del precio y de
+         "Disponible"). Se dibuja en el espacio `product-ID-promo` que deja la vista
+         views/product_catalog_views.xml, igual que Odoo hace con el precio. -->
+    <t t-name="stock_picking_sale_buttons.ProductCatalogOrderLinePromo"
+       t-inherit="product.ProductCatalogOrderLine" t-inherit-mode="extension">
+        <xpath expr="//t[@t-portal]" position="after">
+            <t t-portal="`#product-${props.productId}-promo`" t-if="promoText">
+                <div t-attf-class="dk-catalog-promo {{ promoClass }}" t-out="promoText"/>
+            </t>
+        </xpath>
+    </t>
+</templates>

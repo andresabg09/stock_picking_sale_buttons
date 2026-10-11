@@ -4,3 +4,4 @@ from . import shop_suggest
 from . import dkh_preview
 from . import dkh_checkout
 from . import dki_preview
+from . import catalog_promo
