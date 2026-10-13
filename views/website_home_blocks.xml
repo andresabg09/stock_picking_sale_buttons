@@ -10,7 +10,7 @@
         <div class="dk-cats">
             <t t-foreach="dk_top" t-as="c">
                 <t t-set="dk_cp" t-value="request.env['product.template'].search([('public_categ_ids', 'child_of', c.id), ('is_published', '=', True), ('sale_ok', '=', True), ('image_128', '!=', False)], limit=1)"/>
-                <a class="dk-cat" t-attf-href="/shop/category/#{c.id}"><i><img t-if="dk_cp" t-att-src="website.image_url(dk_cp, 'image_256')" alt="" loading="lazy"/></i><span t-out="(c.name or '').strip()"/></a>
+                <a class="dk-cat" t-attf-href="/shop/category/#{c.id}"><i><img t-if="dk_cp" t-att-src="website.image_url(dk_cp, 'image_256')" t-att-alt="'%s al por mayor en Panamá' % (c.name or '').strip()" loading="lazy"/></i><span t-out="(c.name or '').strip()"/></a>
             </t>
         </div>
     </template>

@@ -1133,3 +1133,19 @@ header#top .dk-hsearch .dk-hsearch-btn {
         gap: 10px;
     }
 }
+
+/* Texto del Inicio para el cliente mayorista (SEO). */
+#dk-home .dk-seo {
+    margin: 24px 0;
+    text-align: center;
+}
+#dk-home .dk-seo h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin: 0 0 6px;
+}
+#dk-home .dk-seo p {
+    margin: 0 auto;
+    max-width: 720px;
+    color: #4b5563;
+}
