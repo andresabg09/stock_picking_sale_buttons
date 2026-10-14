@@ -1,10 +1,15 @@
 /** @odoo-module **/
 
-// Cámara del log (chatter) de TODOS los documentos de Odoo (pedidos, órdenes de venta, entregas, compras…):
-// varias fotos y videos seguidos, subidos de un solo golpe, y sin perder nada si falla el internet.
+// Adjuntar fotos y videos en el log (chatter) de TODOS los documentos de Odoo (pedidos, órdenes de venta, entregas,
+// compras…): rápido, varias seguidas, y sin perder nada si falla el internet.
 //
-//  * Un solo botón "Cámara" junto a los botones del log. Abre una cámara en vivo: un toque = foto, el otro botón
-//    graba video (máx. 60 s). Las miniaturas se acumulan abajo y "Subir todo" las manda juntas.
+//  * EL CLIP DE SIEMPRE (v18.0.5.3.0): se queda igual para el usuario (mismo clip, misma cámara/carrete/video del
+//    teléfono). Lo que cambia es lo de adentro: Odoo convertía cada archivo a base64 (lento y pesado en el teléfono)
+//    y lo subía de uno en uno bloqueando la pantalla. Ahora los archivos ORIGINALES entran de golpe a una cola
+//    guardada en el teléfono y suben en segundo plano: puedes volver a pulsar el clip y tomar la siguiente foto
+//    enseguida, o elegir varias del carrete a la vez.
+//  * Opcional, dentro de la caja "Archivos": «Cámara (varias fotos seguidas)», una cámara en vivo con ráfaga: un
+//    toque = foto, otro botón graba video (máx. 60 s), las miniaturas se acumulan y "Subir todo" las manda juntas.
 //  * RESOLUCIÓN MÁXIMA, sin reducir nada: la foto sale a la resolución completa del sensor cuando el navegador
 //    lo permite (ImageCapture), si no a la mayor que entregue la cámara en vivo, en JPEG calidad 0,97. Además
 //    hay un botón para usar la cámara del teléfono (resolución completa en cualquier celular).
@@ -20,6 +25,7 @@ import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
 import { Chatter } from "@mail/chatter/web_portal/chatter";
+import { FileUploader } from "@web/views/fields/file_handler";
 
 const MAX_VIDEO_SECONDS = 60;
 const RETRY_DELAYS = [5, 15, 30, 60, 120, 300]; // segundos
@@ -92,6 +98,21 @@ let nameCounter = 0;
 function makeName(kind, mime) {
     nameCounter += 1;
     return `${kind === "video" ? "Video" : "Foto"} ${stamp()} #${nameCounter}.${extensionFor(mime)}`;
+}
+
+// Foto/video que viene del clip (cámara o carrete del teléfono): se renombra con la fecha y hora en que se tomó
+// (lastModified); los demás archivos (PDF, Excel…) conservan su nombre.
+function nativeName(file) {
+    const kind = file.type.startsWith("video") ? "video" : file.type.startsWith("image") ? "photo" : null;
+    if (!kind) {
+        return { kind: "file", name: file.name };
+    }
+    nameCounter += 1;
+    const when = file.lastModified ? new Date(file.lastModified) : new Date();
+    return {
+        kind,
+        name: `${kind === "video" ? "Video" : "Foto"} ${stamp(when)} #${nameCounter}.${extensionFor(file.type)}`,
+    };
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -457,12 +478,30 @@ export class DkCameraDialog extends Component {
 }
 
 // ---------------------------------------------------------------------------------------------
-// Botón "Cámara" en el log de todos los documentos
+// El clip del log: archivos originales -> cola guardada en el teléfono -> subida en segundo plano
 // ---------------------------------------------------------------------------------------------
+FileUploader.props = { ...FileUploader.props, dkRawFiles: { type: Function, optional: true } };
+
+patch(FileUploader.prototype, {
+    async onFileChange(ev) {
+        if (!this.props.dkRawFiles) {
+            return super.onFileChange(...arguments); // cualquier otro FileUploader de Odoo, sin cambios
+        }
+        const files = [...(ev.target.files || [])];
+        if (!files.length) {
+            return;
+        }
+        // Sin base64, sin esperar la subida: los originales pasan directo a la cola.
+        ev.target.value = null;
+        await this.props.dkRawFiles(files);
+    },
+});
+
 patch(Chatter.prototype, {
     setup() {
         super.setup(...arguments);
-        this.dkCamState = useState(useService("dk_camera").state);
+        this.dkCamService = useService("dk_camera");
+        this.dkCamState = useState(this.dkCamService.state);
         this.dkDialog = useService("dialog");
     },
 
@@ -471,6 +510,25 @@ patch(Chatter.prototype, {
         return thread
             ? this.dkCamState.items.filter((i) => i.model === thread.model && i.resId === thread.id).length
             : 0;
+    },
+
+    // Archivos elegidos/tomados con el clip.
+    async dkQueueFiles(files) {
+        const thread = this.state.thread;
+        if (!thread?.id) {
+            return;
+        }
+        for (const file of files) {
+            const { kind, name } = nativeName(file);
+            await this.dkCamService.add(thread.model, thread.id, file, kind, name);
+        }
+        this.state.isAttachmentBoxOpened = true;
+        // En segundo plano: no se espera, para poder tomar la siguiente foto enseguida.
+        this.dkCamService.flush(thread.model, thread.id).then(({ uploaded }) => {
+            if (uploaded && this.props.hasParentReloadOnAttachmentsChanged) {
+                this.reloadParentView?.();
+            }
+        });
     },
 
     async onClickDkCamera() {

@@ -2,15 +2,30 @@
 <templates xml:space="preserve">
     <!-- Cámara del log: ver static/src/js/dk_camera.js -->
 
-    <!-- Botón "Cámara" junto a los botones del log (entre "Actividades" y la lupa) -->
-    <t t-name="stock_picking_sale_buttons.ChatterDkCamera" t-inherit="mail.Chatter" t-inherit-mode="extension">
-        <xpath expr="//span[hasclass('o-mail-Chatter-topbarGrow')]" position="after">
-            <button class="o-dk-camera-btn btn btn-secondary text-nowrap me-1" t-att-class="{ 'my-2': !props.compactHeight }"
-                    title="Cámara: varias fotos y videos de una vez" t-on-click="onClickDkCamera">
-                <i class="fa fa-camera me-1" role="img"/>
-                <span>Cámara</span>
-                <span t-if="dkCamPending" class="badge text-bg-danger ms-1" t-out="dkCamPending"/>
+    <!-- El clip del log (arriba y "Adjuntar archivos" dentro de la caja): los archivos originales van a la cola
+         del teléfono (dkRawFiles), sin tocar la barra de botones. -->
+    <t t-name="stock_picking_sale_buttons.ChatterDkRawFiles" t-inherit="mail.Chatter" t-inherit-mode="extension">
+        <xpath expr="(//FileUploader)[1]" position="attributes">
+            <attribute name="dkRawFiles">(files) =&gt; this.dkQueueFiles(files)</attribute>
+        </xpath>
+        <xpath expr="(//FileUploader)[2]" position="attributes">
+            <attribute name="dkRawFiles">(files) =&gt; this.dkQueueFiles(files)</attribute>
+        </xpath>
+        <xpath expr="(//FileUploader)[2]" position="after">
+            <button type="button" class="btn btn-link o-dk-camera-link" t-on-click="onClickDkCamera"
+                    t-att-disabled="!state.thread.canPostMessage">
+                <i class="fa fa-camera"/>
+                Cámara (varias fotos seguidas)
             </button>
+        </xpath>
+    </t>
+
+    <!-- Aviso de archivos pendientes sobre el clip -->
+    <t t-name="stock_picking_sale_buttons.ChatterDkClipBadge" t-inherit="mail.Chatter.attachFiles" t-inherit-mode="extension">
+        <xpath expr="//i[hasclass('fa-paperclip')]" position="after">
+            <sup t-if="dkCamPending" class="text-danger fw-bold ms-1" title="Archivos guardados en el teléfono, subiendo">
+                <i class="fa fa-clock-o"/> <t t-out="dkCamPending"/>
+            </sup>
         </xpath>
     </t>
 
