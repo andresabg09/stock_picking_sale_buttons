@@ -6,15 +6,15 @@
 
     <!-- Formulario (diseño A+B aprobado por Andrés 2026-10-14):
          - Cabecera mínima: UN botón principal que cambia según el paso (Pasar a en ruta → Marcar entregado),
-           más Enviar y Pagar de Odoo. Imprimir, Vista previa, Nota de crédito y Restablecer a borrador se
-           ocultan de la cabecera y pasan al menú ⚙ Acciones (acciones de servidor de abajo).
+           más Enviar y Pagar de Odoo. Imprimir, Nota de crédito y Restablecer a borrador se ocultan de la
+           cabecera y pasan al menú ⚙ Acciones (Vista previa se queda como botón gris) (acciones de servidor de abajo).
          - Barra de pasos clicable (En bodega ▸ En ruta ▸ Entregado) arriba del título. -->
     <record id="view_move_form_pedido_state" model="ir.ui.view">
         <field name="name">account.move.form.pedido.state</field>
         <field name="model">account.move</field>
         <field name="inherit_id" ref="account.view_move_form"/>
         <field name="arch" type="xml">
-            <xpath expr="//header/field[@name='state']" position="before">
+            <xpath expr="(//header/button[@name='action_post'])[1]" position="before">
                 <button name="action_dk_to_route" type="object" string="Pasar a en ruta" class="btn-primary"
                         invisible="move_type != 'out_invoice' or state != 'posted' or custom_delivery_state != 'bodega'"/>
                 <button name="action_dk_to_delivered" type="object" string="Marcar entregado" class="btn-primary"
@@ -24,9 +24,6 @@
                 <attribute name="invisible">1</attribute>
             </xpath>
             <xpath expr="(//header/button[@name='action_print_pdf'])[2]" position="attributes">
-                <attribute name="invisible">1</attribute>
-            </xpath>
-            <xpath expr="//header/button[@name='preview_invoice']" position="attributes">
                 <attribute name="invisible">1</attribute>
             </xpath>
             <xpath expr="//header/button[@name='action_reverse']" position="attributes">
@@ -91,7 +88,7 @@
         <field name="name">Pasar a en ruta</field>
         <field name="model_id" ref="account.model_account_move"/>
         <field name="binding_model_id" ref="account.model_account_move"/>
-        <field name="binding_view_types">list,form</field>
+        <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">action = records.action_dk_to_route()</field>
     </record>
@@ -99,7 +96,7 @@
         <field name="name">Marcar como entregado</field>
         <field name="model_id" ref="account.model_account_move"/>
         <field name="binding_model_id" ref="account.model_account_move"/>
-        <field name="binding_view_types">list,form</field>
+        <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">action = records.action_dk_to_delivered()</field>
     </record>
@@ -107,7 +104,7 @@
         <field name="name">Volver a bodega</field>
         <field name="model_id" ref="account.model_account_move"/>
         <field name="binding_model_id" ref="account.model_account_move"/>
-        <field name="binding_view_types">list,form</field>
+        <field name="binding_view_types">list</field>
         <field name="state">code</field>
         <field name="code">action = records.action_dk_to_bodega()</field>
     </record>
@@ -120,14 +117,6 @@
         <field name="binding_view_types">form</field>
         <field name="state">code</field>
         <field name="code">action = records[:1].action_print_pdf()</field>
-    </record>
-    <record id="action_server_pedido_preview" model="ir.actions.server">
-        <field name="name">Vista previa del pedido</field>
-        <field name="model_id" ref="account.model_account_move"/>
-        <field name="binding_model_id" ref="account.model_account_move"/>
-        <field name="binding_view_types">form</field>
-        <field name="state">code</field>
-        <field name="code">action = records[:1].preview_invoice()</field>
     </record>
     <record id="action_server_pedido_credit_note" model="ir.actions.server">
         <field name="name">Crear nota de crédito</field>
