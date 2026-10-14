@@ -52,7 +52,8 @@ class AccountMovePedidoState(models.Model):
         if todo:
             # sudo solo para escribir: el que cambia el estado queda registrado en el chatter (tracking).
             todo.sudo().write({'custom_delivery_state': target})
-        return True
+        # Recarga la pantalla (lista o formulario) para que se vea el estado nuevo.
+        return {'type': 'ir.actions.client', 'tag': 'soft_reload'}
 
     def action_dk_to_route(self):
         return self._dk_move_delivery('ruta', ('bodega',))
@@ -65,3 +66,21 @@ class AccountMovePedidoState(models.Model):
 
     def action_dk_undo_delivery(self):
         return self._dk_move_delivery('ruta', ('entregado',))
+
+    def action_dk_open_route_wizard(self):
+        """Abre la ventana "Armar hoja de ruta" con los pedidos seleccionados. Entran los "En bodega" y
+        los "En ruta" (reintentos: salieron un día y no se pudieron entregar). Los "Entregado" no."""
+        invalid = self.filtered(lambda m: m.move_type != 'out_invoice' or m.state != 'posted'
+                                or m.custom_delivery_state not in ('bodega', 'ruta'))
+        if not self or invalid:
+            raise UserError(_(
+                'Selecciona pedidos "En bodega" o "En ruta" para armar la hoja de ruta.%s',
+                (' No aplica a: %s' % ', '.join(invalid.mapped('name'))) if invalid else ''))
+        return {
+            'type': 'ir.actions.act_window',
+            'name': _('Armar hoja de ruta'),
+            'res_model': 'dk.route.sheet.wizard',
+            'view_mode': 'form',
+            'target': 'new',
+            'context': {'default_move_ids': [(6, 0, self.ids)]},
+        }

@@ -1,0 +1,201 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Hoja de ruta: lista de pedidos que salen a repartirse. Se arma desde la lista de Pedidos
+         (Acción > Armar hoja de ruta), genera un PDF, lo envía por correo y pasa los pedidos
+         "En bodega" a "En ruta". Los "En ruta" que no se pudieron entregar pueden volver a ir. -->
+
+    <!-- Ventana "Armar hoja de ruta" -->
+    <record id="view_dk_route_sheet_wizard_form" model="ir.ui.view">
+        <field name="name">dk.route.sheet.wizard.form</field>
+        <field name="model">dk.route.sheet.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Armar hoja de ruta">
+                <div class="alert alert-info" role="alert">
+                    Al enviar, los pedidos <b>En bodega</b> pasan a <b>En ruta</b>. Los que ya están
+                    <b>En ruta</b> (reintentos) se quedan igual y salen marcados como REINTENTO.
+                </div>
+                <group>
+                    <group>
+                        <field name="route_date"/>
+                        <field name="driver_name" placeholder="Nombre del repartidor"/>
+                    </group>
+                    <group>
+                        <field name="email_to" placeholder="correo@dianke.com, correo2@dianke.com"/>
+                        <field name="email_cc" placeholder="opcional"/>
+                        <field name="subject" placeholder="Se arma solo con la fecha y la cantidad"/>
+                    </group>
+                </group>
+                <field name="body"/>
+                <separator string="Pedidos de esta hoja (quita los que no salgan)"/>
+                <field name="move_ids" nolabel="1">
+                    <list create="false" edit="false">
+                        <field name="name"/>
+                        <field name="partner_id"/>
+                        <field name="amount_total"/>
+                        <field name="custom_pedido_state" widget="badge"
+                               decoration-info="custom_pedido_state == 'bodega'"
+                               decoration-warning="custom_pedido_state == 'ruta'"/>
+                    </list>
+                </field>
+                <footer>
+                    <button name="action_send" string="Enviar y pasar a en ruta" type="object" class="btn-primary"/>
+                    <button name="action_cancel" string="Cancelar" type="object" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <!-- En la lista de Pedidos: Acción > Armar hoja de ruta -->
+    <record id="action_server_pedido_route_sheet" model="ir.actions.server">
+        <field name="name">Armar hoja de ruta</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_dk_open_route_wizard()</field>
+    </record>
+
+    <!-- Hojas de ruta enviadas -->
+    <record id="view_dk_route_sheet_list" model="ir.ui.view">
+        <field name="name">dk.route.sheet.list</field>
+        <field name="model">dk.route.sheet</field>
+        <field name="arch" type="xml">
+            <list string="Hojas de ruta" create="false">
+                <field name="name"/>
+                <field name="date"/>
+                <field name="driver_name"/>
+                <field name="line_count"/>
+                <field name="retry_count"/>
+                <field name="total_to_collect" sum="Total"/>
+                <field name="sent_by"/>
+                <field name="sent_date"/>
+            </list>
+        </field>
+    </record>
+
+    <record id="view_dk_route_sheet_form" model="ir.ui.view">
+        <field name="name">dk.route.sheet.form</field>
+        <field name="model">dk.route.sheet</field>
+        <field name="arch" type="xml">
+            <form string="Hoja de ruta" create="false" edit="false">
+                <sheet>
+                    <div class="oe_title">
+                        <h1><field name="name"/></h1>
+                    </div>
+                    <group>
+                        <group>
+                            <field name="date"/>
+                            <field name="driver_name"/>
+                            <field name="total_to_collect"/>
+                        </group>
+                        <group>
+                            <field name="email_to"/>
+                            <field name="email_cc"/>
+                            <field name="sent_by"/>
+                            <field name="sent_date"/>
+                            <field name="attachment_id"/>
+                        </group>
+                    </group>
+                    <field name="line_ids">
+                        <list>
+                            <field name="sequence" widget="handle"/>
+                            <field name="route_name"/>
+                            <field name="route_order"/>
+                            <field name="partner_id"/>
+                            <field name="move_id"/>
+                            <field name="address" optional="show"/>
+                            <field name="total" sum="Total"/>
+                            <field name="to_collect" sum="Por cobrar"/>
+                            <field name="retry_note"/>
+                        </list>
+                    </field>
+                </sheet>
+                <chatter/>
+            </form>
+        </field>
+    </record>
+
+    <record id="view_dk_route_sheet_search" model="ir.ui.view">
+        <field name="name">dk.route.sheet.search</field>
+        <field name="model">dk.route.sheet</field>
+        <field name="arch" type="xml">
+            <search string="Hojas de ruta">
+                <field name="name"/>
+                <field name="driver_name"/>
+                <field name="line_ids" string="Cliente" filter_domain="[('line_ids.partner_id', 'ilike', self)]"/>
+            </search>
+        </field>
+    </record>
+
+    <record id="action_dk_route_sheet" model="ir.actions.act_window">
+        <field name="name">Hojas de ruta</field>
+        <field name="res_model">dk.route.sheet</field>
+        <field name="view_mode">list,form</field>
+    </record>
+
+    <menuitem id="menu_dk_route_sheet" name="Hojas de ruta" parent="account.menu_finance_receivables"
+              action="action_dk_route_sheet" sequence="25"/>
+
+    <!-- PDF de la hoja de ruta -->
+    <record id="action_report_route_sheet" model="ir.actions.report">
+        <field name="name">Hoja de ruta</field>
+        <field name="model">dk.route.sheet</field>
+        <field name="report_type">qweb-pdf</field>
+        <field name="report_name">stock_picking_sale_buttons.report_route_sheet</field>
+        <field name="report_file">stock_picking_sale_buttons.report_route_sheet</field>
+        <field name="print_report_name">'Hoja de ruta %s' % object.name.replace('/', '-')</field>
+        <field name="binding_model_id" ref="model_dk_route_sheet"/>
+        <field name="binding_type">report</field>
+    </record>
+
+    <template id="report_route_sheet">
+        <t t-call="web.html_container">
+            <t t-foreach="docs" t-as="o">
+                <t t-call="web.internal_layout">
+                    <div class="page" style="font-size: 12px;">
+                        <h2 style="margin-bottom: 4px;">HOJA DE RUTA <span t-field="o.name"/></h2>
+                        <p>
+                            <b>Salida:</b> <span t-field="o.date"/>
+                            &#160;&#160; <b>Repartidor:</b> <span t-out="o.driver_name or '______________________'"/>
+                            &#160;&#160; <b>Hora de salida:</b> ________
+                            &#160;&#160; <b>Regreso:</b> ________
+                        </p>
+                        <table class="table table-sm" style="width: 100%; border-collapse: collapse;">
+                            <thead>
+                                <tr style="background: #e8ebf1;">
+                                    <th style="width: 4%;">#</th>
+                                    <th style="width: 38%;">Cliente y dirección</th>
+                                    <th style="width: 14%;">Pedido</th>
+                                    <th style="width: 11%; text-align: right;">Total</th>
+                                    <th style="width: 13%; text-align: right;">Por cobrar</th>
+                                    <th style="width: 20%;">Entregado / Firma</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <t t-foreach="o.line_ids" t-as="l">
+                                    <tr style="border-bottom: 1px solid #999;">
+                                        <td><span t-out="l_index + 1"/></td>
+                                        <td>
+                                            <b><span t-out="l.partner_id.name"/></b>
+                                            <t t-if="l.route_name"><br/><span style="color: #555;"><span t-out="l.route_name"/><t t-if="l.route_order"> · # <span t-out="l.route_order"/></t></span></t>
+                                            <br/><span t-out="l.address"/>
+                                            <t t-if="l.waze_link"><br/><a t-att-href="l.waze_link">Abrir en Waze</a></t>
+                                            <t t-if="l.is_retry"><br/><b style="color: #b00020;"><span t-out="l.retry_note"/></b></t>
+                                        </td>
+                                        <td><span t-out="l.move_id.name"/></td>
+                                        <td style="text-align: right;"><span t-out="'%.2f' % l.total"/></td>
+                                        <td style="text-align: right;"><b><span t-out="'%.2f' % l.to_collect"/></b></td>
+                                        <td style="height: 46px;">&#160;</td>
+                                    </tr>
+                                </t>
+                            </tbody>
+                        </table>
+                        <p style="text-align: right; font-size: 14px;">
+                            <b>Pedidos: <span t-out="len(o.line_ids)"/> &#160;&#160; Total por cobrar: B/. <span t-out="'%.2f' % o.total_to_collect"/></b>
+                        </p>
+                    </div>
+                </t>
+            </t>
+        </t>
+    </template>
+</odoo>

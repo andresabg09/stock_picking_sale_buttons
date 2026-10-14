@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo noupdate="1">
+    <record id="seq_dk_route_sheet" model="ir.sequence">
+        <field name="name">Hoja de ruta</field>
+        <field name="code">dk.route.sheet</field>
+        <field name="prefix">HR/%(year)s/</field>
+        <field name="padding">4</field>
+    </record>
+</odoo>
