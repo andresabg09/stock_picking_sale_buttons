@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Vista previa / portal de la orden de venta: foto del producto junto al nombre, para que el
+         cliente vea qué está comprando. La imagen va incrustada (qweb_img_raw_data) para que se vea
+         aunque el producto no esté publicado en la tienda, y sale también en el PDF. -->
+    <template id="sale_order_portal_product_image" inherit_id="sale.sale_order_portal_content">
+        <xpath expr="(//td[@id='product_name']/*)[1]" position="before">
+            <span t-if="line.product_id.image_128" class="float-start me-2" style="width: 56px;">
+                <span t-field="line.product_id.image_128"
+                      t-options="{'widget': 'image', 'qweb_img_raw_data': True, 'class': 'img-fluid rounded'}"/>
+            </span>
+        </xpath>
+    </template>
+</odoo>
