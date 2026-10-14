@@ -3,7 +3,7 @@ from odoo import models, fields, api
 class StockPicking(models.Model):
     _inherit = 'stock.picking'
     invoice_count = fields.Integer(
-        string='Facturas',
+        string='Pedidos',
         compute='_compute_invoice_count',
     )
     def action_view_sale_order(self):

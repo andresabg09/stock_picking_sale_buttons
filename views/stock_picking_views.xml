@@ -46,7 +46,7 @@
                     </div>
                 </button>
                 <button name="action_view_invoices" type="object" class="oe_stat_button" icon="fa-pencil-square-o" invisible="invoice_count == 0">
-                    <field name="invoice_count" widget="statinfo" string="Facturas"/>
+                    <field name="invoice_count" widget="statinfo" string="Pedidos"/>
                 </button>
             </div>
         </field>

@@ -68,6 +68,17 @@ redimensionadas en Traslados (`stock.picking`), Ventas (`sale.order`), Facturas
 - Límites: el MCP lee/escribe **datos**, no el código. Cambios al módulo siguen el flujo
   de la regla 1 (commit + push → `deploy.sh` por SSH). Logs y `odoo shell` siguen por SSH.
 
+## Glosario (vocabulario del negocio — Andrés, 2026-10-14)
+Las chicas de la clienta (Dianke) vienen de un sistema donde "factura" las confunde. En la pantalla
+y en las conversaciones: **pedido = factura / facturación** de Odoo (`account.move`, app Facturación →
+ahora "Pedidos"). **Orden** = orden de venta (`sale.order`, app Ventas). "Por generar pedido" = "por
+facturar". Solo cambian los NOMBRES EN PANTALLA; por dentro (modelos, campos, ids, DigiFact) sigue siendo
+factura. Script repetible: `scripts/renombrar_factura_a_pedido.py` (simulacro por defecto, `--apply` tras el
+"sí" de Andrés; hay que volver a correrlo si una actualización de Odoo devuelve algún nombre).
+Estados del pedido (diseño aprobado, Propuesta A+B fusionadas): dos ejes — "dónde está" (En bodega → En
+ruta → Entregado; manual por botón o por lote con "hoja de ruta" PDF+correo) y "cobro" (sale del pago de
+Odoo); Entregado + pagado = "Entregado y cobrado". Se construye por etapas.
+
 ## Errores conocidos SIN resolver
 _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
 - Menores/no bloqueantes (vistos en logs de actualización, no introducidos por este

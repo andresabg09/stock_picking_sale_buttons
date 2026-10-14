@@ -2,9 +2,9 @@
 <odoo>
     <!-- Acción de servidor: traer precios pactados de facturas anteriores
          desde el listado de Contactos (selecciona varios clientes y usa
-         Acción > Traer precios pactados de facturas) -->
+         Acción > Traer precios pactados de pedidos) -->
     <record id="action_server_traer_precios_pactados" model="ir.actions.server">
-        <field name="name">Traer precios pactados de facturas</field>
+        <field name="name">Traer precios pactados de pedidos</field>
         <field name="model_id" ref="base.model_res_partner"/>
         <field name="binding_model_id" ref="base.model_res_partner"/>
         <field name="binding_view_types">list</field>

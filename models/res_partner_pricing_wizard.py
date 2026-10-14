@@ -29,7 +29,7 @@ class ResPartnerPricingWizard(models.TransientModel):
     )
     line_ids = fields.One2many(
         'res.partner.pricing.wizard.line', 'wizard_id',
-        string='Productos facturados a este cliente',
+        string='Productos en pedidos de este cliente',
     )
 
     def _fetch_pricing_lines_for_partner(self, partner):
@@ -222,7 +222,7 @@ class ResPartnerPricingWizardLine(models.TransientModel):
         'res.partner.pricing.wizard', required=True, ondelete='cascade',
     )
     product_id = fields.Many2one('product.product', string='Producto', readonly=True)
-    historial_precios = fields.Char(string='Precios vistos en facturas', readonly=True)
+    historial_precios = fields.Char(string='Precios vistos en pedidos', readonly=True)
     precio_actual = fields.Float(
         string='Ya pactado (actual)', readonly=True, digits='Product Price',
         help='Precio que ya tiene guardado hoy en su lista de precios pactados '

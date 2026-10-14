@@ -227,4 +227,38 @@
             </xpath>
         </field>
     </record>
+
+    <!-- "Factura" -> "Pedido" en la orden de venta: las chicas vienen de un sistema donde "factura" las confunde.
+         Solo cambia el texto en pantalla; los botones y campos siguen siendo los mismos por dentro. -->
+    <record id="view_order_form_pedido_labels" model="ir.ui.view">
+        <field name="name">sale.order.form.pedido.labels</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.view_order_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//button[@id='create_invoice']" position="attributes">
+                <attribute name="string">Generar pedido</attribute>
+            </xpath>
+            <xpath expr="//button[@id='create_invoice_percentage']" position="attributes">
+                <attribute name="string">Generar pedido</attribute>
+            </xpath>
+            <xpath expr="//button[@id='send_proforma_primary']" position="attributes">
+                <attribute name="string">Enviar pedido PROFORMA</attribute>
+            </xpath>
+            <xpath expr="//button[@id='send_proforma']" position="attributes">
+                <attribute name="string">Enviar pedido PROFORMA</attribute>
+            </xpath>
+            <xpath expr="//button[@name='action_view_invoice']/field[@name='invoice_count']" position="attributes">
+                <attribute name="string">Pedidos</attribute>
+            </xpath>
+            <xpath expr="//group[@name='sale_info']" position="attributes">
+                <attribute name="string">Pedido</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']//form//label[@for='qty_invoiced']" position="attributes">
+                <attribute name="string">En pedido</attribute>
+            </xpath>
+            <xpath expr="//field[@name='order_line']/list//field[@name='qty_invoiced']" position="attributes">
+                <attribute name="string">En pedido</attribute>
+            </xpath>
+        </field>
+    </record>
 </odoo>
