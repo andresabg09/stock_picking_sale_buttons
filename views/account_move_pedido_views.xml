@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Estados del PEDIDO (factura de Odoo): En bodega → En ruta → Entregado → Entregado y cobrado.
+         Ver Glosario en CLAUDE.md. Botones manuales aquí; el cambio en lote (selección en la lista) está
+         en las acciones de servidor de abajo. El cobro sale del pago registrado, no se toca a mano. -->
+
+    <!-- Formulario: etiqueta arriba del título + botones en la cabecera -->
+    <record id="view_move_form_pedido_state" model="ir.ui.view">
+        <field name="name">account.move.form.pedido.state</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_move_form"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/field[@name='state']" position="before">
+                <button name="action_dk_to_route" type="object" string="Pasar a en ruta" class="btn-primary"
+                        invisible="move_type != 'out_invoice' or state != 'posted' or custom_delivery_state != 'bodega'"/>
+                <button name="action_dk_to_delivered" type="object" string="Marcar entregado"
+                        class="btn-primary"
+                        invisible="move_type != 'out_invoice' or state != 'posted' or custom_delivery_state != 'ruta'"/>
+                <button name="action_dk_to_delivered" type="object" string="Marcar entregado"
+                        invisible="move_type != 'out_invoice' or state != 'posted' or custom_delivery_state != 'bodega'"/>
+                <button name="action_dk_to_bodega" type="object" string="Volver a bodega"
+                        invisible="move_type != 'out_invoice' or state != 'posted' or custom_delivery_state != 'ruta'"/>
+                <button name="action_dk_undo_delivery" type="object" string="Deshacer entrega"
+                        invisible="move_type != 'out_invoice' or state != 'posted' or custom_delivery_state != 'entregado'"/>
+            </xpath>
+            <xpath expr="//div[contains(@class,'oe_title')]" position="before">
+                <div class="d-flex flex-wrap gap-2 mb-2"
+                     invisible="move_type != 'out_invoice' or state != 'posted'">
+                    <field name="custom_pedido_state" widget="badge"
+                           decoration-info="custom_pedido_state == 'bodega'"
+                           decoration-warning="custom_pedido_state == 'ruta'"
+                           decoration-success="custom_pedido_state in ('entregado', 'cobrado')"/>
+                    <field name="custom_delivery_state" invisible="1"/>
+                </div>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Lista de pedidos de cliente: columna con el estado, junto al estado de pago -->
+    <record id="view_out_invoice_list_pedido_state" model="ir.ui.view">
+        <field name="name">account.out.invoice.list.pedido.state</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_out_invoice_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='status_in_payment']" position="before">
+                <field name="custom_pedido_state" widget="badge" string="Estado del pedido"
+                       decoration-info="custom_pedido_state == 'bodega'"
+                       decoration-warning="custom_pedido_state == 'ruta'"
+                       decoration-success="custom_pedido_state in ('entregado', 'cobrado')"
+                       column_invisible="context.get('default_move_type') not in ('out_invoice', 'out_refund', 'out_receipt')"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Búsqueda: filtros y agrupar por estado del pedido -->
+    <record id="view_account_invoice_filter_pedido_state" model="ir.ui.view">
+        <field name="name">account.invoice.select.pedido.state</field>
+        <field name="model">account.move</field>
+        <field name="inherit_id" ref="account.view_account_invoice_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='cancel']" position="after">
+                <separator/>
+                <filter name="dk_en_bodega" string="En bodega"
+                        domain="[('move_type', '=', 'out_invoice'), ('state', '=', 'posted'), ('custom_pedido_state', '=', 'bodega')]"/>
+                <filter name="dk_en_ruta" string="En ruta"
+                        domain="[('move_type', '=', 'out_invoice'), ('state', '=', 'posted'), ('custom_pedido_state', '=', 'ruta')]"/>
+                <filter name="dk_entregado" string="Entregado (sin cobrar)"
+                        domain="[('move_type', '=', 'out_invoice'), ('state', '=', 'posted'), ('custom_pedido_state', '=', 'entregado')]"/>
+                <filter name="dk_cobrado" string="Entregado y cobrado"
+                        domain="[('move_type', '=', 'out_invoice'), ('state', '=', 'posted'), ('custom_pedido_state', '=', 'cobrado')]"/>
+            </xpath>
+            <xpath expr="//filter[@name='status']" position="after">
+                <filter name="dk_group_pedido_state" string="Estado del pedido"
+                        context="{'group_by': 'custom_pedido_state'}"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Acciones en lote: seleccionas pedidos en la lista y usas Acción -->
+    <record id="action_server_pedido_to_route" model="ir.actions.server">
+        <field name="name">Pasar a en ruta</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_dk_to_route()</field>
+    </record>
+    <record id="action_server_pedido_to_delivered" model="ir.actions.server">
+        <field name="name">Marcar como entregado</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_dk_to_delivered()</field>
+    </record>
+    <record id="action_server_pedido_to_bodega" model="ir.actions.server">
+        <field name="name">Volver a bodega</field>
+        <field name="model_id" ref="account.model_account_move"/>
+        <field name="binding_model_id" ref="account.model_account_move"/>
+        <field name="binding_view_types">list</field>
+        <field name="state">code</field>
+        <field name="code">action = records.action_dk_to_bodega()</field>
+    </record>
+</odoo>

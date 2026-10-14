@@ -112,6 +112,8 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   ```
 
 ## Historial de cambios (resumen, no detalle)
+- 2026-10-14: Factura -> pedido (nombres en pantalla) aplicado en producción con `scripts/renombrar_factura_a_pedido.py` (menús, acciones, 17 etiquetas de campos, valores del estado de la orden) + etiquetas de la orden de venta/traslado por código (v18.0.4.8.0). SEO del Inicio/Contacto/10 categorías (título "… | Dianke Group", marca Nevada Salud y Belleza) por script, y franja de texto mayorista en el Inicio (la vista de sitio 3366 de `dk_home_hero` se ARCHIVÓ: tapaba la del módulo).
+- 2026-10-14: ETAPA 2 de los estados del pedido (v18.0.4.9.0): `models/account_move_pedido_state.py` (`custom_delivery_state` bodega/ruta/entregado con tracking + `custom_pedido_state` calculado y almacenado que suma "Entregado y cobrado" cuando payment_state es paid/in_payment), `views/account_move_pedido_views.xml` (botones en el formulario, columna/filtros/agrupar en la lista, 3 acciones en lote: Pasar a en ruta / Marcar como entregado / Volver a bodega), `migrations/18.0.4.9.0/post-migration.py` (existentes: publicados pagados -> cobrado, resto de publicados -> entregado). Pendiente: etapa 3 = hoja de ruta (PDF + correo, pasa a "En ruta" al enviar).
 - 2026-10-04: Rediseño de la tienda web (nombre comercial por ahora **SHALOM PANAMÁ**, paleta
   blanco/azul oscuro `#0B1F3A`/negro), hecho por MCP. Fase 1+2 EN VIVO: `ir.ui.view` 3328 +
   `website.page` 11 (`/inicio`) = nuevo inicio, `website.homepage_url='/inicio'`; vistas
