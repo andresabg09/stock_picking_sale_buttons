@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<templates xml:space="preserve">
+    <!-- Cámara del log: ver static/src/js/dk_camera.js -->
+
+    <!-- Botón "Cámara" junto a los botones del log (entre "Actividades" y la lupa) -->
+    <t t-name="stock_picking_sale_buttons.ChatterDkCamera" t-inherit="mail.Chatter" t-inherit-mode="extension">
+        <xpath expr="//span[hasclass('o-mail-Chatter-topbarGrow')]" position="after">
+            <button class="o-dk-camera-btn btn btn-secondary text-nowrap me-1" t-att-class="{ 'my-2': !props.compactHeight }"
+                    title="Cámara: varias fotos y videos de una vez" t-on-click="onClickDkCamera">
+                <i class="fa fa-camera me-1" role="img"/>
+                <span>Cámara</span>
+                <span t-if="dkCamPending" class="badge text-bg-danger ms-1" t-out="dkCamPending"/>
+            </button>
+        </xpath>
+    </t>
+
+    <!-- Ventana de la cámara (pantalla completa) -->
+    <t t-name="stock_picking_sale_buttons.DkCameraDialog">
+        <Dialog size="'fullscreen'" title="'Cámara'" footer="false" contentClass="'dk-cam-dialog'">
+            <div class="dk-cam">
+                <div class="dk-cam-stage">
+                    <video t-ref="video" class="dk-cam-video" autoplay="" playsinline="" muted=""/>
+                    <div t-if="state.flash" class="dk-cam-flash"/>
+                    <div t-if="state.error" class="dk-cam-error" t-out="state.error"/>
+                    <div t-if="state.recording" class="dk-cam-timer">
+                        <span class="dk-cam-dot"/> <t t-out="timeLabel"/> / 01:00
+                    </div>
+                    <div class="dk-cam-controls">
+                        <button type="button" class="dk-cam-side" t-on-click="flip" t-att-disabled="state.recording"
+                                title="Cambiar de cámara" aria-label="Cambiar de cámara">
+                            <i class="fa fa-refresh"/>
+                        </button>
+                        <button type="button" class="dk-cam-shutter" t-on-click="takePhoto" t-att-disabled="state.recording"
+                                title="Tomar foto" aria-label="Tomar foto"/>
+                        <button type="button" class="dk-cam-rec" t-att-class="{ 'is-recording': state.recording }"
+                                t-on-click="toggleRecord" title="Grabar video" aria-label="Grabar video">
+                            <i t-attf-class="fa {{ state.recording ? 'fa-stop' : 'fa-video-camera' }}"/>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dk-cam-tray" t-if="items.length">
+                    <div t-foreach="items" t-as="item" t-key="item.id" class="dk-cam-thumb">
+                        <video t-if="item.kind === 'video'" t-att-src="item.url" muted="" playsinline="" preload="metadata"/>
+                        <img t-else="" t-att-src="item.url" alt="Foto"/>
+                        <span t-if="item.kind === 'video'" class="dk-cam-vid"><i class="fa fa-play"/></span>
+                        <span class="dk-cam-status" t-att-class="'is-' + item.status" t-out="statusLabel(item)"/>
+                        <button type="button" class="dk-cam-del" t-if="item.status !== 'uploading'"
+                                t-on-click="() => cam.remove(item.id)" title="Quitar" aria-label="Quitar">
+                            <i class="fa fa-times"/>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="dk-cam-actions">
+                    <button type="button" class="btn btn-primary btn-lg dk-cam-upload" t-on-click="uploadAll"
+                            t-att-disabled="!items.length or camState.busy">
+                        <t t-if="camState.busy">Subiendo…</t>
+                        <t t-else="">Subir todo (<t t-out="items.length"/>)</t>
+                    </button>
+                    <button type="button" class="btn btn-secondary" t-on-click="() => nativeRef.el.click()">
+                        <i class="fa fa-camera"/> Foto con la cámara del teléfono (máxima calidad)
+                    </button>
+                    <button type="button" class="btn btn-link" t-on-click="close">Cerrar</button>
+                    <input t-ref="native" type="file" accept="image/*,video/*" capture="environment" multiple=""
+                           class="d-none" t-on-change="onNativePhoto"/>
+                </div>
+                <div class="dk-cam-note">
+                    Las fotos y videos se guardan primero en este teléfono y se suben en su calidad original.
+                    Si no hay señal, se suben solos cuando vuelva.
+                </div>
+            </div>
+        </Dialog>
+    </t>
+</templates>

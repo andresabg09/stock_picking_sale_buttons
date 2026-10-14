@@ -62,10 +62,17 @@ def main():
         if not opts.public:
             login, password, db = env('ODOO_WEB_LOGIN'), env('ODOO_WEB_PASSWORD'), env('ODOO_DB')
             page.goto('%s/web/login?db=%s' % (base, db), wait_until='domcontentloaded')
+            # El formulario nace oculto y Odoo lo muestra por JS (puede tardar ~10 s).
+            page.wait_for_selector('input[name=login]', state='visible', timeout=90000)
             page.fill('input[name=login]', login)
             page.fill('input[name=password]', password)
-            page.click('button[type=submit]')
-            page.wait_for_url('**/odoo**', timeout=60000)
+            page.click('form.oe_login_form button[type=submit]', timeout=60000)
+            try:
+                page.wait_for_url('**/odoo**', timeout=90000)
+            except Exception:
+                page.screenshot(path=opts.out.replace('.png', '_login_fallo.png'))
+                sys.exit('No se pudo iniciar sesión (revisa usuario/contraseña). Captura: %s'
+                         % opts.out.replace('.png', '_login_fallo.png'))
         page.goto(base + opts.path, wait_until='domcontentloaded')
         page.wait_for_timeout(opts.wait)
         for selector in opts.click:

@@ -1,0 +1,38 @@
+/* Cámara del log (static/src/js/dk_camera.js) */
+.dk-cam-dialog .modal-body { padding: 0; background: #0b1f3a; }
+.dk-cam { display: flex; flex-direction: column; gap: 10px; padding: 10px; color: #fff; min-height: 100%; }
+.dk-cam-stage { position: relative; background: #000; border-radius: 10px; overflow: hidden;
+    display: flex; justify-content: center; align-items: center; min-height: 40vh; max-height: 62vh; }
+.dk-cam-video { width: 100%; max-height: 62vh; object-fit: contain; background: #000; }
+.dk-cam-flash { position: absolute; inset: 0; background: #fff; opacity: .85; }
+.dk-cam-error { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+    text-align: center; padding: 24px; background: rgba(0, 0, 0, .75); font-size: 1.05rem; }
+.dk-cam-timer { position: absolute; top: 10px; left: 10px; background: rgba(0, 0, 0, .6); border-radius: 999px;
+    padding: 4px 12px; font-weight: 700; }
+.dk-cam-dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ff3b30; margin-right: 4px; }
+.dk-cam-controls { position: absolute; left: 0; right: 0; bottom: 12px; display: flex; justify-content: center;
+    align-items: center; gap: 28px; }
+.dk-cam-shutter { width: 74px; height: 74px; border-radius: 50%; border: 5px solid #fff; background: rgba(255, 255, 255, .25); }
+.dk-cam-shutter:active { background: #fff; }
+.dk-cam-side, .dk-cam-rec { width: 52px; height: 52px; border-radius: 50%; border: 2px solid #fff; color: #fff;
+    background: rgba(0, 0, 0, .45); font-size: 1.2rem; }
+.dk-cam-rec.is-recording { background: #ff3b30; border-color: #ff3b30; }
+.dk-cam-shutter:disabled, .dk-cam-side:disabled { opacity: .4; }
+.dk-cam-tray { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 4px; }
+.dk-cam-thumb { position: relative; flex: 0 0 auto; width: 96px; height: 96px; border-radius: 8px; overflow: hidden; background: #222; }
+.dk-cam-thumb img, .dk-cam-thumb video { width: 100%; height: 100%; object-fit: cover; }
+.dk-cam-vid { position: absolute; top: 4px; left: 4px; background: rgba(0, 0, 0, .6); border-radius: 4px; padding: 0 6px; font-size: .75rem; }
+.dk-cam-status { position: absolute; left: 0; right: 0; bottom: 0; font-size: .68rem; text-align: center; padding: 2px;
+    background: rgba(0, 0, 0, .65); }
+.dk-cam-status.is-error { background: #b3261e; }
+.dk-cam-status.is-uploading { background: #0f5c8c; }
+.dk-cam-del { position: absolute; top: 2px; right: 2px; width: 26px; height: 26px; border-radius: 50%; border: 0;
+    background: rgba(0, 0, 0, .7); color: #fff; }
+.dk-cam-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.dk-cam-actions .dk-cam-upload { flex: 1 1 220px; min-height: 52px; font-weight: 700; }
+.dk-cam-actions .btn-link { color: #fff; }
+.dk-cam-note { font-size: .78rem; opacity: .8; }
+@media (max-width: 767px) {
+    .dk-cam-stage { max-height: 50vh; }
+    .dk-cam-video { max-height: 50vh; }
+}
