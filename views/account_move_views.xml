@@ -72,7 +72,7 @@
     </record>
 
 
-    <!-- Kanban facturas: vencimiento, origen, estado de pago -->
+    <!-- Kanban de pedidos: vencimiento en días, origen, estado de pago -->
     <record id="view_account_move_kanban_inherit_custom" model="ir.ui.view">
         <field name="name">account.move.kanban.inherit.custom</field>
         <field name="model">account.move</field>
@@ -92,11 +92,12 @@
                     <i class="fa fa-file-text-o me-1" title="Origen"/>
                     <t t-out="record.invoice_origin.raw_value"/>
                 </div>
-                <div t-if="record.invoice_date_due.raw_value" class="small mt-1">
+                <!-- Vencimiento igual que en la lista: "En 10 días", "Hoy", "Hace 40 días" (widget remaining_days).
+                     Se oculta si el pedido ya está pagado o cancelado, como en la lista. -->
+                <div t-if="record.invoice_date_due.raw_value" class="small mt-1 d-flex align-items-center">
                     <i class="fa fa-calendar me-1" title="Vencimiento"/>
-                    <span t-att-class="'fw-bold ' + (record.invoice_date_due.raw_value &lt; new Date().toISOString().slice(0,10) ? 'text-danger' : record.invoice_date_due.raw_value === new Date().toISOString().slice(0,10) ? 'text-warning' : 'text-muted')">
-                        Vence: <field name="invoice_date_due"/>
-                    </span>
+                    <field name="invoice_date_due" widget="remaining_days"
+                           invisible="payment_state in ('paid', 'in_payment', 'reversed') or state == 'cancel'"/>
                 </div>
                 <div class="mt-1" t-if="record.move_type.raw_value === 'out_invoice' and record.state.raw_value === 'posted'">
                     <span t-if="record.custom_pedido_state.raw_value === 'bodega'"
