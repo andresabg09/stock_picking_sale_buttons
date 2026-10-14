@@ -266,7 +266,7 @@ const dkCameraService = {
 registry.category("services").add("dk_camera", dkCameraService);
 
 // ---------------------------------------------------------------------------------------------
-// Ventana de la cámara
+// Ventana de la cámara (diseño D "cristal", aprobado por Andrés 2026-10-14)
 // ---------------------------------------------------------------------------------------------
 function pickVideoMime() {
     const candidates = [
@@ -279,6 +279,9 @@ function pickVideoMime() {
     return candidates.find((m) => window.MediaRecorder?.isTypeSupported?.(m));
 }
 
+const FLASH_CYCLE = { auto: "on", on: "off", off: "auto" };
+const FLASH_LABEL = { auto: "Flash automático", on: "Flash encendido", off: "Flash apagado" };
+
 export class DkCameraDialog extends Component {
     static template = "stock_picking_sale_buttons.DkCameraDialog";
     static components = { Dialog };
@@ -290,34 +293,97 @@ export class DkCameraDialog extends Component {
         this.notification = useService("notification");
         this.videoRef = useRef("video");
         this.nativeRef = useRef("native");
-        this.state = useState({ error: "", recording: false, seconds: 0, facing: "environment", flash: false });
+        this.state = useState({
+            error: "",
+            recording: false,
+            seconds: 0,
+            facing: "environment",
+            mode: "photo", // photo | video: qué hace el disparador grande
+            flash: "auto",
+            flashSupported: false,
+            zoom: 1,
+            zoomChips: [],
+            mp: 0,
+            online: navigator.onLine !== false,
+            review: null, // id del archivo que se está revisando
+            zoomedIn: false,
+            shot: false,
+            undo: null,
+        });
         this.stream = null;
+        this.track = null;
+        this.caps = {};
+        this.photoCaps = null;
         this.recorder = null;
         this.recordTimer = null;
-        onMounted(() => this.startStream());
+        this.undoTimer = null;
+        this.pinch = null;
+        this.swipeX = null;
+        this.onOnline = () => (this.state.online = true);
+        this.onOffline = () => (this.state.online = false);
+        onMounted(() => {
+            window.addEventListener("online", this.onOnline);
+            window.addEventListener("offline", this.onOffline);
+            this.startStream();
+        });
         onWillUnmount(() => {
+            window.removeEventListener("online", this.onOnline);
+            window.removeEventListener("offline", this.onOffline);
+            clearTimeout(this.undoTimer);
             this.stopRecording(true);
             this.stopStream();
         });
     }
 
+    // ---- datos ----
     get items() {
         return this.camState.items.filter((i) => i.model === this.props.model && i.resId === this.props.resId);
+    }
+
+    get lastItem() {
+        const items = this.items;
+        return items[items.length - 1];
+    }
+
+    get reviewItem() {
+        return this.items.find((i) => i.id === this.state.review);
+    }
+
+    get reviewIndex() {
+        return this.items.findIndex((i) => i.id === this.state.review) + 1;
+    }
+
+    isZoom(z) {
+        return Math.abs(this.state.zoom - z) < 0.15;
+    }
+
+    get flashLabel() {
+        return FLASH_LABEL[this.state.flash];
     }
 
     get timeLabel() {
         return `${pad(Math.floor(this.state.seconds / 60))}:${pad(this.state.seconds % 60)}`;
     }
 
-    statusLabel(item) {
-        return { pending: "En espera", uploading: "Subiendo…", error: "Sin señal: reintentará" }[item.status];
+    get uploadLabel() {
+        return this.camState.busy ? "Subiendo…" : `Subir ${this.items.length}`;
     }
 
+    sizeLabel(item) {
+        const mb = item.size / 1048576;
+        return mb >= 1 ? `${mb.toFixed(1).replace(".", ",")} MB` : `${Math.round(item.size / 1024)} KB`;
+    }
+
+    dotClass(item) {
+        return { pending: "wait", uploading: "up", error: "off" }[item.status] || "";
+    }
+
+    // ---- cámara ----
     async startStream() {
         this.stopStream();
         if (!navigator.mediaDevices?.getUserMedia) {
             this.state.error =
-                "Este navegador no permite abrir la cámara aquí. Usa el botón «Foto con la cámara del teléfono».";
+                "Este navegador no puede abrir la cámara aquí. Usa el botón del clip «Archivos» para elegir del carrete.";
             return;
         }
         try {
@@ -329,21 +395,47 @@ export class DkCameraDialog extends Component {
                 },
                 audio: false,
             });
-            this.state.error = "";
-            const video = this.videoRef.el;
-            if (video) {
-                video.srcObject = this.stream;
-                await video.play().catch(() => {});
-            }
         } catch {
             this.state.error =
-                "No se pudo abrir la cámara. Revisa el permiso del navegador, o usa «Foto con la cámara del teléfono».";
+                "No se pudo abrir la cámara. Revisa el permiso del navegador o usa «Archivos» para elegir del carrete.";
+            return;
+        }
+        this.state.error = "";
+        this.track = this.stream.getVideoTracks()[0];
+        this.caps = this.track?.getCapabilities?.() || {};
+        this.photoCaps = null;
+        if (window.ImageCapture && this.track) {
+            try {
+                this.photoCaps = await new window.ImageCapture(this.track).getPhotoCapabilities();
+            } catch {
+                this.photoCaps = null;
+            }
+        }
+        // megapíxeles reales (sensor completo si el navegador lo dice; si no, el cuadro de la cámara en vivo)
+        const settings = this.track?.getSettings?.() || {};
+        const w = this.photoCaps?.imageWidth?.max || settings.width || 0;
+        const h = this.photoCaps?.imageHeight?.max || settings.height || 0;
+        this.state.mp = Math.round((w * h) / 1e6);
+        // flash: linterna (video) o flash de la foto
+        const fill = this.photoCaps?.fillLightMode || [];
+        this.state.flashSupported = Boolean(this.caps.torch) || fill.includes("flash");
+        // zoom
+        const zoom = this.caps.zoom;
+        this.state.zoomChips = zoom
+            ? [0.5, 1, 2, 3, 5].filter((z) => z >= zoom.min - 0.01 && z <= zoom.max + 0.01)
+            : [];
+        this.state.zoom = Math.max(1, zoom?.min || 1);
+        const video = this.videoRef.el;
+        if (video) {
+            video.srcObject = this.stream;
+            await video.play().catch(() => {});
         }
     }
 
     stopStream() {
         this.stream?.getTracks().forEach((t) => t.stop());
         this.stream = null;
+        this.track = null;
     }
 
     async flip() {
@@ -351,21 +443,79 @@ export class DkCameraDialog extends Component {
         await this.startStream();
     }
 
+    async applyAdvanced(constraint) {
+        try {
+            await this.track?.applyConstraints({ advanced: [constraint] });
+            return true;
+        } catch {
+            return false;
+        }
+    }
+
+    async setZoom(value) {
+        const zoom = this.caps.zoom;
+        if (!zoom) {
+            return;
+        }
+        const clamped = Math.min(zoom.max, Math.max(zoom.min, value));
+        if (await this.applyAdvanced({ zoom: clamped })) {
+            this.state.zoom = clamped;
+        }
+    }
+
+    async cycleFlash() {
+        this.state.flash = FLASH_CYCLE[this.state.flash];
+        if (this.caps.torch) {
+            await this.applyAdvanced({ torch: this.state.flash === "on" });
+        }
+    }
+
+    // pellizcar con dos dedos para acercar
+    onTouchStart(ev) {
+        if (ev.touches.length === 2 && this.caps.zoom) {
+            this.pinch = { d: this.touchDistance(ev), z: this.state.zoom };
+        }
+    }
+
+    onTouchMove(ev) {
+        if (this.pinch && ev.touches.length === 2) {
+            this.setZoom((this.pinch.z * this.touchDistance(ev)) / this.pinch.d);
+        }
+    }
+
+    onTouchEnd() {
+        this.pinch = null;
+    }
+
+    touchDistance(ev) {
+        const [a, b] = ev.touches;
+        return Math.hypot(a.clientX - b.clientX, a.clientY - b.clientY) || 1;
+    }
+
+    // ---- captura ----
+    async onShutter() {
+        if (this.state.mode === "video") {
+            return this.toggleRecord();
+        }
+        return this.takePhoto();
+    }
+
     async takePhoto() {
-        const track = this.stream?.getVideoTracks()[0];
-        if (!track || this.state.recording) {
+        if (!this.track || this.state.recording) {
             return;
         }
         let blob = null;
         // 1) Resolución COMPLETA del sensor (Chrome/Android).
         if (window.ImageCapture) {
             try {
-                const capture = new window.ImageCapture(track);
-                const caps = await capture.getPhotoCapabilities();
+                const capture = new window.ImageCapture(this.track);
                 const options = {};
-                if (caps.imageWidth?.max && caps.imageHeight?.max) {
-                    options.imageWidth = caps.imageWidth.max;
-                    options.imageHeight = caps.imageHeight.max;
+                if (this.photoCaps?.imageWidth?.max && this.photoCaps?.imageHeight?.max) {
+                    options.imageWidth = this.photoCaps.imageWidth.max;
+                    options.imageHeight = this.photoCaps.imageHeight.max;
+                }
+                if (this.photoCaps?.fillLightMode?.includes("flash")) {
+                    options.fillLightMode = { auto: "auto", on: "flash", off: "off" }[this.state.flash];
                 }
                 blob = await capture.takePhoto(options);
             } catch {
@@ -383,8 +533,8 @@ export class DkCameraDialog extends Component {
         }
         if (blob) {
             await this.cam.add(this.props.model, this.props.resId, blob, "photo");
-            this.state.flash = true;
-            setTimeout(() => (this.state.flash = false), 150);
+            this.state.shot = true;
+            setTimeout(() => (this.state.shot = false), 140);
         }
     }
 
@@ -442,16 +592,92 @@ export class DkCameraDialog extends Component {
         }
     }
 
-    async onNativePhoto(ev) {
-        // Cámara del teléfono: resolución completa en cualquier celular.
+    // ---- archivos del carrete / documentos ----
+    async onNativeFiles(ev) {
         for (const file of [...ev.target.files]) {
-            const kind = file.type.startsWith("video") ? "video" : "photo";
-            await this.cam.add(this.props.model, this.props.resId, file, kind, makeName(kind, file.type));
+            const { kind, name } = nativeName(file);
+            await this.cam.add(this.props.model, this.props.resId, file, kind, name);
         }
         ev.target.value = "";
     }
 
+    // ---- revisar ----
+    openReview(id) {
+        this.state.review = id;
+        this.state.zoomedIn = false;
+    }
+
+    openLast() {
+        if (this.lastItem) {
+            this.openReview(this.lastItem.id);
+        }
+    }
+
+    closeReview() {
+        this.state.review = null;
+        this.state.zoomedIn = false;
+    }
+
+    step(delta) {
+        const items = this.items;
+        const index = items.findIndex((i) => i.id === this.state.review);
+        const next = items[index + delta];
+        if (next) {
+            this.openReview(next.id);
+        }
+    }
+
+    onSwipeStart(ev) {
+        this.swipeX = ev.touches?.[0]?.clientX ?? null;
+    }
+
+    onSwipeEnd(ev) {
+        const x = ev.changedTouches?.[0]?.clientX;
+        if (this.swipeX !== null && x !== undefined && Math.abs(x - this.swipeX) > 60) {
+            this.step(x < this.swipeX ? 1 : -1);
+        }
+        this.swipeX = null;
+    }
+
+    toggleZoomIn() {
+        this.state.zoomedIn = !this.state.zoomedIn;
+    }
+
+    async discard() {
+        const item = this.reviewItem;
+        if (!item) {
+            return;
+        }
+        const items = this.items;
+        const index = items.findIndex((i) => i.id === item.id);
+        const neighbour = items[index + 1] || items[index - 1];
+        const saved = { blob: item.blob, kind: item.kind, name: item.name };
+        await this.cam.remove(item.id);
+        // se puede deshacer por unos segundos
+        this.state.undo = saved;
+        clearTimeout(this.undoTimer);
+        this.undoTimer = setTimeout(() => (this.state.undo = null), 6000);
+        if (neighbour) {
+            this.openReview(neighbour.id);
+        } else {
+            this.closeReview();
+        }
+    }
+
+    async undoDiscard() {
+        const saved = this.state.undo;
+        this.state.undo = null;
+        if (saved) {
+            const item = await this.cam.add(this.props.model, this.props.resId, saved.blob, saved.kind, saved.name);
+            this.openReview(item.id);
+        }
+    }
+
+    // ---- subir / cerrar ----
     async uploadAll() {
+        if (!this.items.length) {
+            return;
+        }
         const { uploaded, failed } = await this.cam.flush(this.props.model, this.props.resId);
         if (uploaded && !failed) {
             this.notification.add(`Se subieron ${uploaded} archivo(s).`, { type: "success" });
@@ -529,6 +755,19 @@ patch(Chatter.prototype, {
                 this.reloadParentView?.();
             }
         });
+    },
+
+    // El clip: en celulares y tablets abre la cámara; en computadora (mouse) sigue el selector de archivos normal.
+    async onClickAttachFile(ev) {
+        const result = await super.onClickAttachFile(...arguments); // guarda el documento si es nuevo
+        if (result === false) {
+            return false;
+        }
+        if (window.matchMedia?.("(pointer: coarse)").matches && navigator.mediaDevices?.getUserMedia) {
+            this.onClickDkCamera();
+            return false; // no abrir el selector del sistema
+        }
+        return result;
     },
 
     async onClickDkCamera() {

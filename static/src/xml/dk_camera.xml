@@ -29,61 +29,134 @@
         </xpath>
     </t>
 
-    <!-- Ventana de la cámara (pantalla completa) -->
+    <!-- Ventana de la cámara: diseño D "cristal" (pantalla completa, todo translúcido) -->
     <t t-name="stock_picking_sale_buttons.DkCameraDialog">
-        <Dialog size="'fullscreen'" title="'Cámara'" footer="false" contentClass="'dk-cam-dialog'">
-            <div class="dk-cam">
-                <div class="dk-cam-stage">
-                    <video t-ref="video" class="dk-cam-video" autoplay="" playsinline="" muted=""/>
-                    <div t-if="state.flash" class="dk-cam-flash"/>
-                    <div t-if="state.error" class="dk-cam-error" t-out="state.error"/>
-                    <div t-if="state.recording" class="dk-cam-timer">
-                        <span class="dk-cam-dot"/> <t t-out="timeLabel"/> / 01:00
-                    </div>
-                    <div class="dk-cam-controls">
-                        <button type="button" class="dk-cam-side" t-on-click="flip" t-att-disabled="state.recording"
-                                title="Cambiar de cámara" aria-label="Cambiar de cámara">
-                            <i class="fa fa-refresh"/>
-                        </button>
-                        <button type="button" class="dk-cam-shutter" t-on-click="takePhoto" t-att-disabled="state.recording"
-                                title="Tomar foto" aria-label="Tomar foto"/>
-                        <button type="button" class="dk-cam-rec" t-att-class="{ 'is-recording': state.recording }"
-                                t-on-click="toggleRecord" title="Grabar video" aria-label="Grabar video">
-                            <i t-attf-class="fa {{ state.recording ? 'fa-stop' : 'fa-video-camera' }}"/>
-                        </button>
-                    </div>
+        <Dialog size="'fullscreen'" header="false" footer="false" contentClass="'dkc-dialog'">
+            <div class="dkc">
+                <!-- visor -->
+                <div class="dkc-stage" t-on-touchstart="onTouchStart" t-on-touchmove="onTouchMove" t-on-touchend="onTouchEnd">
+                    <video t-ref="video" class="dkc-video" autoplay="" playsinline="" muted=""/>
+                    <div class="dkc-grid"/>
+                    <div t-if="state.shot" class="dkc-flash"/>
+                    <div t-if="state.error" class="dkc-error" t-out="state.error"/>
                 </div>
 
-                <div class="dk-cam-tray" t-if="items.length">
-                    <div t-foreach="items" t-as="item" t-key="item.id" class="dk-cam-thumb">
+                <!-- barra superior: cerrar · flash · cambiar cámara · archivos · SUBIR -->
+                <div class="dkc-top">
+                    <button type="button" class="dkc-ib" t-on-click="close" aria-label="Cerrar">
+                        <svg viewBox="0 0 24 24"><path d="M6 6l12 12M18 6L6 18"/></svg>
+                    </button>
+                    <button type="button" class="dkc-ib" t-if="state.flashSupported" t-on-click="cycleFlash"
+                            t-att-class="{ 'is-on': state.flash === 'on' }" t-att-aria-label="flashLabel" t-att-title="flashLabel">
+                        <svg viewBox="0 0 24 24"><path d="M13 3L5 14h6l-1 7 8-11h-6l1-7z"/></svg>
+                        <small t-if="state.flash === 'auto'">A</small>
+                        <small t-if="state.flash === 'off'" class="dkc-off">✕</small>
+                    </button>
+                    <button type="button" class="dkc-ib" t-on-click="flip" t-att-disabled="state.recording" aria-label="Cambiar de cámara">
+                        <svg viewBox="0 0 24 24"><path d="M20 8a8 8 0 0 0-14-2M4 4v4h4M4 16a8 8 0 0 0 14 2m2 2v-4h-4"/></svg>
+                    </button>
+                    <button type="button" class="dkc-ib" t-on-click="() => nativeRef.el.click()" aria-label="Adjuntar archivos o fotos del carrete" title="Archivos y carrete">
+                        <svg viewBox="0 0 24 24"><path d="M21 12l-8.5 8.5a5 5 0 0 1-7-7L14 5a3.3 3.3 0 0 1 4.7 4.7L10 18.4a1.7 1.7 0 0 1-2.4-2.4L15 8.6"/></svg>
+                    </button>
+                    <span class="dkc-grow"/>
+                    <button type="button" class="dkc-upload" t-on-click="uploadAll" t-att-disabled="!items.length or camState.busy">
+                        <svg viewBox="0 0 24 24"><path d="M12 16V5m-5 5l5-5 5 5M5 20h14"/></svg>
+                        <t t-out="uploadLabel"/>
+                    </button>
+                </div>
+
+                <!-- avisos -->
+                <div class="dkc-notes">
+                    <span t-if="state.recording" class="dkc-chip is-rec"><i class="dkc-dot"/> <t t-out="timeLabel"/> / 01:00</span>
+                    <span t-if="state.mp" class="dkc-chip">Original · <t t-out="state.mp"/> MP</span>
+                    <span t-if="!state.online" class="dkc-chip is-warn">Sin señal · se subirá solo</span>
+                </div>
+
+                <!-- zoom -->
+                <div class="dkc-zoom" t-if="state.zoomChips.length">
+                    <button type="button" t-foreach="state.zoomChips" t-as="z" t-key="z"
+                            t-att-class="{ 'on': isZoom(z) }" t-on-click="() => setZoom(z)">
+                        <t t-out="z === 0.5 ? '.5' : z + '×'"/>
+                    </button>
+                </div>
+
+                <!-- miniaturas de cristal -->
+                <div class="dkc-strip" t-if="items.length">
+                    <button type="button" t-foreach="items" t-as="item" t-key="item.id" class="dkc-th"
+                            t-on-click="() => openReview(item.id)" t-att-aria-label="item.name">
                         <video t-if="item.kind === 'video'" t-att-src="item.url" muted="" playsinline="" preload="metadata"/>
-                        <img t-else="" t-att-src="item.url" alt="Foto"/>
-                        <span t-if="item.kind === 'video'" class="dk-cam-vid"><i class="fa fa-play"/></span>
-                        <span class="dk-cam-status" t-att-class="'is-' + item.status" t-out="statusLabel(item)"/>
-                        <button type="button" class="dk-cam-del" t-if="item.status !== 'uploading'"
-                                t-on-click="() => cam.remove(item.id)" title="Quitar" aria-label="Quitar">
-                            <i class="fa fa-times"/>
+                        <img t-elif="item.kind === 'photo'" t-att-src="item.url" alt="Foto"/>
+                        <span t-else="" class="dkc-doc"><i class="fa fa-file-o"/></span>
+                        <span t-if="item.kind === 'video'" class="dkc-vid"><i class="fa fa-play"/></span>
+                        <span class="dkc-st" t-att-class="dotClass(item)"/>
+                    </button>
+                </div>
+
+                <!-- base de cristal -->
+                <div class="dkc-dock">
+                    <div class="dkc-modes">
+                        <button type="button" t-att-class="{ 'on': state.mode === 'video' }" t-on-click="() => state.mode = 'video'">VIDEO</button>
+                        <button type="button" t-att-class="{ 'on': state.mode === 'photo' }" t-on-click="() => state.mode = 'photo'">FOTO</button>
+                    </div>
+                    <div class="dkc-row">
+                        <button type="button" class="dkc-stack" t-on-click="openLast" t-att-disabled="!items.length" aria-label="Ver lo tomado">
+                            <img t-if="lastItem and lastItem.kind === 'photo'" t-att-src="lastItem.url" alt=""/>
+                            <video t-elif="lastItem and lastItem.kind === 'video'" t-att-src="lastItem.url" muted="" playsinline="" preload="metadata"/>
+                            <span t-if="items.length" class="dkc-count" t-out="items.length"/>
                         </button>
+                        <button type="button" class="dkc-shutter" t-att-class="{ 'is-video': state.mode === 'video', 'is-rec': state.recording }"
+                                t-on-click="onShutter" aria-label="Disparador"><i/></button>
+                        <button type="button" class="dkc-rec" t-att-class="{ 'is-rec': state.recording }" t-on-click="toggleRecord" aria-label="Grabar video"><i/></button>
                     </div>
                 </div>
 
-                <div class="dk-cam-actions">
-                    <button type="button" class="btn btn-primary btn-lg dk-cam-upload" t-on-click="uploadAll"
-                            t-att-disabled="!items.length or camState.busy">
-                        <t t-if="camState.busy">Subiendo…</t>
-                        <t t-else="">Subir todo (<t t-out="items.length"/>)</t>
-                    </button>
-                    <button type="button" class="btn btn-secondary" t-on-click="() => nativeRef.el.click()">
-                        <i class="fa fa-camera"/> Foto con la cámara del teléfono (máxima calidad)
-                    </button>
-                    <button type="button" class="btn btn-link" t-on-click="close">Cerrar</button>
-                    <input t-ref="native" type="file" accept="image/*,video/*" capture="environment" multiple=""
-                           class="d-none" t-on-change="onNativePhoto"/>
+                <!-- revisar -->
+                <div class="dkc-review" t-if="reviewItem">
+                    <div class="dkc-rv-media" t-on-touchstart="onSwipeStart" t-on-touchend="onSwipeEnd" t-on-click="toggleZoomIn"
+                         t-att-class="{ 'is-zoomed': state.zoomedIn }">
+                        <video t-if="reviewItem.kind === 'video'" t-att-src="reviewItem.url" controls="" playsinline=""/>
+                        <img t-elif="reviewItem.kind === 'photo'" t-att-src="reviewItem.url" alt="Foto"/>
+                        <div t-else="" class="dkc-doc big"><i class="fa fa-file-o"/><span t-out="reviewItem.name"/></div>
+                    </div>
+                    <div class="dkc-top">
+                        <button type="button" class="dkc-ib" t-on-click="closeReview" aria-label="Volver a la cámara">
+                            <svg viewBox="0 0 24 24"><path d="M15 5l-7 7 7 7"/></svg>
+                        </button>
+                        <span class="dkc-chip"><t t-out="reviewIndex"/> de <t t-out="items.length"/> · <t t-out="sizeLabel(reviewItem)"/> · original</span>
+                        <span class="dkc-grow"/>
+                        <button type="button" class="dkc-upload" t-on-click="uploadAll" t-att-disabled="camState.busy">
+                            <svg viewBox="0 0 24 24"><path d="M12 16V5m-5 5l5-5 5 5M5 20h14"/></svg>
+                            <t t-out="uploadLabel"/>
+                        </button>
+                    </div>
+                    <div class="dkc-sheet">
+                        <div class="dkc-strip is-center">
+                            <button type="button" t-foreach="items" t-as="item" t-key="item.id" class="dkc-th is-small"
+                                    t-att-class="{ 'is-sel': item.id === state.review }" t-on-click="() => openReview(item.id)">
+                                <video t-if="item.kind === 'video'" t-att-src="item.url" muted="" playsinline="" preload="metadata"/>
+                                <img t-elif="item.kind === 'photo'" t-att-src="item.url" alt="Foto"/>
+                                <span t-else="" class="dkc-doc"><i class="fa fa-file-o"/></span>
+                            </button>
+                        </div>
+                        <div class="dkc-actions">
+                            <button type="button" class="dkc-btn is-no" t-on-click="discard"
+                                    t-att-disabled="reviewItem.status === 'uploading'">
+                                <svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg>Descartar
+                            </button>
+                            <button type="button" class="dkc-btn is-yes" t-on-click="closeReview">
+                                <svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>Conservar y seguir
+                            </button>
+                        </div>
+                        <div class="dkc-cap">Toca la foto para acercarla. Desliza para ver la siguiente.</div>
+                    </div>
                 </div>
-                <div class="dk-cam-note">
-                    Las fotos y videos se guardan primero en este teléfono y se suben en su calidad original.
-                    Si no hay señal, se suben solos cuando vuelva.
+
+                <div class="dkc-undo" t-if="state.undo">
+                    <span>Descartada</span>
+                    <button type="button" t-on-click="undoDiscard">Deshacer</button>
                 </div>
+
+                <input t-ref="native" type="file" accept="*/*" multiple="" class="d-none" t-on-change="onNativeFiles"/>
             </div>
         </Dialog>
     </t>
