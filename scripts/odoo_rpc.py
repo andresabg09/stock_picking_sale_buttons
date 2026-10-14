@@ -90,6 +90,9 @@ def main():
                       {'fields': ['name', 'state', 'latest_version', 'installed_version', 'write_date']})
     elif opts.action == 'search_read':
         kwargs = {'fields': fields, 'limit': opts.limit}
+        _ctx = json.loads(opts.context)
+        if _ctx:
+            kwargs['context'] = _ctx
         if opts.order:
             kwargs['order'] = opts.order
         result = call(opts.model, 'search_read', [json.loads(opts.arg)], kwargs)
@@ -97,7 +100,8 @@ def main():
         result = call(opts.model, 'search_count', [json.loads(opts.arg)])
     elif opts.action == 'read':
         ids = json.loads(opts.arg)
-        result = call(opts.model, 'read', [ids if isinstance(ids, list) else [ids]], {'fields': fields})
+        _ctx = json.loads(opts.context)
+        result = call(opts.model, 'read', [ids if isinstance(ids, list) else [ids]], dict({'fields': fields}, **({'context': _ctx} if _ctx else {})))
     elif opts.action == 'fields_get':
         result = call(opts.model, 'fields_get', [], {'attributes': opts.attrs.split(',')})
     elif opts.action == 'name_search':
