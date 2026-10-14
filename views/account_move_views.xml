@@ -83,6 +83,8 @@
                 <field name="invoice_date_due"/>
                 <field name="invoice_origin"/>
                 <field name="payment_state"/>
+                <field name="move_type"/>
+                <field name="custom_pedido_state"/>
             </xpath>
             <!-- Inyectar después del último div del card -->
             <xpath expr="//t[@t-name='card']/div[last()]" position="after">
@@ -95,6 +97,16 @@
                     <span t-att-class="'fw-bold ' + (record.invoice_date_due.raw_value &lt; new Date().toISOString().slice(0,10) ? 'text-danger' : record.invoice_date_due.raw_value === new Date().toISOString().slice(0,10) ? 'text-warning' : 'text-muted')">
                         Vence: <field name="invoice_date_due"/>
                     </span>
+                </div>
+                <div class="mt-1" t-if="record.move_type.raw_value === 'out_invoice' and record.state.raw_value === 'posted'">
+                    <span t-if="record.custom_pedido_state.raw_value === 'bodega'"
+                          class="badge text-bg-info">En bodega</span>
+                    <span t-elif="record.custom_pedido_state.raw_value === 'ruta'"
+                          class="badge text-bg-warning">En ruta</span>
+                    <span t-elif="record.custom_pedido_state.raw_value === 'entregado'"
+                          class="badge text-bg-primary">Entregado</span>
+                    <span t-elif="record.custom_pedido_state.raw_value === 'cobrado'"
+                          class="badge text-bg-success">Entregado y cobrado</span>
                 </div>
                 <div class="mt-1">
                     <span t-if="record.payment_state.raw_value === 'paid'"
