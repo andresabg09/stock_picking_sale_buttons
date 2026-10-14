@@ -11,12 +11,14 @@
         <field name="arch" type="xml">
             <form string="Armar hoja de ruta">
                 <div class="alert alert-info" role="alert">
-                    Al enviar, los pedidos <b>En bodega</b> pasan a <b>En ruta</b>. Los que ya están
-                    <b>En ruta</b> (reintentos) se quedan igual y salen marcados como REINTENTO.
+                    <b>Salida ahora:</b> al enviar, los pedidos <b>En bodega</b> pasan a <b>En ruta</b>.<br/>
+                    <b>Salida futura (otro día u otra hora):</b> el correo sale ahora, los pedidos siguen
+                    <b>En bodega</b> y pasan solos a <b>En ruta</b> cuando llegue esa fecha y hora.<br/>
+                    Los que ya están <b>En ruta</b> (reintentos) se quedan igual y salen marcados como REINTENTO.
                 </div>
                 <group>
                     <group>
-                        <field name="route_date"/>
+                        <field name="departure"/>
                         <field name="driver_name" placeholder="Nombre del repartidor"/>
                     </group>
                     <group>
@@ -38,7 +40,7 @@
                     </list>
                 </field>
                 <footer>
-                    <button name="action_send" string="Enviar y pasar a en ruta" type="object" class="btn-primary"/>
+                    <button name="action_send" string="Enviar hoja de ruta" type="object" class="btn-primary"/>
                     <button name="action_cancel" string="Cancelar" type="object" class="btn-secondary"/>
                 </footer>
             </form>
@@ -62,7 +64,9 @@
         <field name="arch" type="xml">
             <list string="Hojas de ruta" create="false">
                 <field name="name"/>
-                <field name="date"/>
+                <field name="departure"/>
+                <field name="state" widget="badge" decoration-warning="state == 'programada'"
+                       decoration-success="state == 'salio'" decoration-muted="state == 'cancelada'"/>
                 <field name="driver_name"/>
                 <field name="line_count"/>
                 <field name="retry_count"/>
@@ -78,13 +82,19 @@
         <field name="model">dk.route.sheet</field>
         <field name="arch" type="xml">
             <form string="Hoja de ruta" create="false" edit="false">
+                <header>
+                    <button name="action_cancel_scheduled" type="object" string="Cancelar salida programada"
+                            invisible="state != 'programada'"
+                            confirm="Los pedidos se quedan En bodega y no saldrán a la hora programada. ¿Cancelar?"/>
+                    <field name="state" widget="statusbar" statusbar_visible="programada,salio"/>
+                </header>
                 <sheet>
                     <div class="oe_title">
                         <h1><field name="name"/></h1>
                     </div>
                     <group>
                         <group>
-                            <field name="date"/>
+                            <field name="departure"/>
                             <field name="driver_name"/>
                             <field name="total_to_collect"/>
                         </group>
@@ -123,6 +133,8 @@
                 <field name="name"/>
                 <field name="driver_name"/>
                 <field name="line_ids" string="Cliente" filter_domain="[('line_ids.partner_id', 'ilike', self)]"/>
+                <filter name="programadas" string="Programadas" domain="[('state', '=', 'programada')]"/>
+                <filter name="salieron" string="Salieron" domain="[('state', '=', 'salio')]"/>
             </search>
         </field>
     </record>
@@ -155,7 +167,7 @@
                     <div class="page" style="font-size: 12px;">
                         <h2 style="margin-bottom: 4px;">HOJA DE RUTA <span t-field="o.name"/></h2>
                         <p>
-                            <b>Salida:</b> <span t-field="o.date"/>
+                            <b>Salida:</b> <t t-if="o.departure"><span t-field="o.departure"/></t><t t-else=""><span t-field="o.date"/></t>
                             &#160;&#160; <b>Repartidor:</b> <span t-out="o.driver_name or '______________________'"/>
                             &#160;&#160; <b>Hora de salida:</b> ________
                             &#160;&#160; <b>Regreso:</b> ________

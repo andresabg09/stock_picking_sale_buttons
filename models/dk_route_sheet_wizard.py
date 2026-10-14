@@ -1,5 +1,10 @@
+import logging
+from datetime import timedelta
+
 from odoo import _, fields, models
 from odoo.exceptions import UserError
+
+_logger = logging.getLogger(__name__)
 
 # Correos de bodega por defecto (editables en la ventana). Falta la 3.ª persona: Andrés la dará después.
 ROUTE_SHEET_EMAIL_TO = 'dianazuniga@diankegroup.com, anyelidperez@diankegroup.com'
@@ -12,7 +17,10 @@ class DkRouteSheetWizard(models.TransientModel):
 
     move_ids = fields.Many2many(
         'account.move', 'dk_route_wizard_move_rel', 'wizard_id', 'move_id', string='Pedidos')
-    route_date = fields.Date(string='Fecha de salida', required=True, default=fields.Date.context_today)
+    departure = fields.Datetime(
+        string='Salida (fecha y hora)', required=True, default=fields.Datetime.now,
+        help='Hoy u otro día, con hora. Si es una hora futura, los pedidos siguen "En bodega" y pasan '
+             'solos a "En ruta" cuando llegue esa hora.')
     driver_name = fields.Char(string='Repartidor')
     email_to = fields.Char(string='Enviar a', default=ROUTE_SHEET_EMAIL_TO)
     email_cc = fields.Char(string='Con copia (CC)')
@@ -70,9 +78,20 @@ class DkRouteSheetWizard(models.TransientModel):
                 'Solo pueden ir en una hoja de ruta los pedidos "En bodega" o "En ruta" (reintentos). '
                 'No aplica a: %s', ', '.join(invalid.mapped('name'))))
 
+        already = self.env['dk.route.sheet.line'].search(
+            [('move_id', 'in', self.move_ids.ids), ('sheet_id.state', '=', 'programada')])
+        if already:
+            raise UserError(_(
+                'Estos pedidos ya están en una hoja de ruta programada: %s. Cancela esa salida primero si quieres '
+                'cambiarla.', '; '.join('%s (%s)' % (l.move_id.name, l.sheet_id.name) for l in already)))
+
+        local = fields.Datetime.context_timestamp(self, self.departure)
+        immediate = self.departure <= fields.Datetime.now() + timedelta(minutes=1)
         rows = self._lines_data()
         sheet = self.env['dk.route.sheet'].create({
-            'date': self.route_date,
+            'date': local.date(),
+            'departure': self.departure,
+            'state': 'salio' if immediate else 'programada',
             'driver_name': self.driver_name,
             'email_to': self.email_to,
             'email_cc': self.email_cc,
@@ -94,11 +113,13 @@ class DkRouteSheetWizard(models.TransientModel):
         })
         sheet.attachment_id = attachment
 
-        subject = self.subject or _('Hoja de ruta %(date)s — %(n)s pedidos',
-                                    date=fields.Date.to_string(self.route_date), n=len(rows))
+        when = local.strftime('%d/%m/%Y %H:%M')
+        subject = self.subject or _('Hoja de ruta %(date)s — %(n)s pedidos', date=when, n=len(rows))
+        salida = (_('<p><b>Salida:</b> %s</p>', when) if immediate else
+                  _('<p><b>Salida programada:</b> %s. Los pedidos pasan a "En ruta" a esa hora.</p>', when))
         mail = self.env['mail.mail'].create({
             'subject': subject,
-            'body_html': self.body or '',
+            'body_html': salida + (self.body or ''),
             'email_to': self.email_to,
             'email_cc': self.email_cc or '',
             'email_from': self.env.user.email_formatted or False,
@@ -109,13 +130,22 @@ class DkRouteSheetWizard(models.TransientModel):
         # Si el correo falla se levanta el error y TODO se deshace: los pedidos no cambian de estado.
         mail.send(raise_exception=True)
 
-        # Solo después de enviar: lo que estaba "En bodega" pasa a "En ruta". Los reintentos (ya
-        # "En ruta") se quedan como están.
-        self.move_ids._dk_move_delivery('ruta', ('bodega',))
+        # Solo después de enviar el correo. Si la salida es ahora, lo que estaba "En bodega" pasa a "En ruta"
+        # (los reintentos, ya "En ruta", se quedan como están). Si es futura, los pedidos siguen "En bodega" y
+        # el cron (o el aviso exacto de abajo) los pasa a "En ruta" cuando llegue la hora.
+        if immediate:
+            self.move_ids._dk_move_delivery('ruta', ('bodega',))
         for move in self.move_ids:
             move.message_post(body=_('Incluido en la hoja de ruta %(name)s (salida %(date)s).',
-                                     name=sheet.name, date=fields.Date.to_string(self.route_date)))
+                                     name=sheet.name, date=when))
         sheet.message_post(body=_('Enviada a %s.', self.email_to))
+        if not immediate:
+            cron = self.env.ref('stock_picking_sale_buttons.ir_cron_dk_depart_sheets', raise_if_not_found=False)
+            if cron:
+                try:
+                    cron.sudo()._trigger(at=self.departure)  # ejecución exacta a la hora de salida
+                except Exception:
+                    _logger.warning('No se pudo programar la ejecución exacta; lo hará el cron periódico.')
 
         return {
             'type': 'ir.actions.act_window',
