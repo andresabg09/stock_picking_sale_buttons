@@ -15,6 +15,8 @@ Uso (siempre pasar los campos):
     python3 scripts/odoo_rpc.py read product.product 3431 name,free_qty,qty_available
     python3 scripts/odoo_rpc.py fields_get product.template --attrs string,type
     python3 scripts/odoo_rpc.py module stock_picking_sale_buttons     # estado y versión de un módulo
+    python3 scripts/odoo_rpc.py views account.move form               # botones de la cabecera y menú ⚙ que VE el usuario
+    python3 scripts/odoo_rpc.py views account.move list               # (list | kanban | form; sirve para revisar un deploy sin capturas)
 
 Escrituras (cambian la BD de producción; CLAUDE.md regla 6: antes se le explica a Andrés qué se va a hacer y
 se espera su "sí" explícito, caso por caso). Por defecto son SIMULACRO: solo muestran qué harían. Solo se
@@ -33,7 +35,7 @@ import os
 import sys
 import urllib.request
 
-READ_METHODS = {'search_read', 'search_count', 'read', 'fields_get', 'name_search'}
+READ_METHODS = {'search_read', 'search_count', 'read', 'fields_get', 'name_search', 'get_views'}
 FORBIDDEN_METHODS = {'unlink'}
 
 
@@ -68,6 +70,29 @@ def call(model, method, args, kwargs=None, allow_write=False):
     return data.get('result')
 
 
+def print_views_summary(data, vtype):
+    """Resumen legible de get_views: botones de la cabecera (con su condición de visibilidad), columnas /
+    campos y acciones del menú ⚙ (toolbar). Solo lectura."""
+    from lxml import etree
+    view = data['views'][vtype]
+    arch = etree.fromstring(view['arch'].encode())
+    print('== BOTONES DE LA CABECERA ==')
+    for b in arch.xpath('//header/button'):
+        inv = b.get('invisible')
+        if inv == '1' or inv == 'True':
+            continue
+        print('  - %s  [%s]%s' % (b.get('string') or b.get('name'), b.get('name'),
+                                  '  (visible según: %s)' % ' '.join(inv.split())[:90] if inv else ''))
+    if vtype in ('list', 'kanban'):
+        print('== CAMPOS ==')
+        print('  ' + ', '.join(f.get('name') for f in arch.xpath('//field') if f.get('column_invisible') != 'True'
+                               and f.get('invisible') != '1'))
+    print('== MENÚ ⚙ (acciones) ==')
+    for kind, items in (view.get('toolbar') or data.get('toolbar') or {}).items():
+        for item in items:
+            print('  - [%s] %s' % (kind, item.get('name')))
+
+
 def main():
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument('action', help='search_read | search_count | read | fields_get | name_search | module '
@@ -88,6 +113,13 @@ def main():
     if opts.action == 'module':
         result = call('ir.module.module', 'search_read', [[['name', '=', opts.model]]],
                       {'fields': ['name', 'state', 'latest_version', 'installed_version', 'write_date']})
+    elif opts.action == 'views':
+        # Lo que Odoo le entrega al navegador para esa vista: botones, columnas y acciones del menú ⚙.
+        vtype = opts.arg if opts.arg in ('form', 'list', 'kanban', 'search') else 'form'
+        ctx = json.loads(opts.context) or {'lang': 'es_419'}
+        data = call(opts.model, 'get_views', [[[False, vtype]]], {'options': {'toolbar': True}, 'context': ctx})
+        print_views_summary(data, vtype)
+        return
     elif opts.action == 'search_read':
         kwargs = {'fields': fields, 'limit': opts.limit}
         _ctx = json.loads(opts.context)

@@ -137,4 +137,10 @@
         <field name="code">records[:1].button_draft()
 action = {'type': 'ir.actions.client', 'tag': 'soft_reload'}</field>
     </record>
+
+    <!-- Quitar del menú ⚙ del pedido el "Pagar" nativo de Odoo: repite el botón Pagar de la cabecera (abre la
+         misma ventana de pago) y solo confunde a las chicas. Se desvincula; la acción sigue existiendo. -->
+    <record id="account.action_move_force_register_payment" model="ir.actions.server">
+        <field name="binding_model_id" eval="False"/>
+    </record>
 </odoo>
