@@ -388,11 +388,21 @@ export class DkCameraDialog extends Component {
         }
         try {
             this.stream = await navigator.mediaDevices.getUserMedia({
-                video: {
-                    facingMode: { ideal: this.state.facing },
-                    width: { ideal: 4096 },
-                    height: { ideal: 2160 },
-                },
+                // Visor fluido: con ImageCapture la FOTO sale a la resolución completa del sensor sin importar el
+                // tamaño del visor, así que el visor va a 1080p y hasta 60 cuadros. Sin ImageCapture (iPhone) la
+                // foto sale del visor, entonces ahí se pide la mayor resolución.
+                video: window.ImageCapture
+                    ? {
+                          facingMode: { ideal: this.state.facing },
+                          width: { ideal: 1920 },
+                          height: { ideal: 1080 },
+                          frameRate: { ideal: 60 },
+                      }
+                    : {
+                          facingMode: { ideal: this.state.facing },
+                          width: { ideal: 4096 },
+                          height: { ideal: 2160 },
+                      },
                 audio: false,
             });
         } catch {
@@ -703,6 +713,49 @@ export class DkCameraDialog extends Component {
     }
 }
 
+
+// ---------------------------------------------------------------------------------------------
+// Ventana "Cámara / Archivos" que sale al pulsar el clip en celular y tablet
+// ---------------------------------------------------------------------------------------------
+class DkAttachChoice extends Component {
+    static template = "stock_picking_sale_buttons.DkAttachChoice";
+    static components = { Dialog };
+    static props = {
+        close: Function,
+        attachmentsCount: { type: Number, optional: true },
+        onCamera: Function,
+        onFiles: Function,
+        onList: Function,
+    };
+
+    setup() {
+        this.filesRef = useRef("files");
+    }
+
+    pickCamera() {
+        this.props.close();
+        this.props.onCamera();
+    }
+
+    pickFiles() {
+        this.filesRef.el.click(); // la ventana se queda abierta hasta que llegue el archivo (el input vive aquí)
+    }
+
+    pickList() {
+        this.props.close();
+        this.props.onList();
+    }
+
+    async onFiles(ev) {
+        const files = [...(ev.target.files || [])];
+        ev.target.value = "";
+        this.props.close();
+        if (files.length) {
+            await this.props.onFiles(files);
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------------------------
 // El clip del log: archivos originales -> cola guardada en el teléfono -> subida en segundo plano
 // ---------------------------------------------------------------------------------------------
@@ -757,17 +810,46 @@ patch(Chatter.prototype, {
         });
     },
 
-    // El clip: en celulares y tablets abre la cámara; en computadora (mouse) sigue el selector de archivos normal.
+    // El clip: en celulares y tablets pregunta "Cámara o Archivos"; en computadora (mouse) sigue el selector normal.
+    get dkIsTouch() {
+        return Boolean(window.matchMedia?.("(pointer: coarse)").matches && navigator.mediaDevices?.getUserMedia);
+    },
+
+    dkOpenChoice() {
+        this.dkDialog.add(DkAttachChoice, {
+            attachmentsCount: this.attachments?.length || 0,
+            onCamera: () => this.onClickDkCamera(),
+            onFiles: (files) => this.dkQueueFiles(files),
+            onList: () => {
+                this.state.isAttachmentBoxOpened = true;
+                if (this.rootRef?.el) {
+                    this.rootRef.el.scrollTop = 0;
+                }
+                this.state.thread.scrollTop = "bottom";
+            },
+        });
+    },
+
+    // Sin archivos todavía: el clip es el selector de Odoo; aquí se cambia por la ventana de elegir.
     async onClickAttachFile(ev) {
         const result = await super.onClickAttachFile(...arguments); // guarda el documento si es nuevo
         if (result === false) {
             return false;
         }
-        if (window.matchMedia?.("(pointer: coarse)").matches && navigator.mediaDevices?.getUserMedia) {
-            this.onClickDkCamera();
+        if (this.dkIsTouch) {
+            this.dkOpenChoice();
             return false; // no abrir el selector del sistema
         }
         return result;
+    },
+
+    // Con archivos ya subidos, Odoo usa el clip para abrir/cerrar la lista: en celular/tablet preguntamos primero.
+    onClickAddAttachments() {
+        if (this.dkIsTouch && this.state.thread.canPostMessage) {
+            this.dkOpenChoice();
+            return;
+        }
+        return super.onClickAddAttachments(...arguments);
     },
 
     async onClickDkCamera() {

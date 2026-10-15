@@ -4,7 +4,7 @@
 .dkc-dialog .modal-body { overflow: hidden; }
 
 .dkc {
-    --g-bg: rgba(28, 30, 36, .46);
+    --g-bg: rgba(28, 30, 36, .58);
     --g-line: rgba(255, 255, 255, .16);
     --g-blur: blur(22px) saturate(1.45);
     --acc: #4C8DFF;
@@ -16,12 +16,15 @@
 .dkc button:disabled { opacity: .4; cursor: default; }
 .dkc svg { width: 22px; height: 22px; stroke: #fff; fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
 
-/* cristal */
-.dkc-ib, .dkc-chip, .dkc-zoom, .dkc-strip, .dkc-dock, .dkc-sheet, .dkc-undo, .dkc-upload {
+/* cristal: translúcido sobre el visor. El DESENFOQUE (backdrop-filter) solo va en la revisión (foto quieta):
+   sobre el video en vivo obligaba al teléfono a desenfocar cada cuadro y el visor se sentía a 15-20 FPS. */
+.dkc-ib, .dkc-chip, .dkc-zoom, .dkc-strip, .dkc-dock, .dkc-sheet, .dkc-undo, .dkc-upload, .dkc-gallery {
     background: var(--g-bg);
-    -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur);
     border: 1px solid var(--g-line);
-    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2), 0 10px 32px rgba(0, 0, 0, .28);
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, .2);
+}
+.dkc-review .dkc-ib, .dkc-review .dkc-chip, .dkc-review .dkc-sheet, .dkc-review .dkc-upload, .dkc-undo {
+    -webkit-backdrop-filter: var(--g-blur); backdrop-filter: var(--g-blur);
 }
 
 /* visor */
@@ -96,6 +99,8 @@
 .dkc-shutter:active i { transform: scale(.88); }
 .dkc-shutter.is-video i { background: #FF3B30; }
 .dkc-shutter.is-rec i { border-radius: 14px; transform: scale(.55); background: #FF3B30; }
+.dkc-gallery { width: 58px; height: 58px; border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+.dkc-gallery svg { width: 26px; height: 26px; }
 .dkc-rec { width: 56px; height: 56px; border-radius: 50%; border: 3px solid #fff !important; display: flex; align-items: center; justify-content: center; }
 .dkc-rec i { display: block; width: 22px; height: 22px; border-radius: 50%; background: #FF3B30; }
 .dkc-rec.is-rec i { border-radius: 5px; }
@@ -128,3 +133,14 @@
     .dkc-sheet { left: 50%; right: auto; width: 560px; margin-left: -280px; }
     .dkc-undo { bottom: calc(env(safe-area-inset-bottom, 0px) + 190px); }
 }
+
+/* ¿Cámara o archivos? */
+.dkc-choice .modal-body { padding: 12px !important; }
+.dkc-choose { display: flex; flex-direction: column; gap: 10px; }
+.dkc-opt { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 16px; border-radius: 16px;
+    border: 1px solid #D9DCE3; background: #F4F6FA; color: #1B1D23; min-height: 68px; }
+.dkc-opt i { font-size: 26px; width: 34px; text-align: center; color: #0B1F3A; }
+.dkc-opt b { display: block; font-size: 17px; font-weight: 800; }
+.dkc-opt small { display: block; font-size: 13px; color: #5B6272; }
+.dkc-opt.is-cam { background: #0B1F3A; border-color: #0B1F3A; color: #fff; }
+.dkc-opt.is-cam i, .dkc-opt.is-cam small { color: #fff; }
