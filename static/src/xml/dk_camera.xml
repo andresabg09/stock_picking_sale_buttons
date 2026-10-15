@@ -137,7 +137,7 @@
                                 <svg viewBox="0 0 24 24"><path d="M5 7h14M10 7V4h4v3M7 7l1 13h8l1-13"/></svg>Descartar
                             </button>
                             <button type="button" class="dkc-btn is-yes" t-on-click="closeReview">
-                                <svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>Conservar y seguir
+                                <svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>Conservar
                             </button>
                         </div>
                         <div class="dkc-cap">Toca la foto para acercarla. Desliza para ver la siguiente.</div>
