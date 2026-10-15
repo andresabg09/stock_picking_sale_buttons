@@ -105,8 +105,7 @@
 
                 <!-- revisar -->
                 <div class="dkc-review" t-if="reviewItem">
-                    <div class="dkc-rv-media" t-on-touchstart="onSwipeStart" t-on-touchend="onSwipeEnd" t-on-click="toggleZoomIn"
-                         t-att-class="{ 'is-zoomed': state.zoomedIn }">
+                    <div class="dkc-rv-media" t-ref="rvMedia">
                         <video t-if="reviewItem.kind === 'video'" t-att-src="reviewItem.url" controls="" playsinline=""/>
                         <img t-elif="reviewItem.kind === 'photo'" t-att-src="reviewItem.url" alt="Foto"/>
                         <div t-else="" class="dkc-doc big"><i class="fa fa-file-o"/><span t-out="reviewItem.name"/></div>
@@ -140,7 +139,7 @@
                                 <svg viewBox="0 0 24 24"><path d="M5 12l5 5 9-10"/></svg>Conservar
                             </button>
                         </div>
-                        <div class="dkc-cap">Toca la foto para acercarla. Desliza para ver la siguiente.</div>
+                        <div class="dkc-cap">Pellizca o toca dos veces para acercar. Desliza para ver la siguiente.</div>
                     </div>
                 </div>
 
@@ -158,15 +157,15 @@
     <t t-name="stock_picking_sale_buttons.DkAttachChoice">
         <Dialog size="'sm'" title="'Agregar al log'" footer="false" contentClass="'dkc-choice'">
             <div class="dkc-choose">
-                <button type="button" class="dkc-opt is-cam" t-on-click="pickCamera">
+                <button type="button" class="dkc-opt btn btn-primary" t-on-click="pickCamera">
                     <i class="fa fa-camera"/>
                     <span><b>Cámara</b><small>Varias fotos y videos seguidos</small></span>
                 </button>
-                <button type="button" class="dkc-opt" t-on-click="pickFiles">
+                <button type="button" class="dkc-opt btn btn-secondary" t-on-click="pickFiles">
                     <i class="fa fa-folder-open-o"/>
                     <span><b>Archivos</b><small>Carrete, PDF, Excel…</small></span>
                 </button>
-                <button t-if="props.attachmentsCount" type="button" class="dkc-opt" t-on-click="pickList">
+                <button t-if="props.attachmentsCount" type="button" class="dkc-opt btn btn-secondary" t-on-click="pickList">
                     <i class="fa fa-paperclip"/>
                     <span><b>Ver adjuntos</b><small><t t-out="props.attachmentsCount"/> archivo(s) en este documento</small></span>
                 </button>

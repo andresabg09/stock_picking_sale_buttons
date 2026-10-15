@@ -19,13 +19,14 @@
 //  * La subida usa el mismo servicio de adjuntos de Odoo (mismos permisos y mismo lugar del log).
 // El botón normal de adjuntar de Odoo sigue funcionando igual.
 
-import { Component, onMounted, onWillUnmount, reactive, useRef, useState } from "@odoo/owl";
+import { Component, onMounted, onWillUnmount, reactive, useEffect, useRef, useState } from "@odoo/owl";
 import { registry } from "@web/core/registry";
 import { patch } from "@web/core/utils/patch";
 import { useService } from "@web/core/utils/hooks";
 import { Dialog } from "@web/core/dialog/dialog";
 import { Chatter } from "@mail/chatter/web_portal/chatter";
 import { FileUploader } from "@web/views/fields/file_handler";
+import { DkZoom } from "@stock_picking_sale_buttons/js/dk_zoom";
 
 const MAX_VIDEO_SECONDS = 60;
 const RETRY_DELAYS = [5, 15, 30, 60, 120, 300]; // segundos
@@ -293,6 +294,7 @@ export class DkCameraDialog extends Component {
         this.notification = useService("notification");
         this.videoRef = useRef("video");
         this.nativeRef = useRef("native");
+        this.rvRef = useRef("rvMedia");
         this.state = useState({
             error: "",
             recording: false,
@@ -306,7 +308,6 @@ export class DkCameraDialog extends Component {
             mp: 0,
             online: navigator.onLine !== false,
             review: null, // id del archivo que se está revisando
-            zoomedIn: false,
             shot: false,
             undo: null,
         });
@@ -318,9 +319,28 @@ export class DkCameraDialog extends Component {
         this.recordTimer = null;
         this.undoTimer = null;
         this.pinch = null;
-        this.swipeX = null;
+        this.zoomer = null;
         this.onOnline = () => (this.state.online = true);
         this.onOffline = () => (this.state.online = false);
+        useEffect(
+            (el) => {
+                if (!el) {
+                    return;
+                }
+                this.zoomer = new DkZoom({
+                    container: el,
+                    getTarget: () => el.querySelector("img, video"),
+                    isVideo: () => this.reviewItem?.kind === "video",
+                    onSwipe: (dir) => this.step(dir),
+                });
+                this.zoomer.attach();
+                return () => {
+                    this.zoomer.detach();
+                    this.zoomer = null;
+                };
+            },
+            () => [this.rvRef.el]
+        );
         onMounted(() => {
             window.addEventListener("online", this.onOnline);
             window.addEventListener("offline", this.onOffline);
@@ -614,7 +634,7 @@ export class DkCameraDialog extends Component {
     // ---- revisar ----
     openReview(id) {
         this.state.review = id;
-        this.state.zoomedIn = false;
+        this.zoomer?.reset();
     }
 
     openLast() {
@@ -625,7 +645,7 @@ export class DkCameraDialog extends Component {
 
     closeReview() {
         this.state.review = null;
-        this.state.zoomedIn = false;
+        this.zoomer?.reset();
     }
 
     step(delta) {
@@ -635,22 +655,6 @@ export class DkCameraDialog extends Component {
         if (next) {
             this.openReview(next.id);
         }
-    }
-
-    onSwipeStart(ev) {
-        this.swipeX = ev.touches?.[0]?.clientX ?? null;
-    }
-
-    onSwipeEnd(ev) {
-        const x = ev.changedTouches?.[0]?.clientX;
-        if (this.swipeX !== null && x !== undefined && Math.abs(x - this.swipeX) > 60) {
-            this.step(x < this.swipeX ? 1 : -1);
-        }
-        this.swipeX = null;
-    }
-
-    toggleZoomIn() {
-        this.state.zoomedIn = !this.state.zoomedIn;
     }
 
     async discard() {

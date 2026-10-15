@@ -107,9 +107,8 @@
 
 /* revisar */
 .dkc-review { position: absolute; inset: 0; z-index: 5; background: #000; }
-.dkc-rv-media { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; }
-.dkc-rv-media img, .dkc-rv-media video { max-width: 100%; max-height: 100%; object-fit: contain; transition: transform .25s ease; }
-.dkc-rv-media.is-zoomed img { transform: scale(2.6); }
+.dkc-rv-media { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; overflow: hidden; touch-action: none; }
+.dkc-rv-media img, .dkc-rv-media video { max-width: 100%; max-height: 100%; object-fit: contain; -webkit-user-drag: none; user-select: none; }
 .dkc-sheet { position: absolute; left: 10px; right: 10px; z-index: 4; border-radius: 30px; padding: 14px; display: flex; flex-direction: column; gap: 14px;
     bottom: calc(env(safe-area-inset-bottom, 0px) + 18px); }
 .dkc-actions { display: flex; gap: 12px; }
@@ -134,13 +133,9 @@
     .dkc-undo { bottom: calc(env(safe-area-inset-bottom, 0px) + 190px); }
 }
 
-/* ¿Cámara o archivos? */
-.dkc-choice .modal-body { padding: 12px !important; }
+/* ¿Cámara o archivos? Usa los botones y colores de Odoo (btn-primary / btn-secondary): nada de colores propios. */
 .dkc-choose { display: flex; flex-direction: column; gap: 10px; }
-.dkc-opt { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 16px; border-radius: 16px;
-    border: 1px solid #D9DCE3; background: #F4F6FA; color: #1B1D23; min-height: 68px; }
-.dkc-opt i { font-size: 26px; width: 34px; text-align: center; color: #0B1F3A; }
-.dkc-opt b { display: block; font-size: 17px; font-weight: 800; }
-.dkc-opt small { display: block; font-size: 13px; color: #5B6272; }
-.dkc-opt.is-cam { background: #0B1F3A; border-color: #0B1F3A; color: #fff; }
-.dkc-opt.is-cam i, .dkc-opt.is-cam small { color: #fff; }
+.dkc-opt { display: flex; align-items: center; gap: 14px; width: 100%; text-align: left; padding: 14px 16px; min-height: 68px; }
+.dkc-opt i { font-size: 26px; width: 34px; text-align: center; }
+.dkc-opt b { display: block; font-size: 1.1rem; font-weight: 600; }
+.dkc-opt small { display: block; font-size: .85rem; opacity: .8; }
