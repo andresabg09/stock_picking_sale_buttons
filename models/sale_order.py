@@ -1,9 +1,13 @@
+from datetime import timedelta
+
 from odoo import models, fields, api
 from odoo.exceptions import UserError
 
 TINTE_NNP_MIN_PRICE = 1.16
 
-DIANKE_EMAIL_TO = "ventasdianke@gmail.com,Dianazuniga@diankegroup.com,kenniarueda@diankegroup.com"
+DIANKE_EMAIL_TO = (
+    "ventasdianke@gmail.com,Dianazuniga@diankegroup.com,kenniarueda@diankegroup.com,logistica@diankegroup.com"
+)
 DIANKE_EMAIL_CC = "andres@shalompma.com,luis@shalompma.com,milciades@shalompma.com"
 
 DIANKE_GODREJ_POCKET_UNITS_PER_DISPLAY = 6  # las 6 referencias AMB GODREJ POCKET se manejan por display; Dianke las necesita en unidades
@@ -731,6 +735,17 @@ class SaleOrder(models.Model):
 
         ws.freeze_panes = None
 
+    @staticmethod
+    def _dianke_saludo_panama():
+        """Saludo según la hora de Panamá (UTC-5, sin horario de verano), pedido de Andrés 2026-10-19:
+        5:00-11:59 Buenos días · 12:00-17:59 Buenas tardes · 18:00-4:59 Buenas noches."""
+        hora = (fields.Datetime.now() - timedelta(hours=5)).hour
+        if 5 <= hora < 12:
+            return "Buenos días"
+        if 12 <= hora < 18:
+            return "Buenas tardes"
+        return "Buenas noches"
+
     def _dianke_subject_and_body(self, orders):
         """Arma asunto y cuerpo del correo a Dianke, en singular o plural
         según la cantidad de órdenes — texto acordado con Andrés
@@ -763,22 +778,14 @@ class SaleOrder(models.Model):
             pedido_texto = "el pedido confirmado"
             listo_texto = "listo"
 
+        saludo = self._dianke_saludo_panama()
         body = """
 <div style="margin: 0px; padding: 0px;">
     <p style="margin: 0px; padding: 0px; font-size: 13px;">
-        Querido equipo de Dianke,
+        %s, querido equipo de Dianke.
         <br/><br/>
         Adjunto el Excel con %s (<strong>%s</strong>), %s para su revisión e importación al sistema.
-        Ahí está toda la información acordada; si necesitan algún ajuste, por favor identifíquenlo
-        para poder corregirlo.
         <br/><br/>
-        Así mismo, solicitamos su especial atención a las siguientes especificaciones de despacho:
-        <br/><br/>
-        <ul style="margin: 0px; padding-left: 20px;">
-            <li>Presentación de Productos NNP: todos los artículos se solicitan en unidades individuales.</li>
-            <li>Ambientadores Pocket: también se envían en unidades — ya se ajustó la conversión desde display para facilitarles la recepción e importación.</li>
-        </ul>
-        <br/>
         Quedo a su disposición ante cualquier consulta adicional.
         <br/><br/>
         ¿Podría confirmar que recibió esta orden?
@@ -790,7 +797,7 @@ class SaleOrder(models.Model):
         <br/><br/>
     </p>
 </div>
-""" % (pedido_texto, names_str, listo_texto)
+""" % (saludo, pedido_texto, names_str, listo_texto)
 
         return subject, body
 
