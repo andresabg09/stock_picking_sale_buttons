@@ -39,8 +39,9 @@
             <xpath expr="//list//field[@name='product_template_id']" position="after">
                 <field name="custom_product_barcode" string="Código"/>
                 <field name="custom_promo_status" string="Promo" readonly="1"
-                       decoration-success="custom_promo_status and 'COMPLETA' in custom_promo_status"
-                       decoration-danger="custom_promo_status and 'COMPLETA' not in custom_promo_status"/>
+                       decoration-success="custom_promo_status and 'Faltan' not in custom_promo_status"
+                       decoration-danger="custom_promo_status and 'Faltan' in custom_promo_status"
+                       decoration-bf="custom_promo_status"/>
             </xpath>
 
             <!-- Wrap en columna producto -->
