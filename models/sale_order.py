@@ -966,6 +966,31 @@ class SaleOrderLine(models.Model):
                         cat = cat.parent_id
         return None, None
 
+    # --- Producto de regalo (recompensa) siempre a precio 0 ---------------------------------------
+    # Odoo crea la línea del regalo con el precio real del producto y 100 % de descuento; unas veces
+    # se queda con el precio y otras queda en 0, y las líneas con precio contaban como productos
+    # pagados en la columna Promo ("te faltan N" aunque la promo estaba completa). Pedido de Andrés
+    # 2026-10-19: TODAS las líneas de regalo se muestran a 0, como las demás.
+    def _dk_zero_reward_price(self):
+        for line in self:
+            if (
+                line.is_reward_line
+                and line.reward_id.reward_type == 'product'
+                and line.price_unit
+                and not line.qty_invoiced
+            ):
+                line.price_unit = 0.0
+
+    def _compute_price_unit(self):
+        super()._compute_price_unit()
+        self._dk_zero_reward_price()
+
+    @api.model_create_multi
+    def create(self, vals_list):
+        lines = super().create(vals_list)
+        lines.filtered('is_reward_line')._dk_zero_reward_price()
+        return lines
+
     @api.depends(
         'product_id', 'product_uom_qty', 'price_unit',
         'order_id.order_line.product_id',
@@ -999,6 +1024,8 @@ class SaleOrderLine(models.Model):
             for ol in line.order_id.order_line:
                 if ol.display_type or not ol.product_id:
                     continue
+                if ol.is_reward_line:
+                    continue  # el producto de regalo nunca suma a la promo, aunque muestre precio
                 _, ol_rule = self._get_matched_program(ol, programs)
                 if ol_rule != rule:
                     continue
