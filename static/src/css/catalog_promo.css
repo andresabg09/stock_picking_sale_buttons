@@ -43,6 +43,41 @@
     justify-content: center;
     overflow: hidden;
 }
+/* Nevada: lo que dice su lista semanal, en la esquina de abajo a la derecha de la foto (amarillo; gris si la
+   lista tiene más de 7 días). Solo informativo: nunca se suma a lo disponible de Dianke. */
+.dk-catalog-img {
+    position: relative;
+}
+.dk-nv-badge {
+    position: absolute;
+    right: 6px;
+    bottom: 6px;
+    max-width: calc(100% - 12px);
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 3px 10px 3px 8px;
+    background: #fff;
+    border: 1px solid #ced4da;
+    border-radius: 999px;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.15);
+    font-size: 0.78rem;
+    font-weight: 500;
+    line-height: 1.3;
+    color: #343a40;
+    white-space: nowrap;
+}
+.dk-nv-dot {
+    flex: none;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #f2b400;
+}
+.dk-nv-old .dk-nv-dot {
+    background: #9aa0a6;
+}
+
 /* derecha: precio, existencia, código y atributos, uno debajo del otro */
 .dk-catalog-card [name="o_kanban_price"] {
     grid-column: 2;

@@ -13,4 +13,5 @@ access_dkh_quick_alias_manager,dkh.quick.alias.manager,model_dkh_quick_alias,sal
 access_dkh_quick_alias_user,dkh.quick.alias.user,model_dkh_quick_alias,base.group_user,1,0,0,0
 access_dk_route_sheet_user,dk.route.sheet.user,model_dk_route_sheet,base.group_user,1,1,1,0
 access_dk_route_sheet_line_user,dk.route.sheet.line.user,model_dk_route_sheet_line,base.group_user,1,1,1,0
+access_dk_nevada_stock_wizard_manager,dk.nevada.stock.wizard.manager,model_dk_nevada_stock_wizard,stock.group_stock_manager,1,1,1,1
 access_dk_route_sheet_wizard_user,dk.route.sheet.wizard.user,model_dk_route_sheet_wizard,base.group_user,1,1,1,1

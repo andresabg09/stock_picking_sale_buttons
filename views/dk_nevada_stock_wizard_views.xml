@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Cargar la lista semanal de existencias de Nevada (solo informativa; ver models/dk_nevada_stock_wizard.py).
+         Menú: Inventario > Operaciones > Cargar lista de Nevada. Funciona desde la empresa Dianke, sin cambiar
+         de empresa. Primero se revisa (no cambia nada) y recién después se aplica. -->
+    <record id="view_dk_nevada_stock_wizard_form" model="ir.ui.view">
+        <field name="name">dk.nevada.stock.wizard.form</field>
+        <field name="model">dk.nevada.stock.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Cargar lista de Nevada">
+                <field name="state" invisible="1"/>
+                <field name="filename" invisible="1"/>
+                <div class="alert alert-info" role="alert" invisible="state != 'draft'">
+                    Sube el Excel que manda Nevada cada semana (código de barras y cantidad). La bodega de Nevada
+                    queda igual a esa lista; sirve solo para que los vendedores vean, en el catálogo, cuánto dice
+                    Nevada que tiene. No mueve nada de Dianke.
+                </div>
+                <group invisible="state != 'draft'">
+                    <field name="file" filename="filename"/>
+                    <field name="zero_missing"/>
+                </group>
+                <field name="summary" nolabel="1" invisible="state == 'draft'"/>
+                <footer>
+                    <button name="action_preview" string="Revisar lista" type="object" class="btn-primary"
+                            invisible="state != 'draft'"/>
+                    <button name="action_apply" string="Aplicar en la bodega de Nevada" type="object" class="btn-primary"
+                            invisible="state != 'preview'"
+                            confirm="Esto actualiza las existencias de la bodega de Nevada. ¿Continuar?"/>
+                    <button name="action_back" string="Cambiar archivo" type="object" class="btn-secondary"
+                            invisible="state != 'preview'"/>
+                    <button string="Cerrar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dk_nevada_stock_wizard" model="ir.actions.act_window">
+        <field name="name">Cargar lista de Nevada</field>
+        <field name="res_model">dk.nevada.stock.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+    </record>
+
+    <menuitem id="menu_dk_nevada_stock_wizard"
+              name="Cargar lista de Nevada"
+              parent="stock.menu_stock_warehouse_mgmt"
+              action="action_dk_nevada_stock_wizard"
+              groups="stock.group_stock_manager"
+              sequence="90"/>
+</odoo>

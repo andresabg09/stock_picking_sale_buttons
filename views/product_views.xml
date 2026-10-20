@@ -27,9 +27,22 @@
         <field name="model">product.product</field>
         <field name="inherit_id" ref="product.product_view_kanban_catalog"/>
         <field name="arch" type="xml">
+            <xpath expr="//field[@name='id']" position="after">
+                <field name="dk_nevada_label"/>
+                <field name="dk_nevada_tone"/>
+                <field name="dk_nevada_tip"/>
+            </xpath>
             <xpath expr="//field[@name='image_128']" position="replace">
                 <div class="dk-catalog-img">
                     <field name="image_512" widget="image" options="{'img_class': 'mw-100 mh-100 object-fit-contain'}" alt="Product" invisible="not image_512"/>
+                    <!-- Lo que dice Nevada que tiene (su lista semanal): solo informativo, nunca se suma a
+                         lo disponible de Dianke. Ver models/product_stock_label.py. -->
+                    <span t-if="record.dk_nevada_label.raw_value"
+                          t-attf-class="dk-nv-badge dk-nv-{{ record.dk_nevada_tone.raw_value }}"
+                          t-att-title="record.dk_nevada_tip.raw_value">
+                        <i class="dk-nv-dot"/>
+                        <t t-out="record.dk_nevada_label.raw_value"/>
+                    </span>
                 </div>
             </xpath>
         </field>
