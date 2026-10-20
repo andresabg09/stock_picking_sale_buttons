@@ -1,7 +1,10 @@
 import base64
 import io
+import logging
 
 from odoo import models
+
+_logger = logging.getLogger(__name__)
 
 
 class ProductProduct(models.Model):
@@ -32,5 +35,8 @@ class ProductProduct(models.Model):
             out = io.BytesIO()
             image.save(out, format='JPEG', quality=90)
             return 'data:image/jpeg;base64,%s' % base64.b64encode(out.getvalue()).decode()
-        except Exception:
-            return False
+        except Exception as error:
+            # Sin poder convertir: se entrega la foto original (como antes de esta función), nunca una fila vacía.
+            _logger.warning("PDF: no se pudo convertir la foto de %s (%s): %s", self.display_name, data[:12], error)
+            mime = 'webp' if data[:4] == b'RIFF' else 'png'
+            return 'data:image/%s;base64,%s' % (mime, raw.decode())
