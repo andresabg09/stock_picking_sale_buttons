@@ -13,8 +13,8 @@
         <!-- TABLA PENDIENTE: celda imagen y código por fila -->
         <xpath expr="//table[@name='stock_move_table']//tr//td[position()=1]" position="before">
             <td style="width:90px;">
-                <img t-if="move.product_id.image_1024"
-                     t-att-src="image_data_uri(move.product_id.image_1024)"
+                <img t-if="move.product_id.image_256"
+                     t-att-src="image_data_uri(move.product_id.image_256)"
                      style="max-height:90px;max-width:90px;object-fit:contain;"/>
             </td>
         </xpath>
@@ -36,8 +36,8 @@
     <template id="stock_report_delivery_has_serial_move_line_inherit" inherit_id="stock.stock_report_delivery_has_serial_move_line">
         <xpath expr="//td[1]" position="before">
             <td style="width:90px;">
-                <img t-if="move_line.product_id.image_1024"
-                     t-att-src="image_data_uri(move_line.product_id.image_1024)"
+                <img t-if="move_line.product_id.image_256"
+                     t-att-src="image_data_uri(move_line.product_id.image_256)"
                      style="max-height:90px;max-width:90px;object-fit:contain;"/>
             </td>
         </xpath>
@@ -50,8 +50,8 @@
     <template id="stock_report_delivery_aggregated_move_lines_inherit" inherit_id="stock.stock_report_delivery_aggregated_move_lines">
         <xpath expr="//td[1]" position="before">
             <td style="width:90px;">
-                <img t-if="aggregated_lines[line].get('product') and aggregated_lines[line]['product'].image_1024"
-                     t-att-src="image_data_uri(aggregated_lines[line]['product'].image_1024)"
+                <img t-if="aggregated_lines[line].get('product') and aggregated_lines[line]['product'].image_256"
+                     t-att-src="image_data_uri(aggregated_lines[line]['product'].image_256)"
                      style="max-height:90px;max-width:90px;object-fit:contain;"/>
             </td>
         </xpath>
