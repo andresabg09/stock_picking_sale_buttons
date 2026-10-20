@@ -14,7 +14,7 @@
         <xpath expr="//table[@name='stock_move_table']//tr//td[position()=1]" position="before">
             <td style="width:90px;">
                 <img t-if="move.product_id.image_256"
-                     t-att-src="image_data_uri(move.product_id.image_256)"
+                     t-att-src="move.product_id._dk_report_img()"
                      style="max-height:90px;max-width:90px;object-fit:contain;"/>
             </td>
         </xpath>
@@ -37,7 +37,7 @@
         <xpath expr="//td[1]" position="before">
             <td style="width:90px;">
                 <img t-if="move_line.product_id.image_256"
-                     t-att-src="image_data_uri(move_line.product_id.image_256)"
+                     t-att-src="move_line.product_id._dk_report_img()"
                      style="max-height:90px;max-width:90px;object-fit:contain;"/>
             </td>
         </xpath>
@@ -51,7 +51,7 @@
         <xpath expr="//td[1]" position="before">
             <td style="width:90px;">
                 <img t-if="aggregated_lines[line].get('product') and aggregated_lines[line]['product'].image_256"
-                     t-att-src="image_data_uri(aggregated_lines[line]['product'].image_256)"
+                     t-att-src="aggregated_lines[line]['product']._dk_report_img()"
                      style="max-height:90px;max-width:90px;object-fit:contain;"/>
             </td>
         </xpath>

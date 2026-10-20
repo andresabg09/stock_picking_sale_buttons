@@ -16,7 +16,7 @@
         <xpath expr="//td[@name='account_invoice_line_name']" position="before">
             <td name="td_image" style="width:90px;">
                 <img t-if="line.product_id.image_256"
-                     t-att-src="image_data_uri(line.product_id.image_256)"
+                     t-att-src="line.product_id._dk_report_img()"
                      style="max-height:90px;max-width:90px;object-fit:contain;"/>
             </td>
         </xpath>
