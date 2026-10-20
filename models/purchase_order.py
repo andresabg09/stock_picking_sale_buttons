@@ -1,4 +1,4 @@
-from odoo import models, fields
+from odoo import api, models, fields
 import math
 import io
 
@@ -30,6 +30,13 @@ class PurchaseOrder(models.Model):
         string='Lista de Precios (Correo)',
         help='Se usa para completar el cuerpo del correo de envío al proveedor.',
     )
+
+    @api.model
+    def retrieve_dashboard(self):
+        """Agrega al panel de Compras cuántos productos están por agotarse (botón "Por agotar")."""
+        result = super().retrieve_dashboard()
+        result['dk_por_agotar'] = self.env['dk.restock'].dk_count()
+        return result
 
     def action_merge(self):
         # Identificar la orden más antigua (la que sobrevive) antes del merge

@@ -7,6 +7,8 @@ from . import sale_order
 from . import sale_order_catalog
 from . import product_stock_label
 from . import dk_nevada_stock_wizard
+from . import product_restock
+from . import dk_restock
 from . import product_report_image
 from . import sale_dianke_email_wizard
 from . import sale_confirm_payment_wizard
