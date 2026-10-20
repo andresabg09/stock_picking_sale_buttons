@@ -15,7 +15,12 @@ redimensionadas en Traslados (`stock.picking`), Ventas (`sale.order`), Facturas
    1. Editar el código localmente (con el visto bueno de qué cambiar).
    2. Claude hace commit + push **automáticamente, sin preguntar antes**, y avisa
       después con un mensaje corto.
-   3. Dar el comando corto de despliegue: `sudo bash .../scripts/deploy.sh` (git pull).
+   3. Dar el comando de despliegue SIEMPRE COMPLETO, sin `...` ni abreviar (Andrés lo copia y lo pega
+      tal cual en su SSH; pedido explícito 2026-10-20), en un bloque de código:
+      ```bash
+      sudo bash /root/odoo-addons/stock_picking_sale_buttons/scripts/deploy.sh
+      ```
+      Lo mismo con cualquier otro comando para su SSH: completo, listo para pegar, en un bloque de código.
    4. Andrés prueba en producción.
    REGLA DEFINITIVA (2026-08-20, confirmada explícitamente por Andrés tras varias
    idas y vueltas — no volver a cambiar sin que él lo pida de nuevo).
