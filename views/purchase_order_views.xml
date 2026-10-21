@@ -81,17 +81,46 @@
     <record id="purchase.purchase_rfq" model="ir.actions.act_window">
         <field name="view_mode">list,form</field>
         <field name="limit">1000000</field>
+        <field name="context">{'quotation_only': True, 'search_default_dk_recientes': 1}</field>
     </record>
     <record id="purchase.purchase_form_action" model="ir.actions.act_window">
         <field name="view_mode">list,form</field>
         <field name="limit">1000000</field>
+        <field name="context">{'search_default_dk_recientes': 1}</field>
     </record>
     <record id="purchase.action_rfq_form" model="ir.actions.act_window">
         <field name="view_mode">list,form</field>
         <field name="limit">1000000</field>
+        <field name="context">{'search_default_dk_recientes': 1}</field>
     </record>
     <record id="purchase.act_res_partner_2_purchase_order" model="ir.actions.act_window">
         <field name="view_mode">list,form</field>
         <field name="limit">1000000</field>
+    </record>
+
+    <!-- Compras arranca "limpio" para Dianke: las compras de enero a agosto de 2026 (historia contable y de inventario,
+         con recepciones hechas y facturas pagadas) NO se borran, solo se ocultan con este filtro, que viene activado por
+         defecto. Para verlas: quitar el filtro "Recientes" de la barra de búsqueda. Fecha de corte fija. -->
+    <record id="view_purchase_rfq_search_dk_recientes" model="ir.ui.view">
+        <field name="name">request.quotation.select.dk.recientes</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.view_purchase_order_filter"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <filter string="Recientes (desde 01/10/2026)" name="dk_recientes"
+                        domain="[('date_order', '&gt;=', '2026-10-01 00:00:00')]"/>
+            </xpath>
+        </field>
+    </record>
+    <record id="view_purchase_order_search_dk_recientes" model="ir.ui.view">
+        <field name="name">purchase.order.select.dk.recientes</field>
+        <field name="model">purchase.order</field>
+        <field name="inherit_id" ref="purchase.purchase_order_view_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//search" position="inside">
+                <filter string="Recientes (desde 01/10/2026)" name="dk_recientes"
+                        domain="[('date_order', '&gt;=', '2026-10-01 00:00:00')]"/>
+            </xpath>
+        </field>
     </record>
 </odoo>
