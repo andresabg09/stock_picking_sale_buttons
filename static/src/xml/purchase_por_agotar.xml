@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <templates xml:space="preserve">
     <!-- Panel de Compras (Todos los RFQ): cuarto botón "Por agotar" al lado de Atrasado, en ámbar, con la
-         cantidad de productos que llegaron a su mínimo. Abre Compras > Por agotar (ver models/dk_restock.py).
+         cantidad de productos que llegaron a su mínimo. Abre Compras > Por agotar (ver models/stock_orderpoint_porgotar.py).
          Los demás botones pasan de 3 a 4 por fila (g-col-4 -> g-col-3) para que quepan. -->
     <t t-name="stock_picking_sale_buttons.PurchaseDashboardPorAgotar"
        t-inherit="purchase.PurchaseDashboard" t-inherit-mode="extension">

@@ -35,7 +35,7 @@ class PurchaseOrder(models.Model):
     def retrieve_dashboard(self):
         """Agrega al panel de Compras cuántos productos están por agotarse (botón "Por agotar")."""
         result = super().retrieve_dashboard()
-        result['dk_por_agotar'] = self.env['dk.restock'].dk_count()
+        result['dk_por_agotar'] = self.env['stock.warehouse.orderpoint'].dk_count()
         return result
 
     def action_merge(self):

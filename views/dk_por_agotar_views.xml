@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Compras > Por agotar = el Reabastecimiento NATIVO de Odoo (reglas con mínimo y máximo) filtrado a la
+         bodega de Dianke y a lo que ya llegó a su mínimo. Diseño "Opción A" aprobado por Andrés
+         (lienzo claude.ai/artifact/2gYoPopN1SaQm31JuZLVsr). Ver models/stock_orderpoint_porgotar.py.
+         Aquí solo se agregan columnas/tarjetas, un filtro y los accesos; "Orden", "Posponer" y "Automatizar"
+         son los de Odoo. -->
+
+    <!-- Lista (computadora y tablet): estado, comprometido, por llegar, Nevada y nota -->
+    <record id="view_orderpoint_tree_dk" model="ir.ui.view">
+        <field name="name">stock.warehouse.orderpoint.list.dk</field>
+        <field name="model">stock.warehouse.orderpoint</field>
+        <field name="inherit_id" ref="stock.view_warehouse_orderpoint_tree_editable"/>
+        <field name="arch" type="xml">
+            <field name="product_id" position="after">
+                <field name="dk_state" widget="badge" decoration-danger="dk_state == 'out'"
+                       decoration-warning="dk_state == 'low'" optional="show"/>
+            </field>
+            <field name="qty_on_hand" position="after">
+                <field name="dk_committed" optional="show"/>
+                <field name="dk_incoming" optional="show"/>
+            </field>
+            <field name="qty_to_order" position="before">
+                <field name="dk_nevada_label" optional="show"/>
+                <field name="dk_note" optional="show"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Tarjetas (celular): foto de 77 px, cajas de bodega / comprometido / por llegar, caja "Por ordenar" -->
+    <record id="view_orderpoint_kanban_dk" model="ir.ui.view">
+        <field name="name">stock.warehouse.orderpoint.kanban.dk</field>
+        <field name="model">stock.warehouse.orderpoint</field>
+        <field name="inherit_id" ref="stock.view_stock_warehouse_orderpoint_kanban"/>
+        <field name="arch" type="xml">
+            <xpath expr="//t[@t-name='card']" position="replace">
+                <t t-name="card">
+                    <div class="d-flex gap-3">
+                        <field name="dk_image" widget="image" options="{'size': [77, 77], 'img_class': 'object-fit-contain'}"/>
+                        <div class="flex-grow-1" style="min-width:0">
+                            <field name="product_id" class="fw-bold"/>
+                            <span t-if="record.dk_state.raw_value"
+                                  t-attf-class="badge mt-1 text-bg-#{record.dk_state.raw_value == 'out' ? 'danger' : 'warning'}">
+                                <field name="dk_state"/>
+                            </span>
+                        </div>
+                    </div>
+                    <div class="row g-1 mt-2 text-center">
+                        <div class="col-4"><div class="bg-100 rounded p-1"><div class="small">En bodega (existencia)</div><b><field name="qty_on_hand"/></b></div></div>
+                        <div class="col-4"><div class="bg-100 rounded p-1"><div class="small">Comprometido</div><b><field name="dk_committed"/></b></div></div>
+                        <div class="col-4"><div class="bg-100 rounded p-1"><div class="small">Por llegar</div><b><field name="dk_incoming"/></b></div></div>
+                        <div class="col-4"><div class="bg-100 rounded p-1"><div class="small">Pronóstico</div><b><field name="qty_forecast"/></b></div></div>
+                        <div class="col-4"><div class="bg-100 rounded p-1"><div class="small">Mínimo</div><b><field name="product_min_qty"/></b></div></div>
+                        <div class="col-4">
+                            <div t-attf-class="rounded p-1 #{record.dk_nevada_label.raw_value ? 'bg-warning-subtle' : 'bg-100'}">
+                                <div class="small">Nevada</div>
+                                <b><t t-out="record.dk_nevada_label.raw_value || '—'"/></b>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="border rounded mt-2">
+                        <div class="d-flex justify-content-between p-2">
+                            <div><div class="small">Por ordenar</div><span class="fs-4 fw-bold"><field name="qty_to_order"/></span></div>
+                            <div class="text-end"><div class="small">Máximo</div><b><field name="product_max_qty"/></b></div>
+                        </div>
+                        <div t-if="record.dk_note.raw_value" class="p-2 fw-bold text-bg-light border-top">
+                            <field name="dk_note"/>
+                        </div>
+                    </div>
+                    <button t-if="record.qty_to_order.raw_value &gt; 0" name="action_replenish" type="object"
+                            class="btn btn-primary w-100 mt-2">Orden</button>
+                </t>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Ficha de la regla: poder ajustar "Por ordenar" y ver lo mismo que en la lista (en celular se llega tocando la tarjeta) -->
+    <record id="view_orderpoint_form_dk" model="ir.ui.view">
+        <field name="name">stock.warehouse.orderpoint.form.dk</field>
+        <field name="model">stock.warehouse.orderpoint</field>
+        <field name="inherit_id" ref="stock.view_warehouse_orderpoint_form"/>
+        <field name="arch" type="xml">
+            <field name="qty_multiple" position="after">
+                <field name="qty_to_order"/>
+                <field name="trigger"/>
+            </field>
+            <field name="visibility_days" position="after">
+                <field name="dk_state"/>
+                <field name="qty_on_hand"/>
+                <field name="dk_committed"/>
+                <field name="dk_incoming"/>
+                <field name="qty_forecast"/>
+                <field name="dk_nevada_label"/>
+                <field name="dk_note"/>
+            </field>
+        </field>
+    </record>
+
+    <!-- Filtro "Por agotar" -->
+    <record id="view_orderpoint_search_dk" model="ir.ui.view">
+        <field name="name">stock.warehouse.orderpoint.search.dk</field>
+        <field name="model">stock.warehouse.orderpoint</field>
+        <field name="inherit_id" ref="stock.stock_reorder_report_search"/>
+        <field name="arch" type="xml">
+            <xpath expr="//filter[@name='filter_to_reorder']" position="before">
+                <filter string="Por agotar (llegó al mínimo)" name="dk_por_agotar"
+                        domain="[('dk_below_min', '=', True)]"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Se abre con un código (usa la pantalla nativa sin crear reglas nuevas); lo usan el menú y el botón del
+         panel de Compras -->
+    <record id="action_dk_por_agotar" model="ir.actions.server">
+        <field name="name">Por agotar</field>
+        <field name="model_id" ref="stock.model_stock_warehouse_orderpoint"/>
+        <field name="state">code</field>
+        <field name="code">action = model.dk_open_por_agotar()</field>
+    </record>
+
+    <menuitem id="menu_dk_por_agotar"
+              name="Por agotar"
+              parent="purchase.menu_procurement_management"
+              action="action_dk_por_agotar"
+              groups="purchase.group_purchase_user"
+              sequence="5"/>
+
+    <!-- Lista de Productos: "Definir mínimo y máximo" a los productos marcados -->
+    <record id="view_dk_orderpoint_bulk_wizard_form" model="ir.ui.view">
+        <field name="name">dk.orderpoint.bulk.wizard.form</field>
+        <field name="model">dk.orderpoint.bulk.wizard</field>
+        <field name="arch" type="xml">
+            <form string="Definir mínimo y máximo">
+                <div class="alert alert-info" role="alert">
+                    Crea (o actualiza) la regla de reabastecimiento de cada producto marcado en la bodega de Dianke,
+                    en modo <strong>Manual</strong> (no hace pedidos solos). El mínimo es la alarma; el máximo es
+                    hasta cuánto pedir (súbelo si quieres surtir de más). Verás el resultado en
+                    Compras &gt; Pedidos &gt; Por agotar.
+                </div>
+                <group>
+                    <field name="product_tmpl_ids" widget="many2many_tags" readonly="1"/>
+                    <field name="min_qty"/>
+                    <field name="max_qty"/>
+                </group>
+                <footer>
+                    <button name="action_apply" type="object" string="Aplicar" class="btn-primary"/>
+                    <button string="Cancelar" special="cancel" class="btn-secondary"/>
+                </footer>
+            </form>
+        </field>
+    </record>
+
+    <record id="action_dk_orderpoint_bulk_wizard" model="ir.actions.act_window">
+        <field name="name">Definir mínimo y máximo</field>
+        <field name="res_model">dk.orderpoint.bulk.wizard</field>
+        <field name="view_mode">form</field>
+        <field name="target">new</field>
+        <field name="binding_model_id" ref="product.model_product_template"/>
+        <field name="binding_view_types">list</field>
+        <field name="groups_id" eval="[(4, ref('stock.group_stock_manager'))]"/>
+    </record>
+</odoo>

@@ -15,6 +15,4 @@ access_dk_route_sheet_user,dk.route.sheet.user,model_dk_route_sheet,base.group_u
 access_dk_route_sheet_line_user,dk.route.sheet.line.user,model_dk_route_sheet_line,base.group_user,1,1,1,0
 access_dk_nevada_stock_wizard_manager,dk.nevada.stock.wizard.manager,model_dk_nevada_stock_wizard,stock.group_stock_manager,1,1,1,1
 access_dk_route_sheet_wizard_user,dk.route.sheet.wizard.user,model_dk_route_sheet_wizard,base.group_user,1,1,1,1
-access_dk_restock_user,dk.restock.user,model_dk_restock,purchase.group_purchase_user,1,1,1,1
-access_dk_restock_line_user,dk.restock.line.user,model_dk_restock_line,purchase.group_purchase_user,1,1,1,1
-access_dk_restock_order_wizard_user,dk.restock.order.wizard.user,model_dk_restock_order_wizard,purchase.group_purchase_user,1,1,1,1
+access_dk_orderpoint_bulk_wizard_manager,dk.orderpoint.bulk.wizard.manager,model_dk_orderpoint_bulk_wizard,stock.group_stock_manager,1,1,1,1
