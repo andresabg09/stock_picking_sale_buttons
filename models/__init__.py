@@ -8,6 +8,7 @@ from . import sale_order_catalog
 from . import product_stock_label
 from . import dk_nevada_stock_wizard
 from . import product_restock
+from . import product_web_stock
 from . import stock_orderpoint_porgotar
 from . import dk_orderpoint_bulk_wizard
 from . import product_report_image

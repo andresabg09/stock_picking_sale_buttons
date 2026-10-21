@@ -46,6 +46,7 @@
                             <t t-call="website_sale.cart_line_description_following_lines">
                                 <t t-set="div_class" t-value="''"/>
                             </t>
+                            <div t-if="line.product_id.is_storable and line.product_id.dk_web_free_qty &lt;= 0" class="dk-oos-note">Sin existencia hoy. Puedes cotizarlo igual: en breves te escribimos con la fecha de llegada.</div>
                             <div name="o_wsale_cart_line_button_container" class="dk-cline-del">
                                 <a href="#" class="js_delete_product dk-del" role="button" aria-label="Eliminar del carrito" title="Eliminar del carrito">Eliminar</a>
                             </div>
@@ -99,6 +100,8 @@
                     <t t-out="len(website_sale_order.website_order_line)"/> productos · <t t-out="int(website_sale_order.cart_quantity)"/> unidades
                 </span>
             </div>
+            <t t-set="dk_oos_lines" t-value="website_sale_order and website_sale_order.website_order_line.filtered(lambda l: l.product_id.is_storable and l.product_id.dk_web_free_qty &lt;= 0)"/>
+            <div t-if="dk_oos_lines" class="dk-oos-box"><b>Algunos productos no tienen existencia hoy</b>Tu pedido queda como cotización y en breves te escribimos con la fecha de llegada de esos productos.</div>
         </xpath>
         <xpath expr="//div[hasclass('clearfix')]" position="after">
             <t t-set="dk_cart_sugs" t-value="request.env['product.template']._dk_cart_suggestions(website_sale_order, 4)"/>
@@ -110,6 +113,15 @@
                     </t>
                 </div>
             </section>
+        </xpath>
+    </template>
+
+    <!-- Confirmación: aviso si el pedido (cotización) trae productos sin existencia. Solo en borrador/enviada: ya
+         confirmada la orden reserva y todo se vería "sin existencia". -->
+    <template id="dk_confirmation_oos" inherit_id="website_sale.confirmation" priority="99" name="Confirmación: aviso de productos sin existencia">
+        <xpath expr="//t[@t-set='tx_sudo']" position="after">
+            <t t-set="dk_oos_lines" t-value="order.state in ('draft', 'sent') and order.order_line.filtered(lambda l: l.product_id.is_storable and l.product_id.dk_web_free_qty &lt;= 0)"/>
+            <div t-if="dk_oos_lines" class="dk-oos-box"><b>Algunos productos no tienen existencia hoy</b>Tu pedido queda como cotización y en breves nos comunicaremos contigo para informarte cuándo llegaría la mercancía.</div>
         </xpath>
     </template>
 </odoo>

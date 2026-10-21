@@ -66,10 +66,11 @@
         <t t-set="dk_order" t-value="website.sale_get_order()"/>
         <t t-set="dk_line" t-value="dk_order.website_order_line.filtered_domain([('product_id', '=', dk_variant)])[:1] if dk_variant else False"/>
         <t t-set="dk_qty" t-value="int(dk_line.product_uom_qty) if dk_line else 0"/>
-        <article class="dk-card">
+        <article t-attf-class="dk-card #{'dk-oos' if p.dk_web_oos else ''}">
             <a class="dk-card-img" t-att-href="p.website_url">
                 <img t-att-src="website.image_url(p, 'image_512')" t-att-alt="p.name" loading="lazy"/>
                 <span t-if="p.dk_is_new" class="badge dk-badge dk-badge-new">Nuevo</span>
+                <span t-if="p.dk_web_oos" class="badge dk-oos-tag">No disponible</span>
                 <span t-if="dk_info.get('has_discounted_price')" class="badge dk-badge dk-badge-sale">Rebaja</span>
             </a>
             <div class="dk-card-body">
@@ -78,6 +79,8 @@
                     <span t-out="dk_info['price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/>
                     <del t-if="dk_info.get('has_discounted_price')"><span t-out="dk_info['list_price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/></del>
                 </div>
+                <div t-if="p.dk_web_avail_label" class="dk-avail"><i class="dk-dot" aria-hidden="true"/><t t-out="p.dk_web_avail_label"/></div>
+                <div t-if="p.dk_web_oos" class="dk-oos-note">Puedes cotizarlo igual: en breves te escribimos con la fecha de llegada.</div>
                 <t t-if="dk_can_add">
                     <t t-set="dk_rule" t-value="p._dkh_qty_rule()"/>
                     <div class="dk-buy" t-att-data-product-id="dk_variant" t-att-data-min="dk_rule[0]" t-att-data-step="dk_rule[1]" t-att-data-qty="dk_qty" t-att-data-state="'in' if dk_qty else 'out'">
@@ -148,6 +151,8 @@
                 <t t-set="dk_line" t-value="dk_order.website_order_line.filtered_domain([('product_id', '=', product_variant.id)])[:1]"/>
                 <t t-set="dk_qty" t-value="int(dk_line.product_uom_qty) if dk_line else 0"/>
                 <div class="dk-pbox">
+                    <div t-if="product.dk_web_avail_label" class="dk-avail dk-avail-lg"><i class="dk-dot" aria-hidden="true"/><t t-out="product.dk_web_avail_label"/></div>
+                    <div t-if="product.dk_web_oos" class="dk-oos-box"><b>No disponible por ahora</b>Puedes cotizarlo igual: en breves te escribimos con la fecha de llegada.</div>
                     <div class="dk-pbox-title">Cantidad</div>
                     <t t-set="dk_rule" t-value="product_variant._dkh_qty_rule()"/>
                     <div class="dk-buy dk-buy-lg" t-att-data-product-id="product_variant.id" t-att-data-min="dk_rule[0]" t-att-data-step="dk_rule[1]" t-att-data-qty="dk_qty" t-att-data-state="'in' if dk_qty else 'out'">

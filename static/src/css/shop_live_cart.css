@@ -437,3 +437,41 @@
     width: 100%;
     height: 44px;
 }
+
+/* ---- Sin existencia / Disponible (ver models/product_web_stock.py) ----
+   La tarjeta se ve apagada pero se puede cotizar igual. La etiqueta lleva la clase .badge del tema: sin ella las
+   letras salen negras sobre el fondo oscuro. */
+.dk-card.dk-oos .dk-card-img { background: #e9edf2; }
+.dk-card.dk-oos .dk-card-img img { opacity: 0.45; filter: grayscale(0.4); }
+.dk-card .dk-card-img { position: relative; }
+.badge.dk-oos-tag {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    background: #475569;
+    color: #fff;
+    border-radius: 999px;
+    padding: 4px 12px;
+    font-size: 0.75rem;
+    font-weight: 800;
+}
+.dk-avail { display: flex; align-items: center; gap: 7px; font-size: 0.8rem; font-weight: 600; }
+.dk-avail-lg { font-size: 0.95rem; margin-bottom: 8px; }
+.dk-dot { flex: none; width: 9px; height: 9px; border-radius: 50%; background: #1e8e3e; display: inline-block; }
+.dk-oos-note {
+    font-size: 0.78rem;
+    line-height: 1.4;
+    background: #fff4e0;
+    border-radius: 8px;
+    padding: 8px 10px;
+}
+.dk-oos-box {
+    border: 1px solid #f2d9a6;
+    background: #fff4e0;
+    border-radius: 8px;
+    padding: 12px 14px;
+    margin: 10px 0 14px;
+    line-height: 1.45;
+}
+.dk-oos-box b { display: block; }
+
