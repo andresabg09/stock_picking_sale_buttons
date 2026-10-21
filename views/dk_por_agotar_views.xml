@@ -16,6 +16,12 @@
                 <field name="dk_state" widget="badge" decoration-danger="dk_state == 'out'"
                        decoration-warning="dk_state == 'low'" optional="show"/>
             </field>
+            <field name="qty_on_hand" position="attributes">
+                <attribute name="string">Existencia</attribute>
+            </field>
+            <field name="qty_forecast" position="attributes">
+                <attribute name="string">Disponible</attribute>
+            </field>
             <field name="qty_on_hand" position="after">
                 <field name="dk_committed" optional="show"/>
                 <field name="dk_incoming" optional="show"/>
@@ -49,7 +55,7 @@
                         <div class="col-4"><div class="bg-100 rounded p-1"><div class="small">En bodega (existencia)</div><b><field name="qty_on_hand"/></b></div></div>
                         <div class="col-4"><div class="bg-100 rounded p-1"><div class="small">Comprometido</div><b><field name="dk_committed"/></b></div></div>
                         <div class="col-4"><div class="bg-100 rounded p-1"><div class="small">Por llegar</div><b><field name="dk_incoming"/></b></div></div>
-                        <div class="col-4"><div class="bg-100 rounded p-1"><div class="small">Pronóstico</div><b><field name="qty_forecast"/></b></div></div>
+                        <div class="col-4"><div class="bg-100 rounded p-1"><div class="small">Disponible</div><b><field name="qty_forecast"/></b></div></div>
                         <div class="col-4"><div class="bg-100 rounded p-1"><div class="small">Mínimo</div><b><field name="product_min_qty"/></b></div></div>
                         <div class="col-4">
                             <div t-attf-class="rounded p-1 #{record.dk_nevada_label.raw_value ? 'bg-warning-subtle' : 'bg-100'}">
@@ -86,10 +92,10 @@
             </field>
             <field name="visibility_days" position="after">
                 <field name="dk_state"/>
-                <field name="qty_on_hand"/>
+                <field name="qty_on_hand" string="Existencia"/>
                 <field name="dk_committed"/>
                 <field name="dk_incoming"/>
-                <field name="qty_forecast"/>
+                <field name="qty_forecast" string="Disponible"/>
                 <field name="dk_nevada_label"/>
                 <field name="dk_note"/>
             </field>
