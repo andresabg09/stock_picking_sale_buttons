@@ -88,6 +88,7 @@
     <template id="dkh_header" name="DKH: encabezado H">
         <t t-set="dkh_order" t-value="website.sale_get_order() if website.has_ecommerce_access() else False"/>
         <t t-set="dkh_path" t-value="request.httprequest.path"/>
+        <t t-set="dkh_acc" t-value="website.dkh_account()"/>
         <div class="dkh-top">
         <header class="dkh-hd dkh-wrap" data-name="Header">
             <a href="/" class="dkh-logo" aria-label="Shalom, inicio">shalom<span>.</span></a>
@@ -109,9 +110,34 @@
                     <t t-call="stock_picking_sale_buttons.dkh_icon_qr"/>
                 </button>
             </div>
+            <!-- Sin sesión: "Iniciar sesión" en texto (en celular un icono de persona parecería que ya hay sesión).
+                 Con sesión: el nombre del negocio y un menú con Mis pedidos, Mi cuenta y Salir. -->
+            <a t-if="dkh_acc.get('public')" t-attf-href="/web/login?redirect=#{dkh_path}" class="dkh-login">Iniciar sesión</a>
+            <details t-else="" class="dkh-me">
+                <summary class="dkh-me-btn" aria-label="Mi cuenta">
+                    <span class="dkh-me-ini" aria-hidden="true" t-out="dkh_acc['initials']"/>
+                    <span class="dkh-me-name">Hola, <t t-out="dkh_acc['name']"/></span>
+                    <svg class="dkh-me-car" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 9l6 6 6-6"/></svg>
+                </summary>
+                <div class="dkh-me-menu">
+                    <div class="dkh-me-who"><b t-out="dkh_acc['name']"/><small t-out="dkh_acc['email']"/></div>
+                    <a href="/my/orders">Mis pedidos</a>
+                    <a href="/my">Mi cuenta</a>
+                    <a href="/web/session/logout?redirect=/shop" class="dkh-me-out">Salir</a>
+                </div>
+            </details>
             <t t-set="dkh_n" t-value="len(dkh_order.website_order_line) if dkh_order else 0"/>
             <a href="/shop/cart" class="dkh-cart" aria-label="Carrito">Carrito<span class="dkh-cart-count" t-att-hidden="'hidden' if not dkh_n else None" t-out="dkh_n"/></a>
         </header>
+        </div>
+        <div t-if="dkh_acc.get('public') and not dkh_path.startswith('/web/') and not dkh_path.startswith('/shop/dk/') and not dkh_path.startswith('/my')"
+             id="dkh-strip" t-attf-class="dkh-strip #{'is-cart' if dkh_path.startswith('/shop/cart') else ''}" role="status">
+            <div class="dkh-wrap dkh-strip-in">
+                <span><b>No has iniciado sesión.</b> <a t-attf-href="/web/login?redirect=#{dkh_path}">Inicia sesión</a> o <a t-attf-href="/web/signup?redirect=#{dkh_path}">regístrate</a> para ver tus pedidos anteriores. También puedes comprar sin cuenta.</span>
+                <button type="button" class="dkh-strip-x" data-dkh-strip="close" aria-label="Cerrar aviso">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M5 5l14 14M19 5L5 19"/></svg>
+                </button>
+            </div>
         </div>
 
         <!-- Tablet: riel lateral con íconos. Celular: barra inferior con botón central para escanear. -->
@@ -134,10 +160,17 @@
         <div id="dkh-more" class="dkh-more" hidden="hidden">
             <div class="dkh-more-sheet" role="dialog" aria-label="Más opciones">
                 <span class="dkh-grab" aria-hidden="true"/>
+                <t t-if="dkh_acc.get('public')">
+                    <p class="dkh-more-note">No has iniciado sesión. Entra para ver tus pedidos anteriores.</p>
+                    <a t-attf-href="/web/login?redirect=#{dkh_path}" class="dkh-more-cta">Iniciar sesión</a>
+                    <a t-attf-href="/web/signup?redirect=#{dkh_path}" class="dkh-more-cta dkh-more-cta-o">Registrarme</a>
+                </t>
+                <div t-else="" class="dkh-more-who"><b t-out="dkh_acc['name']"/><small t-out="dkh_acc['email']"/></div>
+                <a t-if="not dkh_acc.get('public')" href="/my/orders" class="dkh-more-a dkh-more-blue">Mis pedidos <span aria-hidden="true">→</span></a>
+                <a t-if="not dkh_acc.get('public')" href="/my" class="dkh-more-a">Mi cuenta <span aria-hidden="true">→</span></a>
                 <a href="/contactus" class="dkh-more-a dkh-more-pink">Contáctanos <span aria-hidden="true">→</span></a>
-                <a href="/my/orders" class="dkh-more-a dkh-more-blue">Mis pedidos <span aria-hidden="true">→</span></a>
-                <a href="/my" class="dkh-more-a">Mi cuenta <span aria-hidden="true">→</span></a>
                 <a href="https://wa.me/50768337354" target="_blank" rel="noopener" class="dkh-more-a">WhatsApp ventas <span aria-hidden="true">→</span></a>
+                <a t-if="not dkh_acc.get('public')" href="/web/session/logout?redirect=/shop" class="dkh-more-a dkh-more-out">Salir <span aria-hidden="true">→</span></a>
             </div>
         </div>
 

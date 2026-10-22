@@ -26,6 +26,7 @@ from . import website_search
 from . import product_template_shop
 from . import product_public_category
 from . import website_dkh
+from . import res_partner_access
 from . import dkh_rules
 from . import dkh_banner
 from . import dkh_quick_alias

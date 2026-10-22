@@ -1,0 +1,107 @@
+/* Acceso a la tienda: botón Iniciar sesión / menú de la cuenta, franja de aviso, pantallas de acceso y caja del carrito.
+   Diseño aprobado por Andrés (lienzo claude.ai/artifact/1oTWpASVR429Aw6Hm7zzjg). Colores y formas = los de la tienda
+   (azul oscuro, Manrope, esquinas discretas). Lo del encabezado solo existe en la tienda con el encabezado H. */
+
+/* ---- Encabezado: sin sesión ---- */
+.dkh-login {
+    display: inline-flex; align-items: center; justify-content: center; min-height: 44px; padding: 0 20px;
+    border: 1.5px solid var(--dkh-navy, #0B1F3A); border-radius: var(--dki-radius, 8px); background: #fff;
+    color: var(--dkh-navy, #0B1F3A) !important; font-weight: 800; font-size: 15px; text-decoration: none; white-space: nowrap;
+}
+.dkh-login:hover { background: #F4F5F7; }
+
+/* ---- Encabezado: con sesión ---- */
+.dkh-me { position: relative; }
+.dkh-me > summary { list-style: none; cursor: pointer; }
+.dkh-me > summary::-webkit-details-marker { display: none; }
+.dkh-me-btn {
+    display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px;
+    border: 1.5px solid var(--dkh-navy, #0B1F3A); border-radius: var(--dki-radius, 8px); background: #fff;
+    color: var(--dkh-navy, #0B1F3A); font-weight: 800; font-size: 15px;
+}
+.dkh-me-name { max-width: 190px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dkh-me-ini { display: none; }
+.dkh-me[open] .dkh-me-car { transform: rotate(180deg); }
+.dkh-me-menu {
+    position: absolute; right: 0; top: calc(100% + 8px); width: 270px; z-index: 1080; background: #fff;
+    border: 1px solid var(--dkh-line, #E6E9F1); border-radius: 12px; box-shadow: 0 12px 32px rgba(11, 31, 58, .16); padding: 8px;
+}
+.dkh-me-who { padding: 10px 12px 12px; border-bottom: 1px solid var(--dkh-line, #E6E9F1); margin-bottom: 6px; display: flex; flex-direction: column; }
+.dkh-me-who b { overflow-wrap: anywhere; }
+.dkh-me-who small { color: #5b6678; font-weight: 600; margin-top: 2px; overflow-wrap: anywhere; }
+.dkh-me-menu a {
+    display: flex; align-items: center; min-height: 44px; padding: 0 12px; border-radius: 8px; text-decoration: none;
+    color: var(--dkh-navy, #0B1F3A) !important; font-weight: 600; font-size: 15px;
+}
+.dkh-me-menu a:hover { background: #F4F5F7; }
+.dkh-me-menu a.dkh-me-out { color: #9b1c1c !important; margin-top: 6px; border-top: 1px solid var(--dkh-line, #E6E9F1); border-radius: 0 0 8px 8px; font-weight: 800; }
+
+/* ---- Franja "No has iniciado sesión" ---- */
+.dkh-strip { background: #E8EFFA; border-bottom: 1px solid #c9d8f0; color: var(--dkh-navy, #0B1F3A); }
+.dkh-strip-in { display: flex; align-items: flex-start; gap: 12px; padding-top: 10px; padding-bottom: 10px; line-height: 1.45; font-size: 14px; }
+.dkh-strip-in > span { flex: 1; }
+.dkh-strip a { font-weight: 800; text-decoration: underline; color: var(--dkh-navy, #0B1F3A) !important; }
+.dkh-strip-x { flex: 0 0 auto; width: 32px; height: 32px; border: 0; border-radius: 8px; background: transparent; color: var(--dkh-navy, #0B1F3A); display: grid; place-items: center; }
+.dkh-strip-x:hover { background: rgba(11, 31, 58, .08); }
+.dkh-strip.is-cart .dkh-strip-x { display: none; }
+.dkh-strip[hidden] { display: none !important; }
+
+/* ---- Celular: "Iniciar sesión" en texto, la cuenta como círculo con iniciales ---- */
+@media (max-width: 640px) {
+    .dkh-login { border: 0; background: transparent; padding: 0 4px; min-height: 44px; font-size: 14px; text-decoration: underline; text-underline-offset: 3px; }
+    .dkh-login:hover { background: transparent; }
+    .dkh-me-btn { width: 44px; height: 44px; padding: 0; justify-content: center; border-radius: 50%; background: #E8EFFA; }
+    .dkh-me-name, .dkh-me-car { display: none; }
+    .dkh-me-ini { display: grid; place-items: center; font-size: 14px; }
+    .dkh-hd { flex-wrap: wrap; gap: 12px 8px; }
+    /* logo, "Iniciar sesión" y Carrito caben en UNA fila de 390 px */
+    body.dkh .dkh-logo { font-size: 16px; letter-spacing: .05em; white-space: nowrap; margin-right: auto; }
+    body.dkh .dkh-cart { padding: 0 14px; }
+}
+
+/* ---- Hoja "Más" del celular ---- */
+.dkh-more-note { margin: 0; font-size: 13px; color: #475569; line-height: 1.4; }
+.dkh-more-cta {
+    display: flex; align-items: center; justify-content: center; min-height: 48px; border-radius: 10px; font-weight: 800; font-size: 15px;
+    background: var(--dkh-navy, #0B1F3A); color: #fff !important; text-decoration: none; border: 1.5px solid var(--dkh-navy, #0B1F3A);
+}
+.dkh-more-cta-o { background: #fff; color: var(--dkh-navy, #0B1F3A) !important; }
+.dkh-more-who { display: flex; flex-direction: column; padding: 4px 4px 10px; border-bottom: 1px solid var(--dkh-line, #E6E9F1); }
+.dkh-more-who b { font-size: 18px; overflow-wrap: anywhere; }
+.dkh-more-who small { color: #475569; margin-top: 2px; overflow-wrap: anywhere; }
+.dkh-more-out { color: #9b1c1c !important; font-weight: 800; }
+
+/* ---- Carrito: caja para quien no ha iniciado sesión ---- */
+.dkh-send { display: contents; }
+.dkh-guest {
+    margin-top: 16px; background: #E8EFFA; border: 1px solid #c9d8f0; border-radius: 12px; padding: 16px 18px;
+    display: flex; flex-direction: column; gap: 8px; line-height: 1.45; color: var(--dkh-navy, #0B1F3A);
+}
+.dkh-guest-b { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 4px; }
+.dkh-guest .btn, .dk-login-help .btn { min-height: 44px; display: inline-flex; align-items: center; justify-content: center; font-weight: 800; border-radius: var(--dki-radius, 8px); text-decoration: none; }
+
+/* ---- Botones azul oscuro / contorno de estas pantallas (el tema fuerza colores; aquí se fijan) ---- */
+.dkh-guest .btn-primary, .dk-acc .btn-primary, .dk-login-help .btn-primary { background: var(--dkh-navy, #0B1F3A); border: 1.5px solid var(--dkh-navy, #0B1F3A); color: #fff !important; }
+.dkh-guest .btn-outline-primary, .dk-acc .btn-outline-primary, .dk-login-help .btn-outline-primary { background: #fff; border: 1.5px solid var(--dkh-navy, #0B1F3A); color: var(--dkh-navy, #0B1F3A) !important; }
+.dkh-guest .btn-outline-primary:hover, .dk-acc .btn-outline-primary:hover, .dk-login-help .btn-outline-primary:hover { background: #F4F5F7; }
+
+/* ---- Pantallas de acceso (recibir enlace, correo ya registrado, negocio que ya existe, gracias) ---- */
+.dk-acc { background: #F3F5F8; padding: 40px 16px 64px; }
+.dk-acc-in { max-width: 520px; margin: 0 auto; }
+.dk-acc-card { background: #fff; border: 1px solid #dbe2ea; border-radius: 14px; padding: 28px; display: flex; flex-direction: column; gap: 14px; color: var(--dkh-navy, #0B1F3A); }
+.dk-acc-card h1 { margin: 0; font-size: 26px; font-weight: 800; }
+.dk-acc-card p { margin: 0; line-height: 1.5; font-size: 15px; color: #475569; }
+.dk-acc-card a { color: var(--dkh-navy, #0B1F3A); font-weight: 800; }
+.dk-acc-card a.btn { text-decoration: none; }
+.dk-acc-form { display: flex; flex-direction: column; gap: 10px; }
+.dk-acc-form label { font-weight: 700; font-size: 13px; margin: 0; }
+.dk-acc-form .form-control { min-height: 46px; border-radius: 10px; }
+.dk-acc-btn { min-height: 48px; display: flex !important; align-items: center; justify-content: center; font-weight: 800; border-radius: var(--dki-radius, 8px); width: 100%; }
+.dk-acc-note { background: #E8EFFA; border: 1px solid #c9d8f0; border-radius: 12px; padding: 16px 18px; line-height: 1.5; font-size: 15px; }
+.dk-acc-ok { background: #EAF6EE; border: 1px solid #bfe3cb; border-radius: 12px; padding: 16px 18px; line-height: 1.5; font-size: 15px; display: flex; flex-direction: column; gap: 4px; }
+.dk-acc-err { color: #9b1c1c !important; font-weight: 700; }
+.dk-acc-small { font-size: 13px !important; }
+.dk-acc-mask { letter-spacing: .02em; overflow-wrap: anywhere; }
+
+/* ---- Pantalla de entrar: ayuda para la primera vez ---- */
+.dk-login-help { margin-top: 18px; padding: 14px 16px; border-radius: 12px; background: #F1F4F8; display: flex; flex-direction: column; gap: 8px; line-height: 1.45; font-size: 14px; color: var(--dkh-navy, #0B1F3A); }

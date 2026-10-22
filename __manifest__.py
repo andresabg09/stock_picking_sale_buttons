@@ -1,9 +1,9 @@
 {
     'name': 'Stock Picking - Botones Orden de Venta y Facturas',
-    'version': '18.0.5.14.3',
+    'version': '18.0.5.15.0',
     'summary': 'Smart buttons, imágenes redimensionadas y mejoras visuales en traslados, facturas, ventas y productos',
     'author': 'AutomatePTY',
-    'depends': ['stock', 'sale_stock', 'account', 'sale', 'sale_loyalty', 'product', 'purchase', 'mail', 'website_sale'],
+    'depends': ['stock', 'sale_stock', 'account', 'sale', 'sale_loyalty', 'product', 'purchase', 'mail', 'website_sale', 'auth_signup'],
     'data': [
         'security/ir.model.access.csv',
         'data/shop_search_synonym_data.xml',
@@ -41,6 +41,7 @@
         'views/dkh_banner_views.xml',
         'views/dkh_home.xml',
         'views/dkh_cart.xml',
+        'views/dk_access_templates.xml',
     ],
     'assets': {
         'web.assets_backend': [
@@ -72,6 +73,8 @@
             'stock_picking_sale_buttons/static/src/css/dkh.css',
             'stock_picking_sale_buttons/static/src/css/dkh_pages.css',
             'stock_picking_sale_buttons/static/src/css/dki.css',
+            'stock_picking_sale_buttons/static/src/css/dk_access.css',
+            'stock_picking_sale_buttons/static/src/js/dk_access.js',
             'stock_picking_sale_buttons/static/src/js/dkh_shell.js',
             'stock_picking_sale_buttons/static/src/js/dkh_cart.js',
         ],

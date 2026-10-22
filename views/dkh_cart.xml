@@ -9,6 +9,7 @@
                 <t t-set="dkh_min" t-value="website_sale_order._dkh_min_order_amount()"/>
                 <t t-set="dkh_tot" t-value="website_sale_order.amount_untaxed"/>
                 <t t-set="dkh_miss" t-value="website_sale_order._dkh_min_missing()"/>
+                <t t-set="dkh_pub" t-value="website.dkh_account().get('public')"/>
                 <div class="dkh-confirm">
                     <div class="dkh-pbar">
                         <div class="dkh-pbar-m">
@@ -17,8 +18,22 @@
                             <div class="dkh-bar"><i t-attf-style="width: #{min(100, int(dkh_tot * 100 / dkh_min)) if dkh_min else 100}%"/></div>
                         </div>
                         <b class="dkh-pbar-t">B/. <t t-out="'%.2f' % dkh_tot"/></b>
-                        <a t-if="dkh_miss &lt;= 0" href="/shop/checkout?try_skip_step=true" class="dkh-btn dkh-btn-w">Finalizar compra</a>
-                        <span t-else="" class="dkh-btn dkh-btn-w dkh-btn-off" aria-disabled="true">Finalizar compra</span>
+                        <!-- Sin sesión: "Enviar mi pedido" (el pedido queda como cotización enviada y no hay que registrarse).
+                             Con sesión: "Finalizar compra", el flujo de siempre. -->
+                        <form t-if="dkh_pub and dkh_miss &lt;= 0" action="/shop/dk/enviar" method="post" class="dkh-send">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <button type="submit" class="dkh-btn dkh-btn-w">Enviar mi pedido</button>
+                        </form>
+                        <a t-elif="dkh_miss &lt;= 0" href="/shop/checkout?try_skip_step=true" class="dkh-btn dkh-btn-w">Finalizar compra</a>
+                        <span t-else="" class="dkh-btn dkh-btn-w dkh-btn-off" aria-disabled="true"><t t-out="'Enviar mi pedido' if dkh_pub else 'Finalizar compra'"/></span>
+                    </div>
+                    <div t-if="dkh_pub" class="dkh-guest">
+                        <b>¿Ya eres cliente? Inicia sesión.</b>
+                        <span>Así tu pedido sale a nombre de tu negocio y ves tus pedidos anteriores. Sin cuenta también funciona: recibimos tu pedido y te contactamos.</span>
+                        <div class="dkh-guest-b">
+                            <a href="/web/login?redirect=/shop/cart" class="btn btn-primary">Iniciar sesión</a>
+                            <a href="/web/signup?redirect=/shop/cart" class="btn btn-outline-primary">Registrarme</a>
+                        </div>
                     </div>
                 </div>
             </t>

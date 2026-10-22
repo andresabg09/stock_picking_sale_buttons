@@ -1,3 +1,5 @@
+import re
+
 from odoo import models
 from odoo.http import request
 
@@ -58,3 +60,17 @@ class Website(models.Model):
         import os
         return bool(os.environ.get('ANTHROPIC_API_KEY'))
 
+
+    def dkh_account(self):
+        """Quién está viendo la tienda, para el encabezado: {'public': True} o nombre, iniciales y correo.
+
+        Para un cliente (usuario de portal) se muestra el nombre de su NEGOCIO, también si es un empleado
+        agregado como contacto; para el equipo de Dianke, su propio nombre."""
+        user = self.env.user
+        if user._is_public():
+            return {'public': True}
+        partner = user.partner_id
+        name = (partner.commercial_partner_id.name if user.share else user.name) or user.login or ''
+        words = [w for w in re.split(r'\s+', name.strip()) if w]
+        initials = ''.join(w[0] for w in words[:2]).upper() or '?'
+        return {'public': False, 'name': name, 'initials': initials, 'email': user.email or user.login or ''}

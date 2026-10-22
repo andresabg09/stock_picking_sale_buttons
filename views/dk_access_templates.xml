@@ -1,0 +1,161 @@
+<?xml version="1.0" encoding="utf-8"?>
+<odoo>
+    <!-- Acceso a la tienda: entrar, registrarse y NO duplicar clientes. Diseño aprobado por Andrés en el lienzo
+         claude.ai/artifact/1oTWpASVR429Aw6Hm7zzjg. Lógica en controllers/dk_access.py y models/res_partner_access.py.
+         Nada es obligatorio: sin cuenta también se puede comprar. -->
+
+    <!-- Pantallas de acceso (recibir enlace, correo ya registrado, negocio que ya existe...) -->
+    <template id="dk_access_page" name="Acceso a la tienda">
+        <t t-call="website.layout">
+            <div id="wrap" class="dk-acc">
+                <div class="dk-acc-in">
+
+                    <section t-if="state == 'form'" class="dk-acc-card">
+                        <h1>Recibir enlace por correo</h1>
+                        <p>Escribe tu correo. Si ya eres cliente nuestro, te mandamos un enlace para que crees tu propia clave. No hace falta registrarse otra vez.</p>
+                        <form action="/shop/dk/acceso" method="post" class="dk-acc-form">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <label for="dk-acc-email">Correo</label>
+                            <input type="email" id="dk-acc-email" name="email" t-att-value="email" class="form-control" required="required" autocomplete="email" autocapitalize="off"/>
+                            <p t-if="error" class="dk-acc-err" role="alert" t-out="error"/>
+                            <button type="submit" class="btn btn-primary dk-acc-btn">Recibir enlace</button>
+                        </form>
+                        <p class="dk-acc-small">¿Ya tienes clave? <a href="/web/login">Inicia sesión</a> · ¿Eres nuevo? <a href="/web/signup">Regístrate</a></p>
+                    </section>
+
+                    <section t-elif="state == 'exists'" class="dk-acc-card">
+                        <h1>Este correo ya está registrado</h1>
+                        <div class="dk-acc-note" role="status">
+                            Encontramos tu cuenta con <b class="dk-acc-mask" t-out="masked"/>. Para no duplicar tu negocio, no creamos una cuenta nueva.
+                        </div>
+                        <form action="/shop/dk/acceso" method="post" class="dk-acc-form">
+                            <input type="hidden" name="csrf_token" t-att-value="request.csrf_token()"/>
+                            <input type="hidden" name="email" t-att-value="email"/>
+                            <button type="submit" class="btn btn-primary dk-acc-btn">Enviarme el enlace para crear mi clave</button>
+                        </form>
+                        <p class="dk-acc-small"><a href="/web/signup">Usar otro correo</a></p>
+                        <p class="dk-acc-small">El enlace llega solo a ese correo. Si ya no tienes acceso a él, escríbenos por <a href="https://wa.me/50768337354" target="_blank" rel="noopener">WhatsApp</a>.</p>
+                    </section>
+
+                    <section t-elif="state == 'sent'" class="dk-acc-card">
+                        <h1>Revisa tu correo</h1>
+                        <div class="dk-acc-ok" role="status">
+                            <b>Listo, te enviamos el enlace</b>
+                            Lo mandamos a <b class="dk-acc-mask" t-out="masked"/>. Ábrelo y elige tu propia clave. El enlace sirve por unos días.
+                        </div>
+                        <p>Cuando tengas tu clave, entra con ese mismo correo. Tus pedidos anteriores estarán esperándote.</p>
+                        <p class="dk-acc-small">¿No te llegó? Mira en la carpeta de correo no deseado o <a href="/shop/dk/acceso">pide el enlace otra vez</a>.</p>
+                        <a href="/shop" class="btn btn-outline-primary dk-acc-btn">Seguir comprando</a>
+                    </section>
+
+                    <section t-elif="state == 'notfound'" class="dk-acc-card">
+                        <h1>No encontramos ese correo</h1>
+                        <p>No hay ninguna cuenta con <b t-out="email"/>. Si eres cliente nuestro con otro correo, prueba con ese. Si eres nuevo, crea tu cuenta.</p>
+                        <a href="/web/signup" class="btn btn-primary dk-acc-btn">Crear mi cuenta</a>
+                        <a href="/shop/dk/acceso" class="btn btn-outline-primary dk-acc-btn">Probar con otro correo</a>
+                        <p class="dk-acc-small">¿Necesitas ayuda? Escríbenos por <a href="https://wa.me/50768337354" target="_blank" rel="noopener">WhatsApp</a>.</p>
+                    </section>
+
+                    <section t-elif="state == 'team'" class="dk-acc-card">
+                        <h1>Ya tenemos un negocio con esos datos</h1>
+                        <div class="dk-acc-note" role="status">
+                            Para proteger la información de ese negocio, no creamos la cuenta todavía. Comunícate con nuestro equipo para que te vinculemos a esta cuenta.
+                        </div>
+                        <a t-att-href="wa_url" target="_blank" rel="noopener" class="btn btn-primary dk-acc-btn">Comunicarme con el equipo por WhatsApp</a>
+                        <p class="dk-acc-small">Mientras tanto puedes seguir comprando sin cuenta. <a href="/shop">Ir a la tienda</a></p>
+                    </section>
+
+                    <section t-elif="state == 'throttled'" class="dk-acc-card">
+                        <h1>Demasiados intentos</h1>
+                        <p>Por seguridad limitamos los envíos de correo. Intenta de nuevo en un rato o escríbenos por WhatsApp.</p>
+                        <a href="https://wa.me/50768337354" target="_blank" rel="noopener" class="btn btn-primary dk-acc-btn">Escribir por WhatsApp</a>
+                    </section>
+
+                    <section t-else="" class="dk-acc-card">
+                        <h1>No pudimos enviar el correo</h1>
+                        <p>Algo falló al mandar el enlace. Escríbenos y te ayudamos a entrar.</p>
+                        <a t-att-href="wa_url or 'https://wa.me/50768337354'" target="_blank" rel="noopener" class="btn btn-primary dk-acc-btn">Escribir por WhatsApp</a>
+                    </section>
+
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Gracias por enviar el pedido (con o sin cuenta) -->
+    <template id="dk_thanks_page" name="Pedido enviado">
+        <t t-call="website.layout">
+            <div id="wrap" class="dk-acc">
+                <div class="dk-acc-in">
+                    <section class="dk-acc-card">
+                        <h1>Recibimos tu pedido</h1>
+                        <div class="dk-acc-ok" role="status">
+                            <b>Gracias, ya lo tenemos<t t-if="order_name"> (<span t-out="order_name"/>)</t>.</b>
+                            Nuestro equipo lo revisa y te contacta para confirmar la entrega.
+                        </div>
+                        <t t-set="dk_acc" t-value="website.dkh_account()"/>
+                        <t t-if="dk_acc.get('public')">
+                            <p>Crea tu cuenta para ver tus pedidos anteriores y hacer los próximos a nombre de tu negocio.</p>
+                            <a href="/web/signup?redirect=/shop" class="btn btn-primary dk-acc-btn">Registrarme</a>
+                            <a href="/web/login?redirect=/shop" class="btn btn-outline-primary dk-acc-btn">Iniciar sesión</a>
+                        </t>
+                        <a t-else="" href="/my/orders" class="btn btn-primary dk-acc-btn">Ver mis pedidos</a>
+                        <a href="/shop" class="btn btn-outline-primary dk-acc-btn">Seguir comprando</a>
+                        <p class="dk-acc-small">¿Algo urgente? Escríbenos por <a t-att-href="wa_url" target="_blank" rel="noopener">WhatsApp</a>.</p>
+                    </section>
+                </div>
+            </div>
+        </t>
+    </template>
+
+    <!-- Pantalla de entrar: ayuda para la primera vez y la clave olvidada -->
+    <template id="dk_login_help" inherit_id="web.login" name="Entrar: primera vez en la tienda">
+        <xpath expr="//div[hasclass('oe_login_buttons')]" position="after">
+            <div class="dk-login-help">
+                <b>¿Primera vez en la tienda o no recuerdas tu clave?</b>
+                <span>Escribe tu correo y te mandamos un enlace para crear tu clave. Si tu negocio ya es cliente nuestro, no hace falta registrarse otra vez.</span>
+                <a href="/shop/dk/acceso" class="btn btn-outline-primary">Recibir enlace por correo</a>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- Registro: nombre del negocio, RUC y WhatsApp (opcionales) para reconocer negocios que ya existen -->
+    <template id="dk_signup_fields" inherit_id="auth_signup.fields" name="Registro: negocio, RUC y WhatsApp">
+        <xpath expr="//div[hasclass('field-name')]/label" position="replace">
+            <label for="name">Nombre del negocio</label>
+        </xpath>
+        <xpath expr="//input[@name='name']" position="attributes">
+            <attribute name="placeholder">Ej. Supercentro Oriente</attribute>
+        </xpath>
+        <xpath expr="//div[hasclass('field-name')]" position="after">
+            <div class="mb-3 field-dk_vat" t-if="not only_passwords">
+                <label for="dk_vat">RUC (opcional)</label>
+                <input type="text" name="dk_vat" id="dk_vat" t-att-value="dk_vat" class="form-control form-control-sm" placeholder="Ej. 8-000-000 DV 00"/>
+                <small class="text-muted">Nos ayuda a reconocer tu negocio y a no duplicarlo.</small>
+            </div>
+            <div class="mb-3 field-dk_phone" t-if="not only_passwords">
+                <label for="dk_phone">WhatsApp (opcional)</label>
+                <input type="tel" name="dk_phone" id="dk_phone" t-att-value="dk_phone" class="form-control form-control-sm" placeholder="Ej. 6000-0000"/>
+            </div>
+        </xpath>
+    </template>
+
+    <!-- Ficha del contacto: botón para mandar el acceso a la tienda (empleados y negocios que el equipo vincula) -->
+    <record id="view_partner_form_dk_shop_access" model="ir.ui.view">
+        <field name="name">res.partner.form.dk.shop.access</field>
+        <field name="model">res.partner</field>
+        <field name="inherit_id" ref="base.view_partner_form"/>
+        <field name="arch" type="xml">
+            <div name="button_box" position="inside">
+                <button name="action_dk_send_shop_access" type="object" class="oe_stat_button" icon="fa-key"
+                        groups="sales_team.group_sale_salesman"
+                        invisible="not email or email == '@'">
+                    <div class="o_stat_info">
+                        <span class="o_stat_text">Enviar acceso</span>
+                        <span class="o_stat_text">a la tienda</span>
+                    </div>
+                </button>
+            </div>
+        </field>
+    </record>
+</odoo>

@@ -5,3 +5,4 @@ from . import dkh_preview
 from . import dkh_checkout
 from . import dki_preview
 from . import catalog_promo
+from . import dk_access
