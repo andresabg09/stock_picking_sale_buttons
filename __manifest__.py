@@ -1,6 +1,6 @@
 {
     'name': 'Stock Picking - Botones Orden de Venta y Facturas',
-    'version': '18.0.5.13.1',
+    'version': '18.0.5.14.0',
     'summary': 'Smart buttons, imágenes redimensionadas y mejoras visuales en traslados, facturas, ventas y productos',
     'author': 'AutomatePTY',
     'depends': ['stock', 'sale_stock', 'account', 'sale', 'sale_loyalty', 'product', 'purchase', 'mail', 'website_sale'],
@@ -21,6 +21,7 @@
         'views/product_catalog_views.xml',
         'views/dk_nevada_stock_wizard_views.xml',
         'views/dk_por_agotar_views.xml',
+        'views/stock_quant_conteo_views.xml',
         'views/purchase_order_views.xml',
         'views/report_invoice_inherit.xml',
         'views/report_deliveryslip_inherit.xml',

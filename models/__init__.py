@@ -11,6 +11,7 @@ from . import product_restock
 from . import product_web_stock
 from . import stock_orderpoint_porgotar
 from . import dk_orderpoint_bulk_wizard
+from . import stock_quant_conteo
 from . import product_report_image
 from . import sale_dianke_email_wizard
 from . import sale_confirm_payment_wizard

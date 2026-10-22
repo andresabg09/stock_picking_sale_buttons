@@ -79,3 +79,79 @@
         padding: 0 1rem;
     }
 }
+
+/* --- 4. Inventario físico / Actualizar cantidad: foto del producto y columnas que se reparten solas.
+       En celular quedan Foto + Producto, Existencia, Contado y Diferencia (lo esencial para contar) --- */
+.o_inventory_report_list_view .o_list_table {
+    table-layout: auto !important;
+    width: 100% !important;
+}
+.o_inventory_report_list_view .o_list_table th:not(.o_list_record_selector):not(.o_list_controller) {
+    width: auto !important;
+}
+.o_inventory_report_list_view .o_list_table td.o_data_cell[name="dk_image"],
+.o_inventory_report_list_view .o_list_table th[data-name="dk_image"] {
+    width: 1% !important;
+    min-width: 0 !important;
+    padding-right: 0.25rem;
+}
+.o_inventory_report_list_view .o_list_table td[name="dk_image"] .o_field_image,
+.o_inventory_report_list_view .o_list_table td[name="dk_image"] img {
+    width: 56px !important;
+    height: 56px !important;
+    max-width: 56px !important;
+    float: none !important;
+    margin: 0;
+}
+/* números y estado: no se parten y ocupan lo justo */
+.o_inventory_report_list_view .o_list_table td.o_list_number,
+.o_inventory_report_list_view .o_list_table th.o_list_number_th,
+.o_inventory_report_list_view .o_list_table td[name="dk_state"],
+.o_inventory_report_list_view .o_list_table th[data-name="dk_state"] {
+    white-space: nowrap;
+    width: 1% !important;
+}
+@media (max-width: 575.98px) {
+    .o_inventory_report_list_view .o_list_table td.o_data_cell,
+    .o_inventory_report_list_view .o_list_table th {
+        padding-left: 0.2rem;
+        padding-right: 0.2rem;
+    }
+    .o_inventory_report_list_view .o_list_table th {
+        font-size: 0.8rem;
+    }
+    .o_inventory_report_list_view .o_list_table td[name="dk_image"] .o_field_image,
+    .o_inventory_report_list_view .o_list_table td[name="dk_image"] img {
+        width: 40px !important;
+        height: 40px !important;
+        max-width: 40px !important;
+    }
+    .o_inventory_report_list_view .o_list_table td.o_data_cell[name="product_id"] {
+        min-width: 70px !important;
+        width: auto !important;
+    }
+    /* lo que no hace falta para contar se esconde en el celular (sigue en la computadora y la tablet) */
+    .o_inventory_report_list_view .o_list_table th[data-name="location_id"],
+    .o_inventory_report_list_view .o_list_table td[name="location_id"],
+    .o_inventory_report_list_view .o_list_table th[data-name="inventory_date"],
+    .o_inventory_report_list_view .o_list_table td[name="inventory_date"],
+    .o_inventory_report_list_view .o_list_table th[data-name="user_id"],
+    .o_inventory_report_list_view .o_list_table td[name="user_id"],
+    .o_inventory_report_list_view .o_list_table th[data-name="product_uom_id"],
+    .o_inventory_report_list_view .o_list_table td[name="product_uom_id"],
+    .o_inventory_report_list_view .o_list_table th[data-name="dk_state"],
+    .o_inventory_report_list_view .o_list_table td[name="dk_state"],
+    .o_inventory_report_list_view .o_list_table th[data-name="available_quantity"],
+    .o_inventory_report_list_view .o_list_table td[name="available_quantity"],
+    .o_inventory_report_list_view .o_list_table button[name="action_inventory_history"] {
+        display: none !important;
+    }
+    /* botones de la fila (Establecer / Aplicar / Limpiar): solo el icono */
+    .o_inventory_report_list_view .o_list_table td.o_list_button .btn {
+        font-size: 0;
+        padding: 0.25rem 0.4rem;
+    }
+    .o_inventory_report_list_view .o_list_table td.o_list_button .btn i {
+        font-size: 1.1rem;
+    }
+}
