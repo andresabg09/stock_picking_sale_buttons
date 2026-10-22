@@ -91,7 +91,7 @@
         <t t-set="dkh_acc" t-value="website.dkh_account()"/>
         <div class="dkh-top">
         <header class="dkh-hd dkh-wrap" data-name="Header">
-            <a href="/" class="dkh-logo" aria-label="Shalom, inicio">shalom<span>.</span></a>
+            <a href="/" class="dkh-logo" aria-label="Dianke Group, inicio">DIANKE GROUP.</a>
             <!-- Computadora: cápsula azul oscuro; la sección activa va en blanco. -->
             <nav class="dkh-nav" aria-label="Principal">
                 <t t-foreach="website.menu_id.child_id" t-as="dkh_m">
