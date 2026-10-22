@@ -1,4 +1,5 @@
 import logging
+import re
 import time
 from urllib.parse import quote
 
@@ -40,6 +41,12 @@ class DkAuthSignup(AuthSignupHome):
     def web_auth_signup(self, *args, **kw):
         if request.httprequest.method == 'POST' and not kw.get('token'):
             Partner = request.env['res.partner'].sudo()
+            error = self._dk_required_error(kw)
+            if error:
+                qcontext = self.get_auth_signup_qcontext()
+                qcontext.update({'error': error, 'dk_vat': kw.get('dk_vat'), 'dk_phone': kw.get('dk_phone'),
+                                 'login': kw.get('login'), 'name': kw.get('name')})
+                return request.render('auth_signup.signup', qcontext)
             email = Partner._dk_norm_email(kw.get('login'))
             if Partner._dk_find_by_email(email):
                 return request.render('stock_picking_sale_buttons.dk_access_page', {
@@ -51,6 +58,20 @@ class DkAuthSignup(AuthSignupHome):
                 return request.render('stock_picking_sale_buttons.dk_access_page', {
                     'state': 'team', 'wa_url': _wa_url(text)})
         return super().web_auth_signup(*args, **kw)
+
+    @staticmethod
+    def _dk_required_error(kw):
+        """Nombre del negocio, RUC y WhatsApp son obligatorios para registrarse (se validan aquí, no solo en el navegador)."""
+        name = (kw.get('name') or '').strip()
+        vat = re.sub(r'[^0-9A-Za-z]', '', kw.get('dk_vat') or '')
+        phone = re.sub(r'\D', '', kw.get('dk_phone') or '')
+        if not name:
+            return 'Escribe el nombre de tu negocio.'
+        if len(vat) < 5:
+            return 'Escribe el RUC de tu negocio.'
+        if len(phone) < 7:
+            return 'Escribe un WhatsApp válido, con todos sus números.'
+        return None
 
     def _signup_with_values(self, token, values):
         super()._signup_with_values(token, values)

@@ -119,8 +119,8 @@
         </xpath>
     </template>
 
-    <!-- Registro: nombre del negocio, RUC y WhatsApp (opcionales) para reconocer negocios que ya existen -->
-    <template id="dk_signup_fields" inherit_id="auth_signup.fields" name="Registro: negocio, RUC y WhatsApp">
+    <!-- Registro: nombre del negocio, RUC y WhatsApp, OBLIGATORIOS (Andrés): el RUC reconoce negocios que ya existen -->
+    <template id="dk_signup_fields" inherit_id="auth_signup.fields" name="Registro: negocio, RUC y WhatsApp (obligatorios)">
         <xpath expr="//div[hasclass('field-name')]/label" position="replace">
             <label for="name">Nombre del negocio</label>
         </xpath>
@@ -129,13 +129,13 @@
         </xpath>
         <xpath expr="//div[hasclass('field-name')]" position="after">
             <div class="mb-3 field-dk_vat" t-if="not only_passwords">
-                <label for="dk_vat">RUC (opcional)</label>
-                <input type="text" name="dk_vat" id="dk_vat" t-att-value="dk_vat" class="form-control form-control-sm" placeholder="Ej. 8-000-000 DV 00"/>
+                <label for="dk_vat">RUC</label>
+                <input type="text" name="dk_vat" id="dk_vat" t-att-value="dk_vat" class="form-control form-control-sm" placeholder="Ej. 8-000-000 DV 00" required="required"/>
                 <small class="text-muted">Nos ayuda a reconocer tu negocio y a no duplicarlo.</small>
             </div>
             <div class="mb-3 field-dk_phone" t-if="not only_passwords">
-                <label for="dk_phone">WhatsApp (opcional)</label>
-                <input type="tel" name="dk_phone" id="dk_phone" t-att-value="dk_phone" class="form-control form-control-sm" placeholder="Ej. 6000-0000"/>
+                <label for="dk_phone">WhatsApp</label>
+                <input type="tel" name="dk_phone" id="dk_phone" t-att-value="dk_phone" class="form-control form-control-sm" placeholder="Ej. 6000-0000" required="required"/>
             </div>
         </xpath>
     </template>
