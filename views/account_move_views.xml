@@ -64,11 +64,11 @@
     </record>
     <record id="account.action_move_out_invoice_type" model="ir.actions.act_window">
         <field name="view_mode">list,form</field>
-        <field name="limit">1000000</field>
+        <field name="limit">80</field>
     </record>
     <record id="account.action_move_in_invoice_type" model="ir.actions.act_window">
         <field name="view_mode">list,form</field>
-        <field name="limit">1000000</field>
+        <field name="limit">80</field>
     </record>
 
 

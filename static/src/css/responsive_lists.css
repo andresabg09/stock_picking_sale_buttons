@@ -70,7 +70,7 @@
 
 /* --- 3. Panel de Compras en celular y tablet: el aviso "no hay solicitudes" no se encima al panel --- */
 @media (max-width: 991.98px) {
-    .o_content:has(.o_purchase_dashboard) .o_view_nocontent {
+    .o_purchase_dashboard ~ .o_list_renderer .o_view_nocontent {
         position: relative !important;
         top: auto !important;
         left: auto !important;

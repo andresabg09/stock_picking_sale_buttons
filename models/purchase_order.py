@@ -7,7 +7,7 @@ class PurchaseOrderLine(models.Model):
     _inherit = 'purchase.order.line'
 
     custom_product_image = fields.Binary(
-        related='product_id.image_1024',
+        related='product_id.image_256',
         string='Imagen',
         readonly=True,
     )

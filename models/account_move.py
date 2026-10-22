@@ -5,7 +5,7 @@ class AccountMoveLine(models.Model):
     _inherit = 'account.move.line'
 
     custom_product_image = fields.Binary(
-        related='product_id.image_1024',
+        related='product_id.image_256',
         string='Imagen',
         readonly=True,
     )
