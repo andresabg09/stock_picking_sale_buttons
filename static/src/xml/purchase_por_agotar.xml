@@ -2,24 +2,46 @@
 <templates xml:space="preserve">
     <!-- Panel de Compras (Todos los RFQ): cuarto botón "Por agotar" al lado de Atrasado, en ámbar, con la
          cantidad de productos que llegaron a su mínimo. Abre Compras > Por agotar (ver models/stock_orderpoint_porgotar.py).
-         Los demás botones pasan de 3 a 4 por fila (g-col-4 -> g-col-3) para que quepan. -->
+
+         Orden por tamaño de pantalla:
+         - computadora y tablet (>= 768 px): los 4 botones en una fila, "Mis solicitudes" y las cifras de la
+           derecha (valor promedio, plazo...) como siempre;
+         - celular: el título sobre los botones, los 4 botones en 2 x 2 (letras grandes, sin partirse) y se
+           esconden "Mis solicitudes" y las cifras para que el panel no quede apiñado. -->
     <t t-name="stock_picking_sale_buttons.PurchaseDashboardPorAgotar"
        t-inherit="purchase.PurchaseDashboard" t-inherit-mode="extension">
+        <!-- título de la fila "Todas las solicitudes": arriba de los botones en celular, a la izquierda en grande -->
+        <xpath expr="//div[@title='All Draft RFQs']/../preceding-sibling::div[1]" position="attributes">
+            <attribute name="class">g-col-12 g-col-sm-3 d-flex align-items-center py-2 justify-content-start justify-content-sm-end text-start text-sm-end justify-content-lg-start text-lg-start text-break fw-bold</attribute>
+        </xpath>
+        <xpath expr="//div[@title='All Draft RFQs']/.." position="attributes">
+            <attribute name="class">g-col-12 g-col-sm-9 grid gap-1</attribute>
+        </xpath>
         <xpath expr="//div[@title='All Draft RFQs']" position="attributes">
-            <attribute name="class">g-col-3 p-0</attribute>
+            <attribute name="class">g-col-6 g-col-md-3 p-0</attribute>
         </xpath>
         <xpath expr="//div[@title='All Waiting RFQs']" position="attributes">
-            <attribute name="class">g-col-3 p-0</attribute>
+            <attribute name="class">g-col-6 g-col-md-3 p-0</attribute>
         </xpath>
         <xpath expr="//div[@title='All Late RFQs']" position="attributes">
-            <attribute name="class">g-col-3 p-0</attribute>
+            <attribute name="class">g-col-6 g-col-md-3 p-0</attribute>
         </xpath>
         <xpath expr="//div[@title='All Late RFQs']" position="after">
-            <div class="g-col-3 p-0" t-on-click="openPorAgotar" title="Productos que llegaron a su mínimo">
-                <a href="#" class="btn btn-warning w-100 h-100 border-0 rounded-0 text-capitalize text-break fw-normal">
+            <div class="g-col-6 g-col-md-3 p-0" t-on-click="openPorAgotar" title="Productos que llegaron a su mínimo">
+                <a href="#" class="btn btn-warning w-100 h-100 border-0 rounded-0 text-capitalize text-break fw-normal py-2">
                     <div class="fs-2" t-out="purchaseData['dk_por_agotar']"/>Por agotar
                 </a>
             </div>
+        </xpath>
+        <!-- "Mis solicitudes": solo de tablet para arriba -->
+        <xpath expr="//div[@title='My Draft RFQs']/../.." position="attributes">
+            <attribute name="class" add="d-none d-md-grid" separator=" "/>
+        </xpath>
+        <xpath expr="//div[@title='My Draft RFQs']/../preceding-sibling::div[1]" position="attributes">
+            <attribute name="class">g-col-3 g-col-sm-3 d-flex align-items-center py-2 justify-content-end text-end justify-content-lg-start text-lg-start text-break</attribute>
+        </xpath>
+        <xpath expr="//div[@title='My Draft RFQs']/.." position="attributes">
+            <attribute name="class">g-col-9 g-col-sm-9 grid gap-2</attribute>
         </xpath>
         <xpath expr="//div[@title='My Draft RFQs']" position="attributes">
             <attribute name="class">g-col-3 p-0</attribute>
@@ -29,6 +51,10 @@
         </xpath>
         <xpath expr="//div[@title='My Late RFQs']" position="attributes">
             <attribute name="class">g-col-3 p-0</attribute>
+        </xpath>
+        <!-- cifras de la derecha (valor promedio, comprado en 7 días, plazo...): solo de tablet para arriba -->
+        <xpath expr="//div[hasclass('o_purchase_dashboard')]//div[hasclass('col-lg-7')]" position="attributes">
+            <attribute name="class" add="d-none d-md-block" separator=" "/>
         </xpath>
     </t>
 </templates>

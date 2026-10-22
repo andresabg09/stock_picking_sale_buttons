@@ -39,6 +39,13 @@
         <field name="model">stock.warehouse.orderpoint</field>
         <field name="inherit_id" ref="stock.view_stock_warehouse_orderpoint_kanban"/>
         <field name="arch" type="xml">
+            <!-- campos que usa la tarjeta con record.X: tienen que estar declarados o la pantalla da error en el celular -->
+            <xpath expr="//templates" position="before">
+                <field name="dk_nevada_label"/>
+                <field name="dk_state"/>
+                <field name="dk_note"/>
+                <field name="qty_to_order"/>
+            </xpath>
             <xpath expr="//t[@t-name='card']" position="replace">
                 <t t-name="card">
                     <div class="d-flex gap-3">

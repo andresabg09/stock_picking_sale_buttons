@@ -1,0 +1,81 @@
+/* Listas dentro de los formularios (líneas de la entrega, de la orden de venta, de la compra, de la factura...)
+   y panel de Compras: se ajustan SOLAS al ancho de la pantalla (celular, tablet o computadora), sin tener que
+   arrastrar columnas ni hacer scroll hacia los lados.
+
+   Odoo calcula el ancho de cada columna con JavaScript y lo fija; al cambiar de pantalla o de tamaño de ventana
+   vuelve a calcularlo y se pierde lo que uno ajustó. Aquí le decimos al navegador que reparta él mismo el ancho
+   según el contenido (table-layout: auto): los números no se parten, los nombres bajan de línea. */
+
+/* --- 1. Reparto automático del ancho (todas las pantallas) --- */
+.o_form_view .o_field_x2many_list .o_list_table {
+    table-layout: auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+}
+.o_form_view .o_field_x2many_list .o_list_table th,
+.o_form_view .o_field_x2many_list .o_list_table td {
+    width: auto !important;
+    max-width: none !important;
+}
+/* los nombres y códigos bajan de línea en vez de cortarse con "..." */
+.o_form_view .o_field_x2many_list .o_list_table td.o_data_cell:not(.o_list_number):not(.o_list_boolean) {
+    white-space: normal;
+    overflow-wrap: anywhere;
+}
+/* los números y los interruptores no se parten y ocupan lo justo */
+.o_form_view .o_field_x2many_list .o_list_table td.o_list_number,
+.o_form_view .o_field_x2many_list .o_list_table th.o_list_number_th {
+    white-space: nowrap;
+    width: 1% !important;
+}
+.o_form_view .o_field_x2many_list .o_list_table td.o_list_boolean,
+.o_form_view .o_field_x2many_list .o_list_table td.o_list_button {
+    white-space: nowrap;
+    width: 1% !important;
+}
+
+/* la foto ocupa lo justo y queda a la izquierda */
+.o_form_view .o_field_x2many_list .o_list_table td[name="custom_product_image"],
+.o_form_view .o_field_x2many_list .o_list_table th[data-name="custom_product_image"] {
+    width: 1% !important;
+    text-align: left;
+}
+.o_form_view .o_field_x2many_list .o_list_table td[name="custom_product_image"] .o_field_image {
+    float: none !important;
+    margin: 0;
+}
+
+/* --- 2. Celular (menos de 576 px): la foto se achica y el código de barras se esconde para que quepa
+       Producto, Demanda, Cantidad y Listo en una sola pantalla --- */
+@media (max-width: 575.98px) {
+    .o_form_view .o_field_x2many_list .o_list_table td.o_data_cell,
+    .o_form_view .o_field_x2many_list .o_list_table th {
+        padding-left: 0.35rem;
+        padding-right: 0.35rem;
+    }
+    .o_form_view .o_field_x2many_list .o_list_table td[name="custom_product_image"] .o_field_image,
+    .o_form_view .o_field_x2many_list .o_list_table td[name="custom_product_image"] img {
+        width: 50px !important;
+        height: 50px !important;
+        max-width: 50px !important;
+    }
+    .o_form_view .o_field_x2many_list .o_list_table th[data-name="custom_product_barcode"],
+    .o_form_view .o_field_x2many_list .o_list_table td[name="custom_product_barcode"] {
+        display: none !important;
+    }
+    .o_form_view .o_field_x2many_list .o_list_table td[name="product_id"] {
+        min-width: 110px;
+    }
+}
+
+/* --- 3. Panel de Compras en celular y tablet: el aviso "no hay solicitudes" no se encima al panel --- */
+@media (max-width: 991.98px) {
+    .o_content:has(.o_purchase_dashboard) .o_view_nocontent {
+        position: relative !important;
+        top: auto !important;
+        left: auto !important;
+        transform: none !important;
+        margin: 1rem auto;
+        padding: 0 1rem;
+    }
+}
