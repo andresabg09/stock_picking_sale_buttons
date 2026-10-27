@@ -1,5 +1,5 @@
 # Se ejecuta DENTRO de `odoo shell` (lo lanza limpiar_duplicados.sh; `env` ya existe). No usar a mano.
-# Borra los productos ARCHIVADOS que tienen un gemelo ACTIVO con el mismo código de barras y NINGÚN historial
+# Borra los productos ARCHIVADOS que tienen un gemelo ACTIVO con el mismo código de barras y el mismo nombre y NINGÚN historial
 # (sin movimientos, ventas, facturas, compras, existencias, etc.). Los que sí tienen historial NO se tocan.
 # Aparte: unifica las copias archivadas de CREMA CORPORAL NNP HONEY & OATMEAL 590ML (código 841670029904).
 # Sin APPLY=1 es SIMULACRO: no cambia nada.
@@ -50,8 +50,13 @@ print('== MODO: %s ==' % ('APLICAR' if APPLY else 'SIMULACRO (no cambia nada)'))
 
 # 1) archivados con gemelo activo (mismo código de barras)
 archived = P.search([('active', '=', False), ('barcode', '!=', False)])
-twins = set(P.search([('active', '=', True), ('barcode', 'in', archived.mapped('barcode'))]).mapped('barcode'))
-cand = archived.filtered(lambda p: p.barcode in twins)
+twin_names = {}
+for t in P.search([('active', '=', True), ('barcode', 'in', archived.mapped('barcode'))]):
+    twin_names.setdefault(t.barcode, set()).add((t.name or '').strip().lower())
+# gemelo = mismo código de barras Y mismo nombre (si el nombre cambia es otro producto con el código repetido)
+cand = archived.filtered(lambda p: (p.name or '').strip().lower() in twin_names.get(p.barcode, set()))
+for p in archived.filtered(lambda p: p.barcode in twin_names and p not in cand):
+    print('  NOMBRE DISTINTO (no se toca): id=%s %s [%s]' % (p.id, p.name, p.barcode))
 hist = history(cand)
 sin_historial = cand.filtered(lambda p: not hist[p.id])
 con_historial = cand - sin_historial
