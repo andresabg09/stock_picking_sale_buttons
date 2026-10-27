@@ -16,7 +16,7 @@ import { ProductCatalogKanbanRecord } from "@product/product_catalog/kanban_reco
 import { ProductCatalogOrderLine } from "@product/product_catalog/order_line/order_line";
 
 // Estado compartido por todas las tarjetas del catálogo abierto (se reinicia si cambia el pedido).
-const promoStore = reactive({ orderId: null, loaded: false, byProduct: {} });
+const promoStore = reactive({ orderId: null, loaded: false, byProduct: {}, ticket: 0 });
 
 // Propiedad nueva que llega desde el servidor.
 ProductCatalogOrderLine.props = {
@@ -48,6 +48,17 @@ patch(ProductCatalogOrderLine.prototype, {
 });
 
 patch(ProductCatalogKanbanRecord.prototype, {
+    // Los cambios de cantidad de una misma tarjeta salen UNO POR UNO, en orden. La versión de Odoo de este
+    // servidor los manda en paralelo: "Agregar" (cantidad 1) todavía se estaba guardando cuando salía el "12",
+    // y el servidor terminaba con el 1 (la cantidad "se reponía"). Cada envío lee la cantidad al momento de
+    // salir, así que siempre lleva lo último que escribió el usuario.
+    _updateQuantityAndGetPrice() {
+        const send = () =>
+            rpc("/product/catalog/update_order_line_info", this._getUpdateQuantityAndGetPriceParams());
+        const previous = this._dkPendingUpdate || Promise.resolve();
+        this._dkPendingUpdate = previous.then(send, send);
+        return this._dkPendingUpdate;
+    },
     async _updateQuantity() {
         await super._updateQuantity(...arguments);
         await this._dkRefreshPromo();
@@ -57,10 +68,14 @@ patch(ProductCatalogKanbanRecord.prototype, {
         if (this.env.orderResModel !== "sale.order") {
             return;
         }
+        const ticket = (promoStore.ticket = (promoStore.ticket || 0) + 1);
         try {
             const status = await rpc("/stock_picking_sale_buttons/catalog/promo_status", {
                 order_id: this.env.orderId,
             });
+            if (ticket !== promoStore.ticket) {
+                return; // llegó una respuesta más nueva: esta ya quedó vieja
+            }
             promoStore.orderId = this.env.orderId;
             promoStore.byProduct = status || {};
             promoStore.loaded = true;
