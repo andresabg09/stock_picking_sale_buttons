@@ -11,7 +11,7 @@
 
 import { patch } from "@web/core/utils/patch";
 import { rpc } from "@web/core/network/rpc";
-import { reactive, useState } from "@odoo/owl";
+import { onPatched, onWillPatch, reactive, useState } from "@odoo/owl";
 import { ProductCatalogKanbanRecord } from "@product/product_catalog/kanban_record";
 import { ProductCatalogOrderLine } from "@product/product_catalog/order_line/order_line";
 
@@ -35,6 +35,23 @@ patch(ProductCatalogOrderLine.prototype, {
             promoStore.byProduct = {};
         }
         this.dkPromo = useState(promoStore);
+        // Cuando Odoo vuelve a dibujar la tarjeta (llegó el precio del servidor o la leyenda de promoción) la caja
+        // de cantidad se reponía al valor guardado y se perdía lo que el usuario estaba escribiendo ("Agregar" → escribir
+        // 12 → volvía a 1). Si la caja tiene el foco, se recuerda lo escrito antes de dibujar y se devuelve después.
+        let typing = null;
+        onWillPatch(() => {
+            const el = document.activeElement;
+            typing =
+                el && el.tagName === "INPUT" && el.closest(".o_product_catalog_quantity")
+                    ? { el, value: el.value }
+                    : null;
+        });
+        onPatched(() => {
+            if (typing && typing.el.isConnected && typing.el.value !== typing.value) {
+                typing.el.value = typing.value;
+            }
+            typing = null;
+        });
     },
     get promoText() {
         if (this.dkPromo.loaded) {
