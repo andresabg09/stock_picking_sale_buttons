@@ -99,4 +99,24 @@
         </field>
     </record>
 
+    <!-- Rendimiento (2026-10-28, pedido de Andrés): la lista de Entregas trae TODOS los traslados sin paginar y
+         Odoo calcula también las columnas OCULTAS (optional="hide"). "Disponibilidad" (~3 s), "Peso de envío"
+         (~1,5 s), país, peso y transportista no se usan: se quitan de la lista (la lista pasó de 9,5 s a unos
+         3-4 s). No tocan las existencias de Inventario. Si algún día se necesitan, se devuelven aquí. -->
+    <record id="stock_picking_list_lighter" model="ir.ui.view">
+        <field name="name">stock.picking.list.lighter</field>
+        <field name="model">stock.picking</field>
+        <field name="inherit_id" ref="stock.vpicktree"/>
+        <field name="priority">99</field>
+        <field name="arch" type="xml">
+            <field name="products_availability" position="replace"/>
+            <field name="products_availability_state" position="replace"/>
+            <field name="shipping_weight" position="replace"/>
+            <field name="weight" position="replace"/>
+            <field name="destination_country_code" position="replace"/>
+            <field name="carrier_id" position="replace"/>
+            <field name="carrier_tracking_ref" position="replace"/>
+        </field>
+    </record>
+
 </odoo>
