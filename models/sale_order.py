@@ -1002,13 +1002,58 @@ class SaleOrderLine(models.Model):
             ('program_type', '=', 'buy_x_get_y'),
             ('active', '=', True),
         ])
+        # Rendimiento (2026-10-28): antes, por CADA línea se volvía a recorrer TODA la orden y todos los
+        # programas (crecía con el cuadrado de las líneas: orden de 207 líneas = 4 s, 140 = 1,9 s al abrirla).
+        # Ahora el programa/regla de cada producto se calcula una vez y el total por regla una vez por orden.
+        # El resultado es el mismo que el de `_get_matched_program` + `_price_qualifies_for_promo`.
+        rules_info = [
+            (program, rule, set(rule.product_ids.ids), rule.product_category_id.id)
+            for program in programs
+            for rule in program.rule_ids
+        ]
+        match_cache = {}
+
+        def match(product):
+            if product.id not in match_cache:
+                categ_ids = set()
+                cat = product.categ_id
+                while cat:
+                    categ_ids.add(cat.id)
+                    cat = cat.parent_id
+                found = (None, None)
+                for program, rule, product_ids, categ_id in rules_info:
+                    if product.id in product_ids or (categ_id and categ_id in categ_ids):
+                        found = (program, rule)
+                        break
+                match_cache[product.id] = found
+            return match_cache[product.id]
+
+        totals_cache = {}
+
+        def totals(order):
+            # unidades que cuentan para cada regla en esta orden
+            if order not in totals_cache:
+                by_rule = {}
+                for ol in order.order_line:
+                    if ol.display_type or not ol.product_id:
+                        continue
+                    if ol.is_reward_line:
+                        continue  # el producto de regalo nunca suma a la promo, aunque muestre precio
+                    _, ol_rule = match(ol.product_id)
+                    if not ol_rule:
+                        continue
+                    if not self._price_qualifies_for_promo(ol, ol_rule):
+                        continue
+                    by_rule[ol_rule.id] = by_rule.get(ol_rule.id, 0.0) + ol.product_uom_qty
+                totals_cache[order] = by_rule
+            return totals_cache[order]
 
         for line in self:
             if not line.product_id or line.display_type:
                 line.custom_promo_status = ''
                 continue
 
-            program, rule = self._get_matched_program(line, programs)
+            program, rule = match(line.product_id)
 
             if not program or not rule:
                 line.custom_promo_status = ''
@@ -1019,19 +1064,8 @@ class SaleOrderLine(models.Model):
                 line.custom_promo_status = ''
                 continue
 
-            # Sumar qty de todas las líneas que califican al mismo programa
-            total_qty = 0.0
-            for ol in line.order_id.order_line:
-                if ol.display_type or not ol.product_id:
-                    continue
-                if ol.is_reward_line:
-                    continue  # el producto de regalo nunca suma a la promo, aunque muestre precio
-                _, ol_rule = self._get_matched_program(ol, programs)
-                if ol_rule != rule:
-                    continue
-                if not self._price_qualifies_for_promo(ol, rule):
-                    continue
-                total_qty += ol.product_uom_qty
+            # Suma de qty de todas las líneas que califican al mismo programa
+            total_qty = totals(line.order_id).get(rule.id, 0.0)
 
             min_qty = rule.minimum_qty
             reward = program.reward_ids[:1]
