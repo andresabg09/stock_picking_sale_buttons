@@ -91,9 +91,21 @@
 .dk-product-list .o_list_table th:not(.o_list_record_selector):not(.o_list_controller) {
     width: auto !important;
 }
-.dk-product-list .o_list_table td.o_data_cell:not(.o_list_number):not(.o_list_boolean) {
-    white-space: normal;
+/* Odoo trae las celdas en una sola línea (white-space: nowrap + puntos suspensivos); aquí bajan de línea */
+.dk-product-list .o_list_table td.o_data_cell:not(.o_list_number):not(.o_list_boolean):not(.o_boolean_favorite_cell) {
+    white-space: normal !important;
     overflow-wrap: anywhere;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    max-width: none !important;
+}
+/* los encabezados también bajan de línea (Odoo los pone con text-truncate = una sola línea) */
+.dk-product-list .o_list_table thead th,
+.dk-product-list .o_list_table thead th * {
+    white-space: normal !important;
+    text-overflow: clip !important;
+    overflow-wrap: normal;
+    word-break: normal;
 }
 .dk-product-list .o_list_table td.o_list_number,
 .dk-product-list .o_list_table td.o_list_boolean {
@@ -136,7 +148,7 @@
         display: none !important;
     }
 }
-/* celular (menos de 576 px): además tipo, pronóstico y actividad; la foto baja a 40 px */
+/* celular (menos de 576 px): además referencia interna (casi siempre vacía), tipo, pronóstico y actividad; la foto baja a 40 px */
 @media (max-width: 575.98px) {
     .dk-product-list .o_list_table td.o_data_cell,
     .dk-product-list .o_list_table th {
@@ -147,6 +159,11 @@
         font-size: 0.75rem;
         white-space: normal;
     }
+    .dk-product-list .o_list_table th:first-of-type:not(.o_list_record_selector),
+    .dk-product-list .o_list_table td.o_boolean_favorite_cell {
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+    }
     .dk-product-list .o_list_table td[name="name"] {
         min-width: 70px;
     }
@@ -156,6 +173,18 @@
         height: 40px !important;
         max-width: 40px !important;
     }
+    /* las categorías del sitio web (etiquetas) bajan de línea en vez de ensanchar la columna */
+    .dk-product-list .o_list_table td[name="public_categ_ids"] .o_field_many2many_tags {
+        flex-wrap: wrap;
+    }
+    .dk-product-list .o_list_table td[name="public_categ_ids"] .o_tag,
+    .dk-product-list .o_list_table td[name="public_categ_ids"] .o_tag * {
+        white-space: normal !important;
+        max-width: 84px;
+        overflow-wrap: anywhere;
+    }
+    .dk-product-list .o_list_table th[data-name="default_code"],
+    .dk-product-list .o_list_table td[name="default_code"],
     .dk-product-list .o_list_table th[data-name="type"],
     .dk-product-list .o_list_table td[name="type"],
     .dk-product-list .o_list_table th[data-name="virtual_available"],

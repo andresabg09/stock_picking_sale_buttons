@@ -73,6 +73,18 @@ redimensionadas en Traslados (`stock.picking`), Ventas (`sale.order`), Facturas
 - Límites: el MCP lee/escribe **datos**, no el código. Cambios al módulo siguen el flujo
   de la regla 1 (commit + push → `deploy.sh` por SSH). Logs y `odoo shell` siguen por SSH.
 
+## Verificar yo mismo (REGLA de Andrés, 2026-10-31: no pedirle capturas ni datos que puedo sacar solo)
+- En el entorno de Claude Code SIEMPRE están definidas `ODOO_URL`, `ODOO_DB`, `ODOO_UID`, `ODOO_API_KEY`
+  (datos: leer y escribir con `scripts/odoo_rpc.py`, escritura solo con el "sí" de Andrés, regla 6) y
+  `ODOO_WEB_LOGIN` / `ODOO_WEB_PASSWORD` (entrar a la web de Odoo con navegador). Comprobarlas con
+  `[ -n "$ODOO_WEB_LOGIN" ]` ANTES de decir que no tengo acceso. Nunca imprimirlas ni pegarlas en el chat/repo.
+- Antes de pedirle algo a Andrés: (1) leer vistas/datos/versión instalada con `odoo_rpc.py` (`module`, `views`,
+  `search_read`); (2) ver la pantalla real con Playwright ENTRANDO a Odoo con esas credenciales (Node:
+  `NODE_PATH=$(npm root -g) node script.js`; el Python de `odoo_shot.py` necesita `pip install playwright`) en 390 /
+  800 / 1280 px. Si el cambio aún no está desplegado, inyectar el CSS/clase en la página real para comprobarlo.
+- Solo se pide a Andrés lo que no alcanzo: desplegar (SSH), logs, y probar con su celular/tablet real.
+- Los scripts de prueba van fuera del repo (`/tmp`).
+
 ## Glosario (vocabulario del negocio — Andrés, 2026-10-14)
 Las chicas de la clienta (Dianke) vienen de un sistema donde "factura" las confunde. En la pantalla
 y en las conversaciones: **pedido = factura / facturación** de Odoo (`account.move`, app Facturación →
@@ -117,6 +129,7 @@ _(actualizar esta lista cuando aparezca uno nuevo o se resuelva)_
   ```
 
 ## Historial de cambios (resumen, no detalle)
+- 2026-10-31: v18.0.5.17.1 — la 5.17.0 se desbordaba en el Odoo REAL (celular 860 px en pantalla de 390): las celdas y encabezados traen `white-space: nowrap`/`text-truncate`, ahora se anulan con !important; en celular se esconde también Referencia interna (solo 2 de 5.607 productos la tienen) y las Categorías del sitio web bajan de línea. Verificado entrando a Odoo con Playwright e inyectando el CSS: Ventas > Productos cabe en 390/820/1280 px; Sitio web > Productos cabe en 820/1280 y en celular queda ~50 px de scroll lateral por la columna Categorías (se respeta la regla de no esconderla; esconderla = 1 línea de CSS). La lista en celular se abre desde el selector de vistas (icono kanban arriba a la derecha > Lista); Odoo arranca en kanban. NO tocar el kanban.
 - 2026-10-31: v18.0.5.17.0 — LISTA DE PRODUCTOS adaptable a celular/tablet (aprobado por Andrés). `views/product_views.xml` hereda `product.product_template_tree_view` (la base de Ventas, Inventario, Compras y Páginas de producto del sitio web) y agrega la clase `dk-product-list` + foto `image_128` (opcional, 56 px; 40 px en celular; solo para reconocer, las fotos grandes son del catálogo). CSS en `responsive_lists.css` sección 5: ancho repartido solo; tablet (<992) esconde responsable, etiquetas, cinta web, empresa y costo; celular (<576) además tipo, pronóstico y actividad. REGLA: "Publicado" y cualquier otra columna nunca se esconden. Probado con réplica en Chromium (390/800/1280 px, cabe sin deslizar); SIN PROBAR contra Odoo real: revisar en celular y tablet tras el deploy.
 - 2026-10-28: v18.0.5.16.1 — Entregas más rápida (con el "sí" de Andrés: no usa esas columnas; si las necesita, se devuelven): vista `stock_picking_list_lighter` (herede `stock.vpicktree`, priority 99) quita de la lista Disponibilidad (`products_availability(_state)`, ~3 s), Peso de envío, Peso, País de destino, Transportista y su referencia. Meta: lista de ~9,5 s a ~3-4 s sin paginar. SIN PROBAR contra Odoo real: medir de nuevo `stock.picking/web_search_read` tras el deploy.
 - 2026-10-28: v18.0.5.16.0 — LENTITUD (pedido de Andrés: Ventas e Inventario se sienten lentos). MEDIDO con Playwright + `odoo_rpc` contra el Odoo real: (1) abrir una orden grande: `sale.order/web_read` 4,6 s (orden de ~140 líneas) y 8,5 s (207 líneas); de eso la columna Promo (`custom_promo_status`) gastaba ~1,6-4 s porque por CADA línea recorría toda la orden y todos los programas (cuadrático). FIX: `_compute_custom_promo_status` calcula programa/regla por producto una vez y el total por regla una vez por orden (mismo resultado; foto previa de 2.206 líneas en el scratchpad para comparar tras el deploy). (2) Entregas: `stock.picking/web_search_read` con `limit` 1000000 tarda 9,5 s con 1.075 traslados; las columnas OCULTAS (optional=hide) igual se piden: `products_availability(_state)` ~3 s, `shipping_weight` ~1,5 s, país/peso/transportista. NO tocado (cambia la vista; pendiente del "sí" de Andrés). (3) Ventas/Productos (listas) ~4 s en frío: el bundle JS pesa 6,5 MB (1 s); las listas piden 80 filas en 0,4-1 s. Las fotos de línea de la orden (`/web/image/sale.order.line/ID/custom_product_image`) tardan ~0,8 s c/u. Base: 770 órdenes, 51.724 mensajes, 69.035 movimientos, 7.328 adjuntos (no es tamaño de datos).
