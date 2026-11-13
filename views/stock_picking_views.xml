@@ -18,6 +18,9 @@
             <xpath expr="//field[@name='move_ids_without_package']//field[@name='quantity']" position="after">
                 <field name="custom_ready" widget="boolean_toggle" string="Listo"/>
             </xpath>
+            <xpath expr="//notebook" position="before">
+                <field name="custom_promo_summary" nolabel="1" readonly="1" invisible="not custom_promo_summary"/>
+            </xpath>
             <xpath expr="//field[@name='move_ids_without_package']" position="attributes">
                 <attribute name="mode">list</attribute>
             </xpath>
