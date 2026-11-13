@@ -1,0 +1,34 @@
+/* Entregas: barra de arriba que se esconde al bajar y reaparece al subir (ver static/src/js/dk_cp_hide.js).
+   Computadora: la barra está FUERA del área que se desliza; al activarse pasa a flotar encima y el contenido
+   recibe un relleno igual a su altura, así nada se mueve. Celular: la barra está dentro del área que se
+   desliza; se saca y se fija arriba (fixed) con el mismo relleno. */
+.o_form_view.dk-cp-on .o_control_panel {
+    z-index: 20;
+    background-color: var(--o-view-background-color, var(--bs-body-bg, #fff));
+    transition: transform 0.2s ease;
+}
+.o_form_view.dk-cp-on:not(.o_xxs_form_view) .o_form_view_container {
+    position: relative;
+}
+.o_form_view.dk-cp-on:not(.o_xxs_form_view) .o_control_panel {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+}
+.o_form_view.dk-cp-on:not(.o_xxs_form_view) .o_form_view_container > .o_content {
+    padding-top: var(--dk-cp-h, 0px);
+}
+.o_form_view.dk-cp-on.o_xxs_form_view .o_control_panel {
+    position: fixed !important;
+    top: var(--dk-cp-top, 46px) !important;
+    left: 0 !important;
+    right: 0 !important;
+}
+.o_form_view.dk-cp-on.o_xxs_form_view .o_form_view_container {
+    padding-top: var(--dk-cp-h, 0px);
+}
+.o_form_view.dk-cp-on.dk-cp-hidden .o_control_panel {
+    transform: translateY(-110%);
+    box-shadow: none;
+}

@@ -1,5 +1,10 @@
+import json
+import unicodedata
+
 from odoo import models, fields, api
 
+# Palabras (sin tildes) que, en una línea a $0, la vuelven regalo de promoción. "regalo" a propósito NO está.
+DK_PROMO_WORDS = ('gratis', 'promo', 'regalia')
 PARAM_FAST_LINE_ONCHANGE = 'stock_picking_sale_buttons.fast_line_onchange'
 # Campos de una línea que se pueden cambiar sin recalcular el traslado completo (cantidad, "Listo", etc.)
 DK_LIGHT_LINE_FIELDS = {'quantity', 'custom_ready', 'picked', 'description_picking', 'forecast_availability'}
@@ -14,12 +19,74 @@ class StockPicking(models.Model):
 
     # ------------------------------------------------------------------
     # Aviso de promociones al despachar (pedido de Andrés 2026-11-13)
-    # Cuenta la CANTIDAD de las filas con "Listo" marcado (= ya está en la caja del cliente).
-    # Misma regla de programa/precio que la columna Promo de Ventas. La leyenda sale SOLO en la línea
-    # de regalo; las líneas pagadas que dejan la promo incompleta llevan un punto naranja.
+    # Mismo programa y misma regla de precio que la columna Promo de Ventas.
+    #  - Cuentan las unidades PAGADAS (Cantidad) de las filas con "Listo" marcado = ya están en la caja.
+    #  - El regalo NO necesita "Listo": en su línea sale siempre cuánto se puede dar con lo que va en la caja.
+    #  - REGALO = línea de recompensa de Odoo, o línea a $0 cuya descripción diga "gratis", "promo(ción)" o
+    #    "regalía" (NO "regalo": puede ser un obsequio al cliente que no es promoción).
+    #  - Las pagadas que dejan la promo incompleta llevan un punto naranja.
+    # Los avisos viajan en UN campo del traslado (JSON {id_de_línea: texto}) y una pieza de pantalla
+    # (`dk_promo_note.js`) los dibuja en cada línea. Devolverlos como cambios de las líneas hacía que, al marcar
+    # varios "Listo" rápido, una respuesta atrasada del servidor volviera a encender/apagar filas.
     # ------------------------------------------------------------------
+    custom_promo_json = fields.Char(
+        string='Avisos de promoción',
+        compute='_compute_custom_promo_json',
+    )
+
+    @api.depends(
+        'move_ids_without_package.quantity',
+        'move_ids_without_package.custom_ready',
+        'move_ids_without_package.product_id',
+        'move_ids_without_package.description_picking',
+    )
+    def _compute_custom_promo_json(self):
+        for picking in self:
+            picking.custom_promo_json = picking._dk_promo_json()
+
+    def _dk_promo_json(self, overrides=None):
+        self.ensure_one()
+        notes = {mid: txt for mid, txt in self._dk_promo_notes(overrides).items() if txt}
+        return json.dumps(notes) if notes else False
+
+    @staticmethod
+    def _dk_norm_text(text):
+        text = unicodedata.normalize('NFD', (text or '').lower())
+        return ''.join(c for c in text if unicodedata.category(c) != 'Mn')
+
+    @classmethod
+    def _dk_is_promo_gift_line(cls, move):
+        """True si la línea es regalo de promoción (ver arriba)."""
+        sline = move.sale_line_id
+        if not sline:
+            return False
+        if sline.is_reward_line:
+            return True
+        if sline.price_unit or sline.discount < 100:
+            return False
+        text = cls._dk_norm_text('%s %s' % (move.description_picking or '', sline.name or ''))
+        return any(word in text for word in DK_PROMO_WORDS)
+
+    @staticmethod
+    def _dk_promo_text(paid, gift, paid_pending, x, y):
+        """Texto del aviso del regalo. paid = pagadas con Listo, gift = regalo en las líneas, x+y = promo X+Y."""
+        promos, rem = divmod(paid, x)
+        allowed = promos * y
+        if paid_pending:
+            # todavía faltan pagadas por marcar: solo se informa el tope actual, sin alarma
+            return '🕒 Van %d pagadas → regalo máx. %d (hay %d)' % (paid, allowed, gift)
+        if gift > allowed:
+            return '⚠️ Van %d pagadas = %d promo. Regalo máx. %d, hay %d → quita %d' % (
+                paid, promos, allowed, gift, gift - allowed)
+        if gift < allowed:
+            return '⏳ Van %d pagadas → regalo máx. %d (hay %d, faltan %d)' % (paid, allowed, gift, allowed - gift)
+        txt = '✅ Van %d pagadas → regalo %d' % (paid, allowed)
+        if rem:
+            txt += ' · faltan %d para otro' % (x - rem)
+        return txt
+
     def _dk_promo_notes(self, overrides=None):
-        """Devuelve {id_de_línea: texto} para las líneas con venta. `overrides` = {id: {'quantity','custom_ready'}}
+        """{id_de_línea: texto} para las líneas con orden de venta. `overrides` = {id: {'quantity','custom_ready'}}
         con cambios que el formulario todavía no guardó."""
         self.ensure_one()
         overrides = overrides or {}
@@ -34,55 +101,47 @@ class StockPicking(models.Model):
             return notes
         SOL = self.env['sale.order.line']
         data = {}
+
+        def entry(program):
+            return data.setdefault(program.id, {
+                'program': program, 'rule': False, 'paid': 0.0, 'gift': 0.0, 'paid_pending': False,
+                'paid_moves': [], 'gift_moves': []})
+
         for move in moves:
             sline = move.sale_line_id
-            if sline.is_reward_line:
-                program = sline.reward_id.program_id
-                if program not in programs:
+            vals = overrides.get(move.id, {})
+            qty = vals.get('quantity', move.quantity) or 0.0
+            if self._dk_is_promo_gift_line(move):
+                program = sline.reward_id.program_id if sline.is_reward_line else SOL._get_matched_program(
+                    sline, programs)[0]
+                if not program or program not in programs:
                     continue
-                d = data.setdefault(program.id, {'program': program, 'paid': 0.0, 'gift': 0.0, 'pending': False,
-                                                 'paid_moves': [], 'gift_moves': []})
+                d = entry(program)
                 d['gift_moves'].append(move.id)
-                kind = 'gift'
+                d['gift'] += qty
             else:
                 program, rule = SOL._get_matched_program(sline, programs)
                 if not program or not SOL._price_qualifies_for_promo(sline, rule):
                     continue
-                d = data.setdefault(program.id, {'program': program, 'paid': 0.0, 'gift': 0.0, 'pending': False,
-                                                 'paid_moves': [], 'gift_moves': []})
-                d['rule'] = rule
+                d = entry(program)
+                d['rule'] = d['rule'] or rule
                 d['paid_moves'].append(move.id)
-                kind = 'paid'
-            vals = overrides.get(move.id, {})
-            if not vals.get('custom_ready', move.custom_ready):
-                d['pending'] = True
-                continue
-            d['paid' if kind == 'paid' else 'gift'] += vals.get('quantity', move.quantity) or 0.0
+                if vals.get('custom_ready', move.custom_ready):
+                    d['paid'] += qty
+                else:
+                    d['paid_pending'] = True
         for d in data.values():
-            rule = d.get('rule')
+            rule = d['rule'] or d['program'].rule_ids[:1]
             if not rule or rule.minimum_qty <= 0:
                 continue
             x = int(rule.minimum_qty)
             reward = d['program'].reward_ids[:1]
             y = int(reward.reward_product_qty) if reward else 0
             paid, gift = int(d['paid']), int(d['gift'])
-            promos, rem = divmod(paid, x)
-            allowed = promos * y
-            if d['pending']:
-                txt = '🕒 Van %d pagadas y %d de regalo. Faltan filas por marcar Listo' % (paid, gift)
-            elif gift > allowed:
-                txt = '⚠️ %d pagadas = %d promo. Regalo máx. %d, hay %d → quita %d' % (paid, promos, allowed, gift, gift - allowed)
-            elif gift < allowed:
-                txt = '⏳ %d pagadas = %d promo. Regalo %d de %d → faltan %d' % (paid, promos, gift, allowed, allowed - gift)
-            elif rem:
-                txt = '⏳ %d pagadas. Faltan %d para otra promo' % (paid, x - rem)
-            elif promos:
-                txt = '✅ %d promo(s) completas' % promos
-            else:
-                txt = ''
+            txt = self._dk_promo_text(paid, gift, d['paid_pending'], x, y)
             for mid in d['gift_moves']:
                 notes[mid] = txt
-            if rem and not d['pending']:
+            if d['paid_moves'] and not d['paid_pending'] and paid % x:
                 for mid in d['paid_moves']:
                     notes[mid] = '🟠'
         return notes
@@ -98,10 +157,7 @@ class StockPicking(models.Model):
             result = {'value': {}}
             if len(self) == 1 and self.id:
                 overrides = {c[1]: c[2] for c in (values.get('move_ids_without_package') or [])}
-                notes = self._dk_promo_notes(overrides)
-                if notes:
-                    result['value']['move_ids_without_package'] = [
-                        [1, mid, {'custom_promo_note': txt or False}] for mid, txt in notes.items()]
+                result['value']['custom_promo_json'] = self._dk_promo_json(overrides) or False
             return result
         return super().onchange(values, field_names, fields_spec)
 
@@ -182,16 +238,10 @@ class StockMove(models.Model):
         compute='_compute_custom_promo_note',
     )
 
-    @api.depends('quantity', 'custom_ready', 'product_id', 'picking_id',
-                 'picking_id.move_ids_without_package.quantity',
-                 'picking_id.move_ids_without_package.custom_ready')
     def _compute_custom_promo_note(self):
-        notes = {}
-        for picking in self.picking_id:
-            if picking.id:
-                notes.update(picking._dk_promo_notes())
+        # Marcador: el texto real sale de `stock.picking.custom_promo_json` (lo dibuja dk_promo_note.js).
         for move in self:
-            move.custom_promo_note = notes.get(move.id) or False
+            move.custom_promo_note = False
 
     # Producto con Cantidad menor que la Demanda (0 o parcial) y con unidades en la lista de Nevada (Zona 1): la fila
     # se sombrea de naranja suave para que bodega sepa que puede estar por llegar (pedido de Andrés 2026-11-13).

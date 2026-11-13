@@ -5,6 +5,9 @@
         <field name="model">stock.picking</field>
         <field name="inherit_id" ref="stock.view_picking_form"/>
         <field name="arch" type="xml">
+            <xpath expr="//form" position="attributes">
+                <attribute name="class" add="dk-picking-form" separator=" "/>
+            </xpath>
             <xpath expr="//field[@name='move_ids_without_package']//field[@name='product_id']" position="before">
                 <field name="custom_product_image" widget="image" options="{'size': [95, 95]}" class="oe_avatar" string="Imagen"/>
             </xpath>
@@ -12,7 +15,7 @@
                 <field name="custom_product_barcode" string="Código de Barras"/>
             </xpath>
             <xpath expr="//field[@name='move_ids_without_package']//field[@name='product_id']" position="after">
-                <field name="custom_promo_note" string="Promo" readonly="1"/>
+                <field name="custom_promo_note" string="Promo" widget="dk_promo_note" readonly="1"/>
             </xpath>
             <xpath expr="//field[@name='move_ids_without_package']//field[@name='description_picking']" position="attributes">
                 <attribute name="optional">show</attribute>
@@ -20,6 +23,9 @@
             </xpath>
             <xpath expr="//field[@name='move_ids_without_package']//field[@name='quantity']" position="after">
                 <field name="custom_ready" widget="boolean_toggle" string="Listo"/>
+            </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']" position="before">
+                <field name="custom_promo_json" invisible="1"/>
             </xpath>
             <xpath expr="//field[@name='move_ids_without_package']" position="attributes">
                 <attribute name="mode">list</attribute>
