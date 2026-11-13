@@ -1,4 +1,3 @@
-from markupsafe import Markup, escape
 from odoo import models, fields, api
 
 PARAM_FAST_LINE_ONCHANGE = 'stock_picking_sale_buttons.fast_line_onchange'
@@ -12,96 +11,81 @@ class StockPicking(models.Model):
         string='Pedidos',
         compute='_compute_invoice_count',
     )
-    custom_promo_summary = fields.Html(
-        string='Promociones',
-        compute='_compute_custom_promo_summary',
-        sanitize=False,
-    )
 
     # ------------------------------------------------------------------
     # Aviso de promociones al despachar (pedido de Andrés 2026-11-13)
     # Cuenta la CANTIDAD de las filas con "Listo" marcado (= ya está en la caja del cliente).
-    # Mismos programas "compra X y llévate Y" y misma regla de precio que la columna Promo de Ventas.
+    # Misma regla de programa/precio que la columna Promo de Ventas. La leyenda sale SOLO en la línea
+    # de regalo; las líneas pagadas que dejan la promo incompleta llevan un punto naranja.
     # ------------------------------------------------------------------
-    @api.depends(
-        'move_ids_without_package.quantity',
-        'move_ids_without_package.custom_ready',
-        'move_ids_without_package.product_id',
-    )
-    def _compute_custom_promo_summary(self):
-        for picking in self:
-            picking.custom_promo_summary = picking._dk_promo_summary_html()
-
-    def _dk_promo_summary_html(self, overrides=None):
-        """HTML con una línea corta por promoción. `overrides` = {id_de_línea: {'quantity':..,'custom_ready':..}}
+    def _dk_promo_notes(self, overrides=None):
+        """Devuelve {id_de_línea: texto} para las líneas con venta. `overrides` = {id: {'quantity','custom_ready'}}
         con cambios que el formulario todavía no guardó."""
         self.ensure_one()
         overrides = overrides or {}
-        moves = self.move_ids_without_package.filtered(lambda m: m.sale_line_id and m.product_id)
+        moves = self.move_ids_without_package.filtered(lambda m: m.sale_line_id and m.product_id and m.id)
+        notes = {m.id: '' for m in moves}
         if not moves:
-            return False
+            return notes
         programs = self.env['loyalty.program'].search([
             ('program_type', '=', 'buy_x_get_y'), ('active', '=', True),
         ])
         if not programs:
-            return False
+            return notes
         SOL = self.env['sale.order.line']
-        data = {}  # program.id -> dict
+        data = {}
         for move in moves:
             sline = move.sale_line_id
             if sline.is_reward_line:
                 program = sline.reward_id.program_id
                 if program not in programs:
                     continue
-                d = data.setdefault(program.id, {'program': program, 'paid': 0.0, 'gift': 0.0, 'pending': False})
-                kind, rule = 'gift', None
+                d = data.setdefault(program.id, {'program': program, 'paid': 0.0, 'gift': 0.0, 'pending': False,
+                                                 'paid_moves': [], 'gift_moves': []})
+                d['gift_moves'].append(move.id)
+                kind = 'gift'
             else:
                 program, rule = SOL._get_matched_program(sline, programs)
                 if not program or not SOL._price_qualifies_for_promo(sline, rule):
                     continue
-                d = data.setdefault(program.id, {'program': program, 'paid': 0.0, 'gift': 0.0, 'pending': False})
+                d = data.setdefault(program.id, {'program': program, 'paid': 0.0, 'gift': 0.0, 'pending': False,
+                                                 'paid_moves': [], 'gift_moves': []})
                 d['rule'] = rule
+                d['paid_moves'].append(move.id)
                 kind = 'paid'
             vals = overrides.get(move.id, {})
-            ready = vals.get('custom_ready', move.custom_ready)
-            qty = vals.get('quantity', move.quantity)
-            if not ready:
+            if not vals.get('custom_ready', move.custom_ready):
                 d['pending'] = True
                 continue
-            d['paid' if kind == 'paid' else 'gift'] += qty or 0.0
-        lines = []
+            d['paid' if kind == 'paid' else 'gift'] += vals.get('quantity', move.quantity) or 0.0
         for d in data.values():
             rule = d.get('rule')
             if not rule or rule.minimum_qty <= 0:
                 continue
-            program = d['program']
             x = int(rule.minimum_qty)
-            reward = program.reward_ids[:1]
+            reward = d['program'].reward_ids[:1]
             y = int(reward.reward_product_qty) if reward else 0
             paid, gift = int(d['paid']), int(d['gift'])
             promos, rem = divmod(paid, x)
             allowed = promos * y
-            name = escape(program.name or 'Promo')
             if d['pending']:
-                css, txt = 'text-muted', '🕒 %s: llevas %d pagadas y %d de regalo (faltan filas por marcar Listo)' % (name, paid, gift)
+                txt = '🕒 Van %d pagadas y %d de regalo. Faltan filas por marcar Listo' % (paid, gift)
             elif gift > allowed:
-                css = 'text-danger fw-bold'
-                txt = '⚠️ %s: %d pagadas = %d promo(s). Regalo máx. %d, hay %d → quita %d' % (name, paid, promos, allowed, gift, gift - allowed)
-            elif rem:
-                css = 'text-warning fw-bold'
-                txt = '⏳ %s: %d pagadas. Faltan %d para otra promo' % (name, paid, x - rem)
-                if gift < allowed:
-                    txt += ' · regalo %d de %d' % (gift, allowed)
+                txt = '⚠️ %d pagadas = %d promo. Regalo máx. %d, hay %d → quita %d' % (paid, promos, allowed, gift, gift - allowed)
             elif gift < allowed:
-                css = 'text-warning fw-bold'
-                txt = '⏳ %s: %d promo(s). Regalo %d de %d → faltan %d' % (name, promos, gift, allowed, allowed - gift)
+                txt = '⏳ %d pagadas = %d promo. Regalo %d de %d → faltan %d' % (paid, promos, gift, allowed, allowed - gift)
+            elif rem:
+                txt = '⏳ %d pagadas. Faltan %d para otra promo' % (paid, x - rem)
             elif promos:
-                css = 'text-success fw-bold'
-                txt = '✅ %s: %d promo(s) completas · regalo %d' % (name, promos, gift)
+                txt = '✅ %d promo(s) completas' % promos
             else:
-                continue
-            lines.append('<div class="%s">%s</div>' % (css, txt))
-        return Markup(''.join(lines)) if lines else False
+                txt = ''
+            for mid in d['gift_moves']:
+                notes[mid] = txt
+            if rem and not d['pending']:
+                for mid in d['paid_moves']:
+                    notes[mid] = '🟠'
+        return notes
 
     def onchange(self, values, field_names, fields_spec):
         """Traslados grandes (100+ líneas): cada vez que se cambia la cantidad o se marca "Listo" en UNA línea,
@@ -114,8 +98,10 @@ class StockPicking(models.Model):
             result = {'value': {}}
             if len(self) == 1 and self.id:
                 overrides = {c[1]: c[2] for c in (values.get('move_ids_without_package') or [])}
-                summary = self._dk_promo_summary_html(overrides)
-                result['value']['custom_promo_summary'] = summary or False
+                notes = self._dk_promo_notes(overrides)
+                if notes:
+                    result['value']['move_ids_without_package'] = [
+                        [1, mid, {'custom_promo_note': txt or False}] for mid, txt in notes.items()]
             return result
         return super().onchange(values, field_names, fields_spec)
 
@@ -190,6 +176,22 @@ class StockMove(models.Model):
         string='Listo',
         default=False,
     )
+
+    custom_promo_note = fields.Char(
+        string='Promo',
+        compute='_compute_custom_promo_note',
+    )
+
+    @api.depends('quantity', 'custom_ready', 'product_id', 'picking_id',
+                 'picking_id.move_ids_without_package.quantity',
+                 'picking_id.move_ids_without_package.custom_ready')
+    def _compute_custom_promo_note(self):
+        notes = {}
+        for picking in self.picking_id:
+            if picking.id:
+                notes.update(picking._dk_promo_notes())
+        for move in self:
+            move.custom_promo_note = notes.get(move.id) or False
 
     def _sync_description_from_sale(self):
         for move in self:
