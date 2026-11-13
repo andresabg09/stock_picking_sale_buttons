@@ -285,6 +285,100 @@
     }
 }
 
+/* --- Líneas de la ORDEN DE ENTREGA (Inventario): todo cabe sin deslizar de lado, en celular, tablet y computadora.
+   Orden: foto · producto · promo · código · demanda · cantidad · Listo (pedido de Andrés 2026-11-13).
+   Computadora/tablet: tabla normal con el ancho repartido (producto y promo con su parte; código sin partirse).
+   Celular (<576 px): cada línea es una tarjeta: foto a la izquierda; nombre, código, promo y, abajo,
+   Demanda · Cantidad · Listo. --- */
+.o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table td[name="product_id"],
+.o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table th[data-name="product_id"] {
+    width: 38% !important;
+}
+.o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table td[name="custom_promo_note"],
+.o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table th[data-name="custom_promo_note"] {
+    width: 22% !important;
+}
+.o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table td[name="custom_product_barcode"],
+.o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table th[data-name="custom_product_barcode"] {
+    width: 1% !important;
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+}
+@media (max-width: 991.98px) {
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_product_image"] .o_field_image,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_product_image"] img {
+        width: 60px !important;
+        height: 60px !important;
+        max-width: 60px !important;
+    }
+}
+@media (max-width: 575.98px) {
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table thead,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tfoot,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr.o_data_row > td.o_list_button,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr.o_data_row > td[name="description_picking"],
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr.o_data_row > td:last-child:not([name]) {
+        display: none !important;
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tbody {
+        display: block !important;
+        width: 100% !important;
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr.o_data_row {
+        display: grid !important;
+        grid-template-columns: 62px 1fr 1fr 52px;
+        grid-template-areas:
+            "img name  name  name"
+            "img code  code  code"
+            "img promo promo promo"
+            "img dem   qty   ready";
+        column-gap: 0.5rem;
+        align-items: center;
+        padding: 0.5rem 0.9rem 0.5rem 0.35rem;
+        border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr.o_data_row > td {
+        display: block !important;
+        width: auto !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        text-align: left !important;
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_product_image"] { grid-area: img; align-self: start; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_product_image"] .o_field_image,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_product_image"] img {
+        width: 58px !important;
+        height: 58px !important;
+        max-width: 58px !important;
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="product_id"] { grid-area: name; font-weight: 600; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_product_barcode"] {
+        grid-area: code;
+        display: block !important;
+        font-size: 0.8rem;
+        color: var(--bs-secondary-color, #6c757d);
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_promo_note"] { grid-area: promo; font-size: 0.85rem; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="product_uom_qty"] { grid-area: dem; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="quantity"] { grid-area: qty; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_ready"] { grid-area: ready; justify-self: end; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="product_uom_qty"]::before,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="quantity"]::before {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 400;
+        color: var(--bs-secondary-color, #6c757d);
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="product_uom_qty"]::before { content: "Demanda"; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="quantity"]::before { content: "Cantidad"; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr:not(.o_data_row),
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr:not(.o_data_row) > td {
+        display: block !important;
+    }
+}
+
 /* Entregas: fila con producto sin existencia propia pero con unidades en Nevada (Zona 1) = naranja suave.
    Odoo marca la fila con `text-warning` (solo cambia el color del texto); aquí se vuelve fondo y el texto queda normal. */
 .o_form_view .o_field_widget[name="move_ids_without_package"] tr.o_data_row.text-warning > td {

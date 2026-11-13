@@ -11,13 +11,15 @@
             <xpath expr="//field[@name='move_ids_without_package']//field[@name='product_id']" position="after">
                 <field name="custom_product_barcode" string="Código de Barras"/>
             </xpath>
+            <xpath expr="//field[@name='move_ids_without_package']//field[@name='product_id']" position="after">
+                <field name="custom_promo_note" string="Promo" readonly="1"/>
+            </xpath>
             <xpath expr="//field[@name='move_ids_without_package']//field[@name='description_picking']" position="attributes">
                 <attribute name="optional">show</attribute>
                 <attribute name="string">Descripción</attribute>
             </xpath>
             <xpath expr="//field[@name='move_ids_without_package']//field[@name='quantity']" position="after">
                 <field name="custom_ready" widget="boolean_toggle" string="Listo"/>
-                <field name="custom_promo_note" string="Promo" readonly="1" style="white-space: normal; min-width: 160px;"/>
             </xpath>
             <xpath expr="//field[@name='move_ids_without_package']" position="attributes">
                 <attribute name="mode">list</attribute>
