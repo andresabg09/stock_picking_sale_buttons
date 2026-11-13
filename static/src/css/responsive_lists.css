@@ -284,3 +284,10 @@
         font-size: 1.1rem;
     }
 }
+
+/* Entregas: fila con producto sin existencia propia pero con unidades en Nevada (Zona 1) = naranja suave.
+   Odoo marca la fila con `text-warning` (solo cambia el color del texto); aquí se vuelve fondo y el texto queda normal. */
+.o_form_view .o_field_widget[name="move_ids_without_package"] tr.o_data_row.text-warning > td {
+    background-color: #FDEBD3 !important;
+    color: inherit !important;
+}

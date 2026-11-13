@@ -193,6 +193,20 @@ class StockMove(models.Model):
         for move in self:
             move.custom_promo_note = notes.get(move.id) or False
 
+    # Producto SIN existencia propia (Cantidad en 0) pero con unidades en la lista de Nevada (Zona 1): la fila
+    # se sombrea de naranja suave para que bodega sepa que puede estar por llegar (pedido de Andrés 2026-11-13).
+    dk_nevada_wait = fields.Boolean(compute='_compute_dk_nevada_wait')
+
+    @api.depends('quantity', 'state', 'product_id')
+    def _compute_dk_nevada_wait(self):
+        for move in self:
+            move.dk_nevada_wait = bool(
+                move.product_id
+                and move.state not in ('done', 'cancel', 'draft')
+                and (move.quantity or 0.0) <= 0
+                and move.product_id.dk_nevada_qty > 0
+            )
+
     def _sync_description_from_sale(self):
         for move in self:
             if move.sale_line_id:
