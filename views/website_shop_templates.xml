@@ -80,6 +80,7 @@
                     <del t-if="dk_info.get('has_discounted_price')"><span t-out="dk_info['list_price']" t-options="{'widget': 'monetary', 'display_currency': website.currency_id}"/></del>
                 </div>
                 <div t-if="p.dk_web_avail_label" class="dk-avail"><i class="dk-dot" aria-hidden="true"/><t t-out="p.dk_web_avail_label"/></div>
+                <div t-if="p.dk_bulk_units" class="dk-bulk"><span class="badge dk-bulk-badge" title="Unidades que trae cada bulto"><i class="fa fa-cubes me-1" aria-hidden="true"/>Bulto: <t t-out="p.dk_bulk_units"/> unidades</span></div>
                 <div t-if="p.dk_web_oos" class="dk-oos-note">Puedes cotizarlo igual: en breves te escribimos con la fecha de llegada.</div>
                 <t t-if="dk_can_add">
                     <t t-set="dk_rule" t-value="p._dkh_qty_rule()"/>
@@ -152,6 +153,7 @@
                 <t t-set="dk_qty" t-value="int(dk_line.product_uom_qty) if dk_line else 0"/>
                 <div class="dk-pbox">
                     <div t-if="product.dk_web_avail_label" class="dk-avail dk-avail-lg"><i class="dk-dot" aria-hidden="true"/><t t-out="product.dk_web_avail_label"/></div>
+                    <div t-if="product.dk_bulk_units" class="dk-bulk"><span class="badge dk-bulk-badge" title="Unidades que trae cada bulto"><i class="fa fa-cubes me-1" aria-hidden="true"/>Bulto: <t t-out="product.dk_bulk_units"/> unidades</span></div>
                     <div t-if="product.dk_web_oos" class="dk-oos-box"><b>No disponible por ahora</b>Puedes cotizarlo igual: en breves te escribimos con la fecha de llegada.</div>
                     <div class="dk-pbox-title">Cantidad</div>
                     <t t-set="dk_rule" t-value="product_variant._dkh_qty_rule()"/>
