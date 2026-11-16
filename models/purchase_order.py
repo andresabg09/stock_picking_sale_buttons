@@ -265,7 +265,7 @@ class PurchaseOrder(models.Model):
         <br/><br/>
         <ul>
             <li>Presentación de Productos NNP: Los artículos Aliset NNP de 69gr y Decolorantes se solicitan como unidades individuales.</li>
-            <li>En cambio los AER POCKETS se encuentran por <strong>DISPLAYS</strong>.</li>
+            <li>Los AER POCKETS también se piden en <strong>unidades</strong> (cada display trae 6).</li>
         </ul>
         <br/>
         Quedo a su disposición ante cualquier consulta adicional.

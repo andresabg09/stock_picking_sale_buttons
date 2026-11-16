@@ -17,7 +17,7 @@ TINTE_MIN = 5
 TINTE_STEP = 5
 ALISET_STEP = 12      # Aliset 69 gr: por docenas
 DECOLORANTE_STEP = 12  # decolorantes: de 12 en 12 (docenas)
-POCKET_STEP = 6       # ambientadores Pocket: por display de 6
+POCKET_STEP = 6       # ambientadores Pocket: se venden en UNIDADES (desde 2026-11-16); de 6 en 6 = display completo
 MIN_ORDER_PARAM = 'dkh.min_order'
 MIN_ORDER_DEFAULT = 150.0
 

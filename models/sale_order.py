@@ -10,7 +10,8 @@ DIANKE_EMAIL_TO = (
 )
 DIANKE_EMAIL_CC = "andres@shalompma.com,luis@shalompma.com,milciades@shalompma.com"
 
-DIANKE_GODREJ_POCKET_UNITS_PER_DISPLAY = 6  # las 6 referencias AMB GODREJ POCKET se manejan por display; Dianke las necesita en unidades
+DIANKE_GODREJ_POCKET_UNITS_PER_DISPLAY = 6  # los GODREJ POCKET se vendían por display (6 uds); desde 2026-11-16 Odoo los maneja en UNIDADES
+DIANKE_GODREJ_POCKET_OLD_DISPLAY_PRICE = 2.0  # órdenes viejas (precio por display ~4,25) se siguen convirtiendo; las nuevas (0,71 por unidad) no
 
 PAYMENT_METHOD_SELECTION = [
     ('efectivo', 'Efectivo'),
@@ -706,7 +707,7 @@ class SaleOrder(models.Model):
 
                 cantidad = line.product_uom_qty
                 precio = line.price_unit
-                if self._dianke_is_godrej_pocket(product.display_name):
+                if self._dianke_is_godrej_pocket(product.display_name) and precio > DIANKE_GODREJ_POCKET_OLD_DISPLAY_PRICE:
                     cantidad = cantidad * DIANKE_GODREJ_POCKET_UNITS_PER_DISPLAY
                     precio = precio / DIANKE_GODREJ_POCKET_UNITS_PER_DISPLAY
                 precio = round(precio, 2)  # nunca 3+ decimales, pedido de Andrés 2026-09-05
