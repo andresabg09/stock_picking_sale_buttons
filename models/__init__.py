@@ -30,3 +30,4 @@ from . import res_partner_access
 from . import dkh_rules
 from . import dkh_banner
 from . import dkh_quick_alias
+from . import product_bulk

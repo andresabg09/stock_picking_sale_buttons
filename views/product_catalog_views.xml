@@ -15,21 +15,40 @@
                 <field name="dk_stock_label"/>
                 <field name="dk_stock_tone"/>
                 <field name="dk_stock_extra"/>
+                <field name="dk_bulk_units"/>
             </field>
             <xpath expr="//t[@t-name='card']/div" position="attributes">
                 <attribute name="class" add="dk-catalog-card" separator=" "/>
             </xpath>
             <xpath expr="//div[@name='o_kanban_qty_available']" position="replace">
-                <div t-if="record.is_storable.raw_value" name="o_kanban_qty_available"
+                <div t-if="record.is_storable.raw_value or record.dk_bulk_units.raw_value" name="o_kanban_qty_available"
                      class="d-flex flex-column align-items-start gap-1 mt-1">
-                    <span t-attf-class="dk-stock-badge dk-stock-{{ record.dk_stock_tone.raw_value }}">
+                    <span t-if="record.is_storable.raw_value"
+                          t-attf-class="dk-stock-badge dk-stock-{{ record.dk_stock_tone.raw_value }}">
                         <field name="dk_stock_label"/>
                     </span>
-                    <span t-if="record.dk_stock_extra.raw_value" class="text-muted small">
+                    <span t-if="record.is_storable.raw_value and record.dk_stock_extra.raw_value" class="text-muted small">
                         <field name="dk_stock_extra"/>
+                    </span>
+                    <!-- Unidades que trae un bulto (la "Unidad de traspaso" de Nevada): para decirle al cliente
+                         cuánto trae cada bulto. Ver models/product_bulk.py. -->
+                    <span t-if="record.dk_bulk_units.raw_value" class="dk-bulk-badge" title="Unidades que trae cada bulto">
+                        <i class="fa fa-cubes me-1" title="Bulto"/>Bulto: <t t-out="record.dk_bulk_units.raw_value"/> unidades
                     </span>
                 </div>
                 <div name="o_kanban_promo" t-attf-id="product-{{record.id.raw_value}}-promo"/>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- Ficha del producto: unidades por bulto (editable). Se muestra en el catálogo de Ventas. -->
+    <record id="view_product_template_form_bulk" model="ir.ui.view">
+        <field name="name">product.template.form.bulk</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_form_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//field[@name='categ_id']" position="after">
+                <field name="dk_bulk_units"/>
             </xpath>
         </field>
     </record>
