@@ -262,4 +262,25 @@
             </xpath>
         </field>
     </record>
+    <!-- Lista de órdenes (Ventas › Por generar pedido y demás listas de sale.order):
+         el botón nativo "Crear facturas" pasa a ser el botón PRINCIPAL "Generar pedidos"
+         (Dianke asocia "factura" con lo fiscal; glosario de CLAUDE.md). -->
+    <record id="sale_order_tree_generar_pedidos" model="ir.ui.view">
+        <field name="name">sale.order.list.generar.pedidos</field>
+        <field name="model">sale.order</field>
+        <field name="inherit_id" ref="sale.sale_order_tree"/>
+        <field name="arch" type="xml">
+            <xpath expr="//header/button[@type='action']" position="attributes">
+                <attribute name="string">Generar pedidos</attribute>
+                <attribute name="class">btn-primary</attribute>
+            </xpath>
+        </field>
+    </record>
+
+    <!-- El mismo asistente salía repetido en el menú Acciones de la lista: se quita de ahí
+         (ya está como botón principal). Si una actualización del módulo `sale` lo devuelve,
+         basta con volver a actualizar este módulo. -->
+    <record id="sale.action_view_sale_advance_payment_inv" model="ir.actions.act_window">
+        <field name="binding_model_id" eval="False"/>
+    </record>
 </odoo>

@@ -80,6 +80,135 @@
     }
 }
 
+/* --- 5. Lista de Productos (Ventas, Inventario, Compras, Páginas de producto del sitio web) ---
+       Foto chica (solo para reconocer el producto; las fotos grandes son del catálogo), ancho repartido solo.
+       Lo que se esconde en pantallas chicas es SOLO lo que se nombra aquí; "Publicado" y cualquier otra
+       columna que se active en el selector de columnas nunca se esconden. --- */
+.dk-product-list .o_list_table {
+    table-layout: auto !important;
+    width: 100% !important;
+}
+.dk-product-list .o_list_table th:not(.o_list_record_selector):not(.o_list_controller) {
+    width: auto !important;
+}
+/* Odoo trae las celdas en una sola línea (white-space: nowrap + puntos suspensivos); aquí bajan de línea */
+.dk-product-list .o_list_table td.o_data_cell:not(.o_list_number):not(.o_list_boolean):not(.o_boolean_favorite_cell) {
+    white-space: normal !important;
+    overflow-wrap: anywhere;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    max-width: none !important;
+}
+/* los encabezados también bajan de línea (Odoo los pone con text-truncate = una sola línea) */
+.dk-product-list .o_list_table thead th,
+.dk-product-list .o_list_table thead th * {
+    white-space: normal !important;
+    text-overflow: clip !important;
+    overflow-wrap: normal;
+    word-break: normal;
+}
+.dk-product-list .o_list_table td.o_list_number,
+.dk-product-list .o_list_table td.o_list_boolean {
+    white-space: nowrap;
+}
+.dk-product-list .o_list_table th.o_list_number_th,
+.dk-product-list .o_list_table td.o_list_number,
+.dk-product-list .o_list_table td.o_list_boolean {
+    width: 1% !important;
+}
+.dk-product-list .o_list_table td[name="image_128"],
+.dk-product-list .o_list_table th[data-name="image_128"] {
+    width: 1% !important;
+    min-width: 0 !important;
+    padding-right: 0.25rem;
+}
+.dk-product-list .o_list_table td[name="image_128"] .o_field_image,
+.dk-product-list .o_list_table td[name="image_128"] img {
+    width: 56px !important;
+    height: 56px !important;
+    max-width: 56px !important;
+    float: none !important;
+    margin: 0;
+}
+.dk-product-list .o_list_table td[name="name"] {
+    min-width: 90px;
+}
+/* el nombre se queda con todo el ancho que sobra (los demás ocupan solo lo justo) */
+.dk-product-list .o_list_table th[data-name="name"] {
+    width: 100% !important;
+}
+/* el pie de la tabla (totales) trae una celda por cada columna, incluso las escondidas, y esas columnas
+   fantasma le quitan ancho al nombre; la lista de productos no tiene totales, así que se quita en pantallas chicas */
+@media (max-width: 991.98px) {
+    .dk-product-list .o_list_table tfoot {
+        display: none !important;
+    }
+}
+/* tablet (hasta 991 px): se esconden responsable, etiquetas, cinta web, empresa y costo */
+@media (max-width: 991.98px) {
+    .dk-product-list .o_list_table th[data-name="responsible_id"],
+    .dk-product-list .o_list_table td[name="responsible_id"],
+    .dk-product-list .o_list_table th[data-name="product_tag_ids"],
+    .dk-product-list .o_list_table td[name="product_tag_ids"],
+    .dk-product-list .o_list_table th[data-name="website_ribbon_id"],
+    .dk-product-list .o_list_table td[name="website_ribbon_id"],
+    .dk-product-list .o_list_table th[data-name="company_id"],
+    .dk-product-list .o_list_table td[name="company_id"],
+    .dk-product-list .o_list_table th[data-name="standard_price"],
+    .dk-product-list .o_list_table td[name="standard_price"] {
+        display: none !important;
+    }
+}
+/* celular (menos de 576 px): además referencia interna (casi siempre vacía), tipo, pronóstico y actividad; la foto es de 70 px */
+@media (max-width: 575.98px) {
+    .dk-product-list .o_list_table td.o_data_cell,
+    .dk-product-list .o_list_table th {
+        padding-left: 0.15rem;
+        padding-right: 0.15rem;
+    }
+    .dk-product-list .o_list_table th {
+        font-size: 0.7rem;
+        white-space: normal;
+    }
+    .dk-product-list .o_list_table td.o_data_cell {
+        font-size: 0.85rem;
+    }
+    .dk-product-list .o_list_table th:first-of-type:not(.o_list_record_selector),
+    .dk-product-list .o_list_table td.o_boolean_favorite_cell {
+        padding-left: 0.25rem;
+        padding-right: 0.25rem;
+    }
+    .dk-product-list .o_list_table td[name="name"] {
+        min-width: 70px;
+    }
+    .dk-product-list .o_list_table td[name="image_128"] .o_field_image,
+    .dk-product-list .o_list_table td[name="image_128"] img {
+        width: 70px !important;
+        height: 70px !important;
+        max-width: 70px !important;
+    }
+    /* las categorías del sitio web (etiquetas) bajan de línea en vez de ensanchar la columna */
+    .dk-product-list .o_list_table td[name="public_categ_ids"] .o_field_many2many_tags {
+        flex-wrap: wrap;
+    }
+    .dk-product-list .o_list_table td[name="public_categ_ids"] .o_tag,
+    .dk-product-list .o_list_table td[name="public_categ_ids"] .o_tag * {
+        white-space: normal !important;
+        max-width: 84px;
+        overflow-wrap: anywhere;
+    }
+    .dk-product-list .o_list_table th[data-name="default_code"],
+    .dk-product-list .o_list_table td[name="default_code"],
+    .dk-product-list .o_list_table th[data-name="type"],
+    .dk-product-list .o_list_table td[name="type"],
+    .dk-product-list .o_list_table th[data-name="virtual_available"],
+    .dk-product-list .o_list_table td[name="virtual_available"],
+    .dk-product-list .o_list_table th[data-name="activity_exception_decoration"],
+    .dk-product-list .o_list_table td[name="activity_exception_decoration"] {
+        display: none !important;
+    }
+}
+
 /* --- 4. Inventario físico / Actualizar cantidad: foto del producto y columnas que se reparten solas.
        En celular quedan Foto + Producto, Existencia, Contado y Diferencia (lo esencial para contar) --- */
 .o_inventory_report_list_view .o_list_table {
@@ -154,4 +283,139 @@
     .o_inventory_report_list_view .o_list_table td.o_list_button .btn i {
         font-size: 1.1rem;
     }
+}
+
+/* --- Líneas de la ORDEN DE ENTREGA (Inventario): todo cabe sin deslizar de lado, en celular, tablet y computadora.
+   Orden: foto · producto · promo · código · demanda · cantidad · Listo (pedido de Andrés 2026-11-13).
+   Computadora/tablet: tabla normal con el ancho repartido (producto y promo con su parte; código sin partirse).
+   Celular (<576 px): cada línea es una tarjeta: foto a la izquierda; nombre, código, promo y, abajo,
+   Demanda · Cantidad · Listo. --- */
+@media (min-width: 992px) {
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table td[name="product_id"],
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table th[data-name="product_id"] {
+        width: 38% !important;
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table td[name="custom_promo_note"],
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table th[data-name="custom_promo_note"] {
+        width: 22% !important;
+    }
+}
+@media (max-width: 991.98px) {
+    /* tablet: el aviso de promo ocupa un ancho fijo y baja de línea; el producto se queda con el resto */
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table td[name="custom_promo_note"],
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table th[data-name="custom_promo_note"] {
+        width: 150px !important;
+        max-width: 150px !important;
+        min-width: 150px !important;
+    }
+}
+.o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table td[name="custom_product_barcode"],
+.o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table th[data-name="custom_product_barcode"] {
+    width: 1% !important;
+    white-space: nowrap !important;
+    overflow-wrap: normal !important;
+}
+@media (max-width: 991.98px) {
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_product_image"] .o_field_image,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_product_image"] img {
+        width: 60px !important;
+        height: 60px !important;
+        max-width: 60px !important;
+    }
+}
+@media (max-width: 575.98px) {
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table thead,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tfoot,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr.o_data_row > td.o_list_button,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr.o_data_row > td[name="description_picking"],
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr.o_data_row > td:last-child:not([name]) {
+        display: none !important;
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tbody {
+        display: block !important;
+        width: 100% !important;
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr.o_data_row {
+        display: grid !important;
+        grid-template-columns: 62px 1fr 1fr 52px;
+        grid-template-areas:
+            "img name  name  name"
+            "img code  code  code"
+            "img promo promo promo"
+            "img dem   qty   ready";
+        column-gap: 0.5rem;
+        align-items: center;
+        padding: 0.5rem 0.9rem 0.5rem 0.35rem;
+        border-bottom: 1px solid var(--bs-border-color, #dee2e6);
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr.o_data_row > td {
+        display: block !important;
+        width: auto !important;
+        min-width: 0 !important;
+        padding: 0 !important;
+        border: 0 !important;
+        text-align: left !important;
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_product_image"] { grid-area: img; align-self: start; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_product_image"] .o_field_image,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_product_image"] img {
+        width: 58px !important;
+        height: 58px !important;
+        max-width: 58px !important;
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="product_id"] { grid-area: name; font-weight: 600; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_product_barcode"] {
+        grid-area: code;
+        display: block !important;
+        font-size: 0.8rem;
+        color: var(--bs-secondary-color, #6c757d);
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_promo_note"] { grid-area: promo; font-size: 0.85rem; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="product_uom_qty"] { grid-area: dem; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="quantity"] { grid-area: qty; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_ready"] { grid-area: ready; justify-self: end; align-self: end; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="product_uom_qty"]::before,
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="quantity"]::before {
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 400;
+        color: var(--bs-secondary-color, #6c757d);
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_ready"]::before {
+        content: "Listo";
+        display: block;
+        font-size: 0.7rem;
+        font-weight: 400;
+        text-align: center;
+        color: var(--bs-secondary-color, #6c757d);
+    }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="product_uom_qty"]::before { content: "Demanda"; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] td[name="quantity"]::before { content: "Cantidad"; }
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr:not(.o_data_row),
+    .o_form_view .o_field_widget[name="move_ids_without_package"] .o_list_table tr:not(.o_data_row) > td {
+        display: block !important;
+    }
+}
+
+/* Entregas: fila con producto sin existencia propia (o parcial) pero con unidades en Nevada (Zona 1) = naranja suave.
+   Odoo marca la fila con `text-warning` (solo cambia el color del texto); aquí se vuelve fondo y el texto queda normal. */
+.o_form_view .o_field_widget[name="move_ids_without_package"] tr.o_data_row.text-warning,
+.o_form_view .o_field_widget[name="move_ids_without_package"] tr.o_data_row.text-warning > td {
+    background-color: #FDEBD3 !important;
+    color: var(--bs-body-color, #212529) !important;
+}
+.o_form_view .o_field_widget[name="move_ids_without_package"] tr.o_data_row.text-warning .text-muted {
+    color: var(--bs-secondary-color, #6c757d) !important;
+}
+/* aviso de promoción de la línea: baja de línea en vez de cortarse con puntos */
+.o_form_view .o_field_widget[name="move_ids_without_package"] td[name="custom_promo_note"],
+.o_form_view .o_field_widget[name="move_ids_without_package"] .dk-promo-note {
+    white-space: normal !important;
+    overflow: visible !important;
+    text-overflow: clip !important;
+    overflow-wrap: anywhere;
+}
+.o_form_view .o_field_widget[name="move_ids_without_package"] .dk-promo-note {
+    display: block;
 }

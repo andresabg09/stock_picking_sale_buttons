@@ -8,6 +8,23 @@
     <record id="stock.product_template_action_product" model="ir.actions.act_window">
         <field name="view_mode">list,kanban,form</field>
     </record>
+    <!-- Lista de Productos adaptable a celular y tablet: foto chica + clase para el CSS
+         (static/src/css/responsive_lists.css, sección 5). La lista base la heredan las de Ventas, Inventario,
+         Compras y las Páginas de producto del sitio web, así que un solo cambio las cubre a todas. -->
+    <record id="view_product_list_inherit_responsive" model="ir.ui.view">
+        <field name="name">product.template.list.inherit.responsive</field>
+        <field name="model">product.template</field>
+        <field name="inherit_id" ref="product.product_template_tree_view"/>
+        <field name="arch" type="xml">
+            <xpath expr="//list" position="attributes">
+                <attribute name="class" add="dk-product-list" separator=" "/>
+            </xpath>
+            <xpath expr="//field[@name='is_favorite']" position="after">
+                <field name="image_128" widget="image" nolabel="1" optional="show"
+                       options="{'size': [56, 56], 'img_class': 'object-fit-contain'}"/>
+            </xpath>
+        </field>
+    </record>
     <!-- Foto 200x200 en kanban general de Productos -->
     <record id="view_product_kanban_inherit_image_size" model="ir.ui.view">
         <field name="name">product.template.kanban.inherit.image.size</field>
