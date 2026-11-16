@@ -182,3 +182,21 @@ body.dki .dk-meta { display: none; }
 body.dki #dk-home.qo .qo-sug-add { white-space: nowrap; padding: 0 12px; min-width: 0; }
 /* Sin desborde horizontal de 1 px en celular/tablet */
 @media (max-width: 744px) { body.dki #wrapwrap { overflow-x: clip; } }
+
+/* Encabezado: Carrito siempre a la derecha, pegado al botón de la cuenta, en computadora y tablet (en una sola fila) */
+@media (min-width: 641px) {
+  body.dkh .dkh-hd { flex-wrap: nowrap; gap: 14px 16px; }
+  body.dkh .dkh-logo { white-space: nowrap; flex: 0 0 auto; }
+  body.dkh .dkh-nav { flex: 0 0 auto; }
+  body.dkh .dkh-sgroup { flex: 1 1 auto; min-width: 0; justify-content: flex-end; margin-left: auto; }
+  body.dkh .dkh-search { flex: 1 1 auto; min-width: 90px; max-width: 300px; width: auto; }
+  body.dkh .dkh-search input.dkh-search-input { min-width: 0; width: 100%; }
+  body.dkh .dkh-me { flex: 0 0 auto; }
+  body.dkh .dkh-me-name { max-width: 150px; }
+  body.dkh .dkh-cart { flex: 0 0 auto; white-space: nowrap; }
+}
+@media (min-width: 641px) and (max-width: 1250px) {
+  body.dkh .dkh-nav a { padding: 10px 9px; }
+  body.dkh .dkh-me-name { max-width: 100px; }
+  body.dkh .dkh-me-btn { padding: 0 12px; }
+}
